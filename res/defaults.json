@@ -1,0 +1,8 @@
+{
+	"command": {
+		"run": {
+		}
+	},
+	"log": {
+		"level": "verbose"
+	}}
