@@ -5,3 +5,18 @@
  * Copyright @2019 by Xraymen Inc.
  */
 
+/**
+ * @param {CliParsed} configuration
+ * @returns {Array<ModuleDescriptor>}
+ */
+function parseScript(configuration) {
+	return [{
+		type: "json",
+		action: "load",
+		params: ["./test/data/dummy.json"]
+	}];
+};
+
+module.exports={
+	parseScript
+};

@@ -43,3 +43,15 @@
  * @property {Array<string>} params
  * @property {Object} options
  */
+
+
+/**
+ * @typedef {{data:*, encoding:string}} DataBlob
+ */
+
+/**
+ * @typedef {Object} ModuleDescriptor
+ * @property {string} type
+ * @property {string} action
+ * @property {Array<string>} params
+ */

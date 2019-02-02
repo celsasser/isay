@@ -5,3 +5,23 @@
  * Copyright @2019 by Xraymen Inc.
  */
 
+const {JsonModule}=require("./json");
+
+/**
+ *
+ * @param {ModuleDescriptor} descriptor
+ * @param {string} defaultType
+ * @returns {class}
+ * @throws {Error}
+ */
+function descriptorToClass({
+	descriptor,
+	defaultType=undefined
+}) {
+	return JsonModule;
+}
+
+module.exports={
+	descriptorToClass
+};
+

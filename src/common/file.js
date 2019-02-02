@@ -31,28 +31,26 @@ function toLocalPath(relativeToRoot) {
  * @param {boolean} local - will apply <code>toLocalPath</code> to uri if true
  * @param {Object} options
  * @param {Function} callback
- * @return {Object}
+ * @return {Promise<Object>}
  */
-function readToJSON(uri, {
+async function readToJSON(uri, {
 	encoding="utf-8",
 	local=false,
 	...options
-}, callback) {
+}={}) {
 	if(local) {
 		uri=toLocalPath(uri);
 	}
 	const parsed=path.parse(uri);
 	options=Object.assign({encoding, ...options});
-	fs.readFile(uri, options, (error, data)=>{
-		if(!error) {
+	return fs.readFile(uri, options)
+		.then(data=>{
 			if(parsed.ext.toLowerCase()===".yaml") {
-				data=jsyaml.safeLoad(data);
+				return jsyaml.safeLoad(data);
 			} else {
-				data=JSON.parse(data);
+				return JSON.parse(data);
 			}
-		}
-		callback(error, data);
-	});
+		});
 }
 
 /**
@@ -91,7 +89,8 @@ function readToJSONSync(uri, {
  * @returns {Promise<boolean>|undefined}
  * @throws {Error} only if in sync mode
  */
-function writeJSON(uri, data, {
+function writeJSON({
+	uri, data,
 	async=true,
 	createPath=true,
 	encoding="utf8",
@@ -101,7 +100,7 @@ function writeJSON(uri, data, {
 	if(typeof (data)!=="string") {
 		data=JSON.stringify(data);
 	}
-	return exports.writeFile(uri, data, {async, createPath, encoding, flag, mode});
+	return exports.writeFile({uri, data, async, createPath, encoding, flag, mode});
 }
 
 
@@ -116,7 +115,8 @@ function writeJSON(uri, data, {
  * @returns {Promise<boolean>|undefined}
  * @throws {Error} only if in sync mode
  */
-function writeFile(uri, data, {
+function writeFile({
+	uri, data,
 	async=true,
 	createPath=true,
 	encoding=undefined,

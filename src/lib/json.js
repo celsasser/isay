@@ -6,47 +6,99 @@
  */
 
 const _=require("lodash");
-const {ModuleBase}=require("./_base");
+const {ModuleBase}=require("./base");
 const file=require("../common/file");
 
+/**
+ * @typedef {ModuleBase} JsonModule
+ */
 class JsonModule extends ModuleBase {
-	constructor() {
-		super();
-		this._data={};
-	}
-
 	/**
 	 * Gets value at property path
-	 * @param {string} path
-	 * @returns {*}
+	 * @param {Object} data
+	 * @returns {Promise<DataBlob>}
 	 */
-	get(path) {
-		return _.get(this._data, path);
+	async get({data}) {
+		const path=this.params[0];
+		return {
+			data: _.get(data, path),
+			encoding: "object"
+		};
 	}
 
 	/**
 	 * Loads and sets data to json or yaml file at path
-	 * @param {string} path
+	 * @returns {Promise<DataBlob>}
 	 */
-	load(path) {
-		this._data=file.readToJSON(path);
+	async load() {
+		const path=this.params[0],
+			data=await file.readToJSON(path);
+		return {
+			data,
+			encoding: "object"
+		};
 	}
 
 	/**
 	 * Merges json or yaml file at path into data
-	 * @param path
+	 * @param {Object} data
+	 * @returns {Promise<DataBlob>}
 	 */
-	merge(path) {
-		this._data=Object.assign(this._data, file.readToJSON(path));
+	async merge({data}) {
+		const path=this.params[0],
+			loaded=await file.readToJSON(path);
+		return {
+			data: _.merge(data, loaded),
+			encoding: "object"
+		};
 	}
 
 	/**
 	 * Sets property path to data
-	 * @param {string} path
-	 * @param {string} data
+	 * @param {Object} data
+	 * @returns {Promise<DataBlob>}
 	 */
-	set(path, data) {
-		this._data=_.set(this._data, path, JSON.parse(data));
+	async set({data}) {
+		const path=this.params[0],
+			value=this.params[1];
+		return {
+			data: _.set(data, path, value),
+			encoding: "object"
+		};
+	}
+
+	/**
+	 * Writes data to path
+	 * @param {Object} data
+	 * @returns {Promise<DataBlob>}
+	 */
+	async write({data}) {
+		const path=this.params[0];
+		await file.writeJSON({
+			async: true,
+			data: data,
+			uri: path
+		});
+		return data;
+	}
+
+	/**************** Private Interface ****************/
+	/**
+	 * We always want this to be parsed.
+	 * @param {*} data
+	 * @param {string} encoding
+	 * @returns {DataBlob}
+	 * @private
+	 */
+	_preprocessChunk({data, encoding}) {
+		if(_.isString(data)) {
+			data=JSON.stringify(data);
+			encoding="object";
+		} else if(Buffer.isBuffer(encoding)) {
+			data=JSON.stringify(data.toString("utf8"));
+			encoding="object";
+		}
+		return {data, encoding};
 	}
 }
 
