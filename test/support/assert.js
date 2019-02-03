@@ -11,7 +11,7 @@
 
 const _=require("lodash");
 const assert=require("assert");
-const {MouseError}=require("../../src/common/error");
+const {XRayError}=require("../../src/common/error");
 const diagnostics=require("../../src/common/diagnostics");
 const format=require("../../src/common/format");
 const log=require("../../src/common/log");
@@ -122,7 +122,7 @@ exports.isNotError=function(error) {
  * @throws {Error}
  */
 exports.notCalled=function(message="should not have been called") {
-	throw new MouseError({
+	throw new XRayError({
 		details: format.messageToString(message),
 		message: "assert.notCalled() failed"
 	});
@@ -142,7 +142,7 @@ exports.immutable=function(...objects) {
 			if(!_.isEqual(pair[0], pair[1])) {
 				const expected=JSON.stringify(pair[0], null, "\t"),
 					actual=JSON.stringify(pair[1], null, "\t");
-				throw new MouseError({
+				throw new XRayError({
 					details: `expected=${expected}\nactual=${actual}`,
 					message: "assert.immutable() failed"
 				});
@@ -161,7 +161,7 @@ exports.immutable=function(...objects) {
 exports.properties=function(object, property) {
 	function _assert(_property) {
 		if(!_.has(object, _property)) {
-			throw new MouseError({
+			throw new XRayError({
 				details: `${property} does not exist in ${JSON.stringify(object)}`,
 				message: `assert.properties(${property}) failed`
 			});
@@ -182,7 +182,7 @@ exports.properties=function(object, property) {
  */
 exports.toLog=function(condition, message="") {
 	if(!condition) {
-		log.error(new MouseError({
+		log.error(new XRayError({
 			details: format.messageToString(message),
 			message: "assert.toLog() failed"
 		}));

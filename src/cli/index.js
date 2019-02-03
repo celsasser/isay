@@ -11,7 +11,7 @@
 const _=require("lodash");
 const path=require("path");
 const {ACTIONS, OPTIONS}=require("./_spec");
-const {MouseError}=require("../common/error");
+const {XRayError}=require("../common/error");
 const file=require("../common/file");
 const format=require("../common/format");
 const log=require("../common/log");
@@ -72,14 +72,14 @@ exports.parse=function() {
 					userUnsupportedOptions=_.difference(Object.keys(this._options), _.map(allSupportedOptions, "keys.long")),
 					userMissingOptions=_.difference(_.map(allRequiredOptions, "keys.long"), Object.keys(this._options));
 				if(userUnsupportedOptions.length>0) {
-					throw new MouseError({
+					throw new XRayError({
 						action: this._action,
 						message: `${this._runner} ${this._action}: options ${userUnsupportedOptions.map(name=>`--${name}`)
 							.join("|")} not supported by "${this._action}" command`
 					});
 				}
 				if(userMissingOptions.length>0) {
-					throw new MouseError({
+					throw new XRayError({
 						action: this._action,
 						message: `${this._runner} ${this._action}: required options ${userMissingOptions.map(name=>`--${name}`)
 							.join("|")} for "${this._action}" are missing`
@@ -88,7 +88,7 @@ exports.parse=function() {
 				try {
 					action.validate(this._position, this._options);
 				} catch(error) {
-					throw new MouseError({
+					throw new XRayError({
 						action: this._action,
 						message: `${this._runner} ${this._action}: ${error.message}`
 					});
@@ -249,7 +249,7 @@ exports.parse=function() {
 		return commandLine.toResponse();
 	} catch(error) {
 		log.error(`Error: ${format.errorToString(error)}`);
-		reportUsage(error.usage);
+		reportUsage(error.action);
 		process.exit(1);
 	}
 };

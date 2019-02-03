@@ -6,8 +6,8 @@
  */
 
 const {parseScript}=require("./parse");
-const {descriptorToClass}=require("../../lib/index");
-const {HorseError}=require("../../common/error");
+const {XRayError}=require("../../common/error");
+const log=require("../../common/log");
 
 /**
  * @param {CliParsed} configuration
@@ -15,13 +15,16 @@ const {HorseError}=require("../../common/error");
  */
 exports.run=async function(configuration) {
 	try {
-		const descriptors=parseScript(configuration),
-			pipeline=_parsedScriptToPipeline(descriptors);
+		log.verbose("- parsing script");
+		const descriptors=parseScript(configuration);
+		log.verbose("- building pipeline");
+		const pipeline=_parsedScriptToPipeline(descriptors);
+		log.verbose("- processing pipeline");
 		return pipeline.process();
 	} catch(error) {
-		return Promise.reject(new HorseError({
+		return Promise.reject(new XRayError({
 			error,
-			message: "attempt to run failed"
+			message: "run failed"
 		}));
 	}
 };
@@ -43,13 +46,10 @@ function _parsedScriptToPipeline(descriptors) {
 		if(index<0) {
 			return next;
 		} else {
-			const descriptor=descriptors[index],
-				Class=descriptorToClass({
-					descriptor,
-					defaultType: _type(index)
-				});
-			const instance=new Class({
+			const descriptor=descriptors[index];
+			const instance=new descriptor.class({
 				action: descriptor.action,
+				domain: descriptor.domain,
 				output: next,
 				params: descriptor.params
 			});
@@ -68,7 +68,7 @@ function _parsedScriptToPipeline(descriptors) {
 				return descriptors[index].type;
 			}
 		}
-		throw new HorseError({
+		throw new XRayError({
 			message: "insufficient type specifications"
 		});
 	}

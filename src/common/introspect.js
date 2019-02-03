@@ -20,7 +20,7 @@ module.exports.Introspect=class {
 		this._instance=object;
 		this._properties=Object.keys(object);
 		this._prototype=Object.getPrototypeOf(object);
-		Object.getOwnPropertyNames(this.prototype).forEach((name)=>{
+		Object.getOwnPropertyNames(this._prototype).forEach((name)=>{
 			if(_.isFunction(object[name])) {
 				this._functions.push(name);
 			} else {

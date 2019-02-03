@@ -8,6 +8,7 @@
 
 exports.ACTIONS={
 	"run": {
+		args: "[script]",
 		desc: "runs a script",
 		/**
 		 * @param {Array<string>} position
@@ -15,6 +16,9 @@ exports.ACTIONS={
 		 * @throws {Error} - if you want to fail validation
 		 */
 		validate: function(position, options) {
+			if(position.length===0 && !options.hasOwnProperty("script")) {
+				throw new Error("no script specified");
+			}
 		}
 	}
 };
@@ -42,6 +46,18 @@ exports.OPTIONS=[
 		keys: {
 			short: "l",
 			long: "log.level"
+		}
+	},
+	{
+		actions: ["run"],
+		args: {
+			count: 1,
+			name: "script"
+		},
+		desc: "script path",
+		keys: {
+			short: "s",
+			long: "script"
 		}
 	}
 ];

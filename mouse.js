@@ -12,8 +12,9 @@ const log=require("./src/common/log");
 const cli=require("./src/cli");
 
 
-const configuration=cli.parse(),
-	command=require(`./src/command/${configuration.action}`);
+const configuration=cli.parse();
+log.verbose(`loading "${configuration.action}" module`);
+const command=require(`./src/command/${configuration.action}`);
 command.run(configuration)
 	.then(()=>{
 		process.exit(0);

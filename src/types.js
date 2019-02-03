@@ -51,7 +51,8 @@
 
 /**
  * @typedef {Object} ModuleDescriptor
- * @property {string} type
  * @property {string} action
+ * @property {class} class
+ * @property {string} domain
  * @property {Array<string>} params
  */

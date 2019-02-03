@@ -13,9 +13,9 @@ const http=require("http");
 
 /**
  * Custom Error type that supports some "smart" constructors. And some property annotation support
- * @typedef {Error} HorseError
+ * @typedef {Error} XRayError
  */
-class HorseError extends Error {
+class XRayError extends Error {
 	/**
 	 * General purpose pig error that hold all of our secrets.  He is designed to stash information
 	 * related to the error so that we capture and report relevant info.  You may specify a number
@@ -60,7 +60,7 @@ class HorseError extends Error {
 			// so that we can trace things to the true origin we steal his stack. There may be times at which we don't want to do this?
 			this.stack=error.stack;
 		}
-		HorseError.annotate(this, _.omitBy({
+		XRayError.annotate(this, _.omitBy({
 			details: getMostImportant("details"),
 			error,
 			instance,
@@ -88,4 +88,4 @@ class HorseError extends Error {
 	}
 }
 
-module.exports.HorseError=HorseError;
+module.exports.XRayError=XRayError;

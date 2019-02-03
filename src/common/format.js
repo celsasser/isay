@@ -24,20 +24,22 @@ function errorToString(error, {
 	instance=true,
 	stack=false
 }={}) {
-	let text="";
+	let text="",
+		delimiter=":";
 	if(typeof(error)==="string") {
 		text=`${text}${error}`;
 	} else {
 		if(instance && error.hasOwnProperty("instance")) {
-			text=`${text}${error.instance.type}: ${error.message}`;
+			text=`${text}${error.instance.type}${delimiter} ${error.message}`;
+			delimiter=".";
 		} else {
 			text=`${text}${error.message}`;
 		}
 		if(details) {
 			if(error.hasOwnProperty("details")) {
-				text=`${text}. ${error.details}`;
+				text=`${text}${delimiter} ${error.details}`;
 			} else if(error.hasOwnProperty("error")) {
-				text=`${text}. ${error.error}`;
+				text=`${text}${delimiter} ${error.error}`;
 			}
 		}
 		if(stack) {

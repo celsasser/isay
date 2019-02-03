@@ -10,7 +10,7 @@
 const _=require("lodash");
 const assert=require("../../test/support/assert");
 const util=require("./util");
-const {MouseError}=require("./error");
+const {XRayError}=require("./error");
 
 module.exports.mutable={
 	array: {
@@ -76,14 +76,14 @@ module.exports.mutable={
 		 * @param {number} index - element index to replace
 		 * @param {Object|Function} predicate that will be used by lodash to find our man
 		 * @returns {T[]}
-		 * @throws {MouseError} if existing element cannot be found
+		 * @throws {XRayError} if existing element cannot be found
 		 */
 		replace(array, newElement, {element=undefined, index=undefined, predicate=undefined}) {
 			index=_searchCriteriaToIndex(array, {element, index, predicate});
 			if(index>-1) {
 				array[index]=newElement;
 			} else {
-				throw new MouseError({
+				throw new XRayError({
 					instance: this.constructor.name,
 					message: "replace(): Could not find existing element to replace"
 				});
@@ -166,7 +166,7 @@ module.exports.immutable={
 		 * @param {number} index - element index to replace
 		 * @param {Object|Function} predicate that will be used by lodash to find our man
 		 * @returns {T[]}
-		 * @throws {MouseError} if existing element cannot be found
+		 * @throws {XRayError} if existing element cannot be found
 		 */
 		replace(array, newElement, {element=undefined, index=undefined, predicate=undefined}) {
 			index=_searchCriteriaToIndex(array, {element, index, predicate});
@@ -174,7 +174,7 @@ module.exports.immutable={
 				array=array.slice();
 				array[index]=newElement;
 			} else {
-				throw new MouseError({
+				throw new XRayError({
 					instance: this.constructor.name,
 					message: "replace(): Could not find existing element to replace"
 				});
