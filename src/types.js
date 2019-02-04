@@ -54,5 +54,6 @@
  * @property {string} action
  * @property {class} class
  * @property {string} domain
+ * @property {string} method
  * @property {Array<string>} params
  */

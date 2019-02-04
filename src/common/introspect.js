@@ -17,7 +17,6 @@ module.exports.Introspect=class {
 	constructor(object) {
 		this._accessors=[];
 		this._functions=[];
-		this._instance=object;
 		this._properties=Object.keys(object);
 		this._prototype=Object.getPrototypeOf(object);
 		Object.getOwnPropertyNames(this._prototype).forEach((name)=>{

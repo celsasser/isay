@@ -16,24 +16,23 @@ class ModuleBase {
 	/**
 	 * @param {string} action
 	 * @param {string} domain
+	 * @param {string} method
 	 * @param {boolean} objectMode
 	 * @param {ModuleBase} output
-	 * @param {Array<string>} params
+	 * @param {Array<*>} params
 	 */
 	constructor({
 		action,
 		domain,
+		method,
 		output=undefined,
 		params=[]
 	}) {
 		this.action=action;
 		this.domain=domain;
+		this.method=method;
 		this.params=params;
 		this._output=output;
-	}
-
-	get test() {
-		return 1;
 	}
 
 	/**
@@ -50,7 +49,7 @@ class ModuleBase {
 			log.verbose(`- preprocessing ${this.domain}.${this.action}`);
 			let blob=this._preprocessChunk({data, encoding});
 			log.verbose(`- running ${this.domain}.${this.action}`);
-			blob=await this[this.action](blob);
+			blob=await this[this.method](blob);
 			return (this._output)
 				? this._output.process(blob)
 				: Promise.resolve(blob);
@@ -58,7 +57,7 @@ class ModuleBase {
 			return Promise.reject(new XRayError({
 				error,
 				instance: this,
-				message: `attempt to process ${this.action} failed`
+				message: `attempt to process ${this.domain}.${this.action} failed`
 			}));
 		}
 	}

@@ -50,6 +50,7 @@ function _parsedScriptToPipeline(descriptors) {
 			const instance=new descriptor.class({
 				action: descriptor.action,
 				domain: descriptor.domain,
+				method: descriptor.method,
 				output: next,
 				params: descriptor.params
 			});

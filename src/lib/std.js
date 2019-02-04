@@ -10,9 +10,9 @@ const util=require("util");
 const {ModuleBase}=require("./base");
 
 /**
- * @typedef {ModuleBase} StdModule
+ * @typedef {ModuleBase} ModuleStd
  */
-class StdModule extends ModuleBase {
+class ModuleStd extends ModuleBase {
 	/**
 	 * Writes output to stderr
 	 * @param {Object} data
@@ -50,5 +50,5 @@ class StdModule extends ModuleBase {
 }
 
 module.exports={
-	StdModule
+	ModuleStd
 };

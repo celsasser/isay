@@ -10,18 +10,19 @@ const {ModuleBase}=require("./base");
 const file=require("../common/file");
 
 /**
- * @typedef {ModuleBase} JsonModule
+ * @typedef {ModuleBase} ModuleJson
  */
-class JsonModule extends ModuleBase {
+class ModuleJson extends ModuleBase {
 	/**
 	 * Gets value at property path
 	 * @param {Object} data
 	 * @returns {Promise<DataBlob>}
 	 */
 	async get({data}) {
-		const path=this.params[0];
 		return {
-			data: _.get(data, path),
+			data: (this.params.length>0)
+				? _.get(data, this.params[0])
+				: data,
 			encoding: "object"
 		};
 	}
@@ -45,10 +46,21 @@ class JsonModule extends ModuleBase {
 	 * @returns {Promise<DataBlob>}
 	 */
 	async merge({data}) {
-		const path=this.params[0],
-			loaded=await file.readToJSON(path);
+		const loaded=await file.readToJSON(this.params[0]);
 		return {
 			data: _.merge(data, loaded),
+			encoding: "object"
+		};
+	}
+
+	/**
+	 * Parses the input parameter
+	 * @param {*} data
+	 * @returns {Promise<DataBlob>}
+	 */
+	async parse({data}) {
+		return {
+			data: this._ensureJson(this.params[0]),
 			encoding: "object"
 		};
 	}
@@ -60,7 +72,7 @@ class JsonModule extends ModuleBase {
 	 */
 	async set({data}) {
 		const path=this.params[0],
-			value=this.params[1];
+			value=this._ensureJson(this.params[1]);
 		return {
 			data: _.set(data, path, value),
 			encoding: "object"
@@ -84,6 +96,18 @@ class JsonModule extends ModuleBase {
 
 	/**************** Private Interface ****************/
 	/**
+	 * Parses the object if it is not already in a legitimate JSON encoding
+	 * @param {*} value
+	 * @returns {Object|number}
+	 * @private
+	 */
+	_ensureJson(value) {
+		return (_.isString(value) || Buffer.isBuffer(value))
+			? JSON.parse(value.toString())
+			: value;
+	}
+
+	/**
 	 * We always want this to be parsed.
 	 * @param {*} data
 	 * @param {string} encoding
@@ -103,5 +127,5 @@ class JsonModule extends ModuleBase {
 }
 
 module.exports={
-	JsonModule
+	ModuleJson
 };

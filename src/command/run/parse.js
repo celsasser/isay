@@ -13,8 +13,8 @@ const _=require("lodash");
 const fs=require("fs-extra");
 const path=require("path");
 const vm=require("vm");
-const {XRayError}=require("../../common/error");
 const {toLocalPath}=require("../../common/file");
+const lib_os=require("../../lib/os");
 
 
 /********************* Local Types *********************/
@@ -23,7 +23,6 @@ const {toLocalPath}=require("../../common/file");
  * @property {string} action
  * @property {class} class
  * @property {string} domain
- * @property {NodeModule} module
  */
 
 
@@ -59,57 +58,102 @@ function _buildModuleDescriptorSequence(script, graph) {
 
 /**
  * Builds a "library graph". It graphs the various routes that a single function call may make into our library.
+ * And at each one of of the terminal nodes lies functionality that will allow us to track function call sequence.
+ * Which in our world is a sequence of ModuleDescriptor. See <code>_buildModuleDescriptorSequence</code> to see how that works.
  * @param {Array<LibraryNode>} library
  * @returns {Object}
+ * @throws {Error}
  * @private
  */
 function _buildLibraryGraph(library) {
-	const graph={
-		/**
-		 * This stack will be built when the graph is "run"
-		 */
-		_callSequence: [],
-		/**
-		 * Used a runtime to track the last fully described domain and action
-		 * @type {LibraryNode}
-		 */
-		_lastDomainNode: null
+	let graphProxy,
+		graphObject={
+			/**
+			 * Creates and adds a ModuleDescriptor to our call-sequence
+			 * @param {LibraryNode} node
+			 * @param {Array<string>} args
+			 * @returns {graphProxy}
+			 */
+			_addCall(node, ...args) {
+				if(node.domain) {
+					this._lastDomainNode=node;
+				} else if(this._lastDomain===null) {
+					throw new Error(`cannot resolve a domain for action=${node.action}`);
+				}
+				this._callSequence.push({
+					action: node.action,
+					class: node.class || this._lastDomainNode.class,
+					domain: node.domain || this._lastDomainNode.domain,
+					method: node.method || node.action,
+					params: args
+				});
+				return graphProxy;
+			},
+			/**
+			 * This stack will be built when the graph is "run"
+			 * @type {Array<ModuleDescriptor>}
+			 */
+			_callSequence: [],
+			/**
+			 * Used a runtime to track the last fully described domain and action
+			 * @type {LibraryNode}
+			 */
+			_lastDomainNode: null
+		};
+
+	/**
+	 * Proxies all attempts to get properties on "os". We open up the floodgates.
+	 */
+	const proxyOS={
+		get(target, property) {
+			// console.log(`proxyOS.get: property=${property}`);
+			if(!(property in target)) {
+				target[property]=graphObject._addCall.bind(graphObject, {
+					action: property,
+					class: lib_os.ModuleOs,
+					domain: "os",
+					method: "executionHandler"
+				});
+			}
+			return target[property];
+		}
 	};
-	return library.reduce((result, node)=>{
+	/**
+	 * Proxies all "gets" at the root of the graph so that we may deal with os requests that omit their domain
+	 */
+	const proxyTop={
+		get(target, property, receiver) {
+			// console.log(`proxyTop.get: property=${property}`);
+			if(!(property in target)) {
+				if(_.get(target._lastDomainNode, "domain")==="os") {
+					target[property]=graphObject._addCall.bind(graphObject, {
+						action: property,
+						method: "executionHandler"
+					});
+				}
+			}
+			return target[property];
+		}
+	};
+
+	graphObject=library.reduce((result, node)=>{
 		// top level to cover those that are hijacking the last domain
 		// note: this will be a problem if any of our domains and actions collide
 		if(result.hasOwnProperty(node.action)===false) {
-			result[node.action]=()=>{
-				if(graph._lastDomain===null) {
-					throw new Error(`cannot resolve a domain for action=${node.action}`);
-				} else {
-					graph._callSequence.push({
-						action: node.action,
-						class: graph._lastDomainNode.class,
-						domain: graph._lastDomainNode.domain,
-						params: Array.from(arguments)
-					});
-					return graph;
-				}
-			};
+			result[node.action]=graphObject._addCall.bind(graphObject, node);
 		}
-		// domain specific handler
-		_.set(result, `${node.domain}.${node.action}`, ()=>{
-			graph._callSequence.push({
-				action: node.action,
-				class: node.class,
-				domain: node.domain,
-				params: Array.from(arguments)
-			});
-			graph._lastDomainNode=node;
-			return graph;
-		});
+		_.set(result, `${node.domain}.${node.action}`, graphObject._addCall.bind(graphObject, node));
 		return result;
-	}, graph);
+	}, graphObject);
+
+	graphObject.os=new Proxy({}, proxyOS);
+	return graphProxy=new Proxy(graphObject, proxyTop);
 }
 
 /**
- * Builds an internal representation of our library
+ * Builds a list of all possible calls supported by our library. It includes all:
+ * 	1. [domain].<action> possibilities
+ * 	2. <action> possibilities where the domain is inherited from a previous call (with a domain)
  * @returns {Array<LibraryNode>}
  * @private
  */
@@ -134,8 +178,7 @@ function _loadLibrary() {
 						result.push({
 							action: property,
 							class: clss,
-							domain: path.parse(filename).name,
-							module
+							domain: path.parse(filename).name
 						});
 					});
 			};
@@ -148,8 +191,9 @@ function _loadLibrary() {
 }
 
 /**
- * Finds the script and returns it one way or the other
+ * Finds the "run" script and returns it
  * @param {CliParsed} configuration
+ * @returns {string}
  * @private
  */
 function _loadScript(configuration) {
