@@ -6,16 +6,16 @@
  */
 
 const assert=require("../../support/assert");
-const {ModuleParse}=require("../../../src/lib/parse");
+const {ModuleString}=require("../../../src/lib/string");
 
-describe("lib.ModuleParse", function() {
+describe("lib.ModuleString", function() {
 	function _createInstance({
 		action="action",
 		domain="parse",
 		method="method",
 		params=[]
 	}={}) {
-		return new ModuleParse({
+		return new ModuleString({
 			action,
 			domain,
 			method,

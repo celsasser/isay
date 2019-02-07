@@ -8,13 +8,13 @@
 const _=require("lodash");
 const {ModuleBase}=require("./base");
 const log=require("../common/log");
-const parse=require("../common/parse");
+const string=require("../common/parse");
 const util=require("../common/util");
 
 /**
  * @typedef {ModuleBase} ModuleStd
  */
-class ModuleParse extends ModuleBase {
+class ModuleString extends ModuleBase {
 	/**
 	 * Parses string to array using specified method in param[0]. Defaults to "white":
 	 * @supported {"delimiter"|"newline"|"shell"|"white"}
@@ -53,7 +53,7 @@ class ModuleParse extends ModuleBase {
 				}
 				case "shell": {
 					return {
-						data: parse.shell(data),
+						data: string.shell(data),
 						encoding: "object"
 					};
 				}
@@ -70,5 +70,5 @@ class ModuleParse extends ModuleBase {
 }
 
 module.exports={
-	ModuleParse
+	ModuleString
 };

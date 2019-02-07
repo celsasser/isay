@@ -6,7 +6,7 @@
  */
 
 os.ls(".")
-	.parse.split("newline")
+	.string.split("newline")
 	.array.filter(item=>item.length>0)
 	.map(item=>`./${item}`)
 	.sort()

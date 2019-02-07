@@ -11,7 +11,7 @@ const log=require("../../common/log");
 
 /**
  * @param {CliParsed} configuration
- * @returns {Promise<void>}
+ * @returns {Promise<DataBlob>}
  */
 exports.run=async function(configuration) {
 	try {
@@ -56,22 +56,6 @@ function _parsedScriptToPipeline(descriptors) {
 			});
 			return _build(index-1, instance);
 		}
-	}
-
-	/**
-	 * Finds the proper type for the descriptor at <param>index</param>
-	 * @param {number} index
-	 * @returns {string}
-	 */
-	function _type(index) {
-		while(index> -1) {
-			if(descriptors[index].type) {
-				return descriptors[index].type;
-			}
-		}
-		throw new XRayError({
-			message: "insufficient type specifications"
-		});
 	}
 
 	return _build(descriptors.length-1);

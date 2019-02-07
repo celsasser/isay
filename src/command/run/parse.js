@@ -106,7 +106,6 @@ function _buildLibraryGraph(library) {
 	 */
 	const proxyOS={
 		get(target, property) {
-			// console.log(`proxyOS.get: property=${property}`);
 			if(!(property in target)) {
 				target[property]=graphObject._addCall.bind(graphObject, {
 					action: property,
@@ -122,7 +121,7 @@ function _buildLibraryGraph(library) {
 	 * Proxies all "gets" at the root of the graph so that we may deal with os requests that omit their domain
 	 */
 	const proxyTop={
-		get(target, property, receiver) {
+		get(target, property) {
 			// console.log(`proxyTop.get: property=${property}`);
 			if(!(property in target)) {
 				if(_.get(target._lastDomainNode, "domain")==="os") {
