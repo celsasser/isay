@@ -5,7 +5,8 @@
  * Copyright @2019 by Xraymen Inc.
  */
 
-const {parseScript}=require("./parse");
+const {createChain}=require("./_chain");
+const {parseScript}=require("./_parse");
 const {XRayError}=require("../../common/error");
 const log=require("../../common/log");
 
@@ -18,9 +19,9 @@ exports.run=async function(configuration) {
 		log.verbose("- parsing script");
 		const descriptors=parseScript(configuration);
 		log.verbose("- building pipeline");
-		const pipeline=_parsedScriptToPipeline(descriptors);
+		const chain=createChain(descriptors);
 		log.verbose("- processing pipeline");
-		return pipeline.process();
+		return chain.process();
 	} catch(error) {
 		return Promise.reject(new XRayError({
 			error,
@@ -29,44 +30,3 @@ exports.run=async function(configuration) {
 	}
 };
 
-/**
- * Translates parsed script into a sequence of modules
- * @param {Array<ModuleDescriptor>} descriptors
- * @returns {ModuleBase}
- * @private
- */
-function _parsedScriptToPipeline(descriptors) {
-	/**
-	 * Builds chain of modules. Works it's way forward
-	 * @param {number} index
-	 * @param {ModuleBase} next
-	 * @returns {ModuleBase}
-	 */
-	function _build(index, next=undefined) {
-		if(index<0) {
-			return next;
-		} else {
-			const descriptor=descriptors[index];
-			const instance=new descriptor.class({
-				action: descriptor.action,
-				domain: descriptor.domain,
-				method: descriptor.method,
-				output: next,
-				params: descriptor.params
-			});
-			return _build(index-1, instance);
-		}
-	}
-
-	return _build(descriptors.length-1);
-}
-
-/**
- *
- * @param {ModuleDescriptor} descriptor
- * @returns {}
- * @private
- */
-function _descriptorToClass(descriptor) {
-
-}

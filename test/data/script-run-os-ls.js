@@ -7,8 +7,7 @@
 
 os.ls(".")
 	.string.split("newline")
-	.array.filter(item=>item.length>0)
-	.map(item=>`./${item}`)
+	.map(os.cat())
 	.sort()
 	.reverse()
 	.std.out();

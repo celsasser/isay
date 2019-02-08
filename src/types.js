@@ -44,9 +44,15 @@
  * @property {Object} options
  */
 
-
 /**
  * @typedef {{data:*, encoding:string}} DataBlob
+ */
+
+/**
+ * @typedef {Object} LibraryNode
+ * @property {string} action
+ * @property {class} class
+ * @property {string} domain
  */
 
 /**
