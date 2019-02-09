@@ -8,6 +8,7 @@
 const _=require("lodash");
 const {ModuleBase}=require("./base");
 const file=require("../common/file");
+const util=require("../common/util");
 
 /**
  * @typedef {ModuleBase} ModuleJson
@@ -18,13 +19,11 @@ class ModuleJson extends ModuleBase {
 	 * @param {Object} data
 	 * @returns {Promise<DataBlob>}
 	 */
-	async get({data}) {
-		return {
-			data: (this.params.length>0)
-				? _.get(data, this.params[0])
-				: data,
-			encoding: "object"
-		};
+	async get(data) {
+		this._assertJson(data);
+		return (this.params.length>0)
+			? _.get(data, this.params[0])
+			: data;
 	}
 
 	/**
@@ -33,24 +32,23 @@ class ModuleJson extends ModuleBase {
 	 */
 	async load() {
 		const path=this.params[0],
-			data=await file.readToJSON(path);
-		return {
-			data,
-			encoding: "object"
-		};
+			result=await file.readToJSON(path);
+		return result;
 	}
 
 	/**
-	 * Merges json or yaml file at path into data
+	 * Merges param data in <code>params[0]</code> into <param>data</param>
 	 * @param {Object} data
 	 * @returns {Promise<DataBlob>}
 	 */
-	async merge({data}) {
-		const loaded=await file.readToJSON(this.params[0]);
-		return {
-			data: _.merge(data, loaded),
-			encoding: "object"
-		};
+	async merge(data) {
+		let merge=this.params[0];
+		if(_.isString(merge)) {
+			merge=JSON.parse(merge);
+		} else {
+			this._assertJson(merge);
+		}
+		return _.merge(data, merge);
 	}
 
 	/**
@@ -58,25 +56,21 @@ class ModuleJson extends ModuleBase {
 	 * @param {*} data
 	 * @returns {Promise<DataBlob>}
 	 */
-	async parse({data}) {
-		return {
-			data: this._ensureJson(this.params[0]),
-			encoding: "object"
-		};
+	async parse(data) {
+		return (_.isString(data) || Buffer.isBuffer(data))
+			? JSON.parse(data.toString("utf8"))
+			: data;
 	}
 
 	/**
-	 * Sets property path to data
+	 * Sets the path stored in <code>param[0]</code> on <param>data</param> with <code>param[1]</code>
 	 * @param {Object} data
 	 * @returns {Promise<DataBlob>}
 	 */
-	async set({data}) {
+	async set(data) {
 		const path=this.params[0],
-			value=this._ensureJson(this.params[1]);
-		return {
-			data: _.set(data, path, value),
-			encoding: "object"
-		};
+			value=this.params[1];
+		return _.set(data, path, value);
 	}
 
 	/**
@@ -84,7 +78,7 @@ class ModuleJson extends ModuleBase {
 	 * @param {Object} data
 	 * @returns {Promise<DataBlob>}
 	 */
-	async write({data}) {
+	async write(data) {
 		const path=this.params[0];
 		await file.writeJSON({
 			async: true,
@@ -96,33 +90,32 @@ class ModuleJson extends ModuleBase {
 
 	/**************** Private Interface ****************/
 	/**
-	 * Parses the object if it is not already in a legitimate JSON encoding
+	 * If the value is not a valid JSON object then we throw an exception
 	 * @param {*} value
-	 * @returns {Object|number}
+	 * @throws {Error}
 	 * @private
 	 */
-	_ensureJson(value) {
-		return (_.isString(value) || Buffer.isBuffer(value))
-			? JSON.parse(value.toString())
-			: value;
+	_assertJson(value) {
+		if(value!==null
+			&& value!==undefined
+			&& _.isPlainObject(value)===false) {
+			throw new Error(`expecting JSON object but found ${util.name(value)}`);
+		}
 	}
 
 	/**
 	 * We always want this to be parsed.
 	 * @param {*} data
-	 * @param {string} encoding
 	 * @returns {DataBlob}
 	 * @private
 	 */
-	_preprocessChunk({data, encoding}) {
+	_preprocessChunk(data) {
 		if(_.isString(data)) {
-			data=JSON.stringify(data);
-			encoding="object";
-		} else if(Buffer.isBuffer(encoding)) {
-			data=JSON.stringify(data.toString("utf8"));
-			encoding="object";
+			return JSON.parse(data);
+		} else if(Buffer.isBuffer(data)) {
+			return JSON.parse(data.toString("utf8"));
 		}
-		return {data, encoding};
+		return data;
 	}
 }
 

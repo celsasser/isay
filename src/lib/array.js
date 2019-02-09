@@ -7,22 +7,43 @@
 
 const _=require("lodash");
 const {ModuleBase}=require("./base");
-const log=require("../common/log");
 const util=require("../common/util");
 
 /**
- * Supports operations on piped arrays
- * Note: All function use lodash. The input to the functions is as follows: _.<method>(array, param[0], param[1]...)
+ * Supports operations on piped arrays. The <code>predicate</code> may either be a function or a chain.
+ * The <code>predicate</code> is called as follows: param[0](blob[index], index):*
  * @typedef {ModuleBase} ModuleArray
  */
 class ModuleArray extends ModuleBase {
+	/**
+	 * Calls predicate for every element in blob
+	 * @param {DataBlob} blob
+	 * @returns {Promise<DataBlob>}
+	 */
+	async each(blob) {
+		const array=this._assertArray(blob),
+			predicate=this._conditionPredicate(this.params[0]);
+		for(let index=0; index<array.length; index++) {
+			await predicate(array[index], index);
+		}
+		return blob;
+	}
+
 	/**
 	 * Filters using param[0] as the predicate
 	 * @param {DataBlob} blob
 	 * @returns {Promise<DataBlob>}
 	 */
 	async filter(blob) {
-		return this._apply(blob, _.filter);
+		const array=this._assertArray(blob),
+			predicate=this._conditionPredicate(this.params[0]),
+			result=[];
+		for(let index=0; index<array.length; index++) {
+			if(await predicate(array[index], index)) {
+				result.push(array[index]);
+			}
+		}
+		return result;
 	}
 
 	/**
@@ -31,7 +52,14 @@ class ModuleArray extends ModuleBase {
 	 * @returns {Promise<DataBlob>}
 	 */
 	async find(blob) {
-		return this._apply(blob, _.find);
+		const array=this._assertArray(blob),
+			predicate=this._conditionPredicate(this.params[0]);
+		for(let index=0; index<array.length; index++) {
+			if(await predicate(array[index], index)) {
+				return array[index];
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -40,7 +68,28 @@ class ModuleArray extends ModuleBase {
 	 * @returns {Promise<DataBlob>}
 	 */
 	async map(blob) {
-		return this._apply(blob, _.map);
+		const array=this._assertArray(blob),
+			predicate=this._conditionPredicate(this.params[0]),
+			result=[];
+		for(let index=0; index<array.length; index++) {
+			result.push(await predicate(array[index], index));
+		}
+		return result;
+	}
+
+	/**
+	 * Reduces array down to the little or big guy you make him. He will use <code>param[1]</code> as a default start value.
+	 * @param {DataBlob} blob
+	 * @returns {Promise<DataBlob>}
+	 */
+	async reduce(blob) {
+		const array=this._assertArray(blob),
+			predicate=this._conditionPredicate(this.params[0]);
+		let result=_.get(this.params, 1, []);
+		for(let index=0; index<array.length; index++) {
+			result=await predicate(result, array[index], index);
+		}
+		return result;
 	}
 
 	/**
@@ -49,7 +98,8 @@ class ModuleArray extends ModuleBase {
 	 * @returns {Promise<DataBlob>}
 	 */
 	async reverse(blob) {
-		return this._apply(blob, _.reverse);
+		const array=this._assertArray(blob);
+		return array.reverse();
 	}
 
 	/**
@@ -58,34 +108,47 @@ class ModuleArray extends ModuleBase {
 	 * @returns {Promise<DataBlob>}
 	 */
 	async sort(blob) {
-		return this._apply(blob, _.sortBy);
+		const array=this._assertArray(blob);
+		// note: may optionally specify a property or function by which to sort
+		return _.sortBy(array, this.params[0]);
 	}
 
 	/********************* Private Interface *********************/
 	/**
 	 * Validates and applies the function to the blob using all params as input.
 	 * @param {DataBlob} blob
-	 * @param {function(array:Array, predicate:Function):Array} func
-	 * @return {DataBlob}
+	 * @return {Array<*>}
 	 * @private
 	 */
-	_apply(blob, func) {
-		if(blob.data==null) {
-			return {
-				data: [],
-				encoding: "object"
-			};
-		} else if(!_.isArray(blob.data)) {
-			log.warn(`array.${this.action} - expecting array but found type=${util.name(blob.data)}`);
-			return {
-				data: [],
-				encoding: "object"
-			};
+	_assertArray(blob) {
+		if(_.isArray(blob)) {
+			return blob;
+		} else if(blob==null) {
+			return [];
 		} else {
-			return {
-				data: func.apply(null, [blob.data].concat(this.params)),
-				encoding: "object"
-			};
+			throw new Error(`expecting array but found ${util.name(blob)}`);
+		}
+	}
+
+	/**
+	 * Makes sure <param>predicate</param> is a function and that it is a promise
+	 * @param {Function} predicate
+	 * @returns {Promise<*>}
+	 * @private
+	 */
+	_conditionPredicate(predicate) {
+		if(predicate==null) {
+			throw new Error("missing predicate function");
+		} else if(_.isFunction(predicate)) {
+			if(predicate[Symbol.toStringTag]==="AsyncFunction") {
+				return predicate;
+			} else {
+				return async(...args)=>{
+					return predicate(...args);
+				};
+			}
+		} else {
+			throw new Error(`expecting predicate but found ${util.name(predicate)}`);
 		}
 	}
 }

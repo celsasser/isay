@@ -224,12 +224,12 @@ exports.parse=function() {
 					.sortBy("keys.long")
 					.value();
 			log.info(`Description: ${action.desc}`);
-			log.info(`Usage: pigcmd.js ${_formatOptions(OPTIONS)} ${actionName} ${action.args || ""}`);
+			log.info(`Usage: mouse.js ${_formatOptions(OPTIONS)} ${actionName} ${action.args || ""}`);
 			options.forEach(option=>{
 				log.info(`   -${option.keys.short}|--${option.keys.long}: ${option.desc}`);
 			});
 		} else {
-			log.info(`Usage: pigcmd.js ${_formatOptions(OPTIONS)} <command> [<args>]`);
+			log.info(`Usage: mouse.js ${_formatOptions(OPTIONS)} <command> [<args>]`);
 			OPTIONS.forEach(option=>{
 				log.info(`   -${option.keys.short}|--${option.keys.long}: ${option.desc}`);
 			});

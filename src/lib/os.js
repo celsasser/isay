@@ -16,17 +16,16 @@ const parse=require("../common/parse");
 class ModuleOs extends ModuleBase {
 	/**
 	 * This is the single point through which we send all command requests.
-	 * @param {Object} data
-	 * @param {string} encoding
+	 * @param {Object} blob
 	 * @returns {Promise<DataBlob>}
 	 */
-	async executionHandler({data, encoding}) {
+	async executionHandler(blob) {
 		const args=this._parseParams(),
-			input=_.isEmpty(data)
+			input=_.isEmpty(blob)
 				? ""
-				: _.isObject(data)
-					? JSON.stringify(data)
-					: data.toString();
+				: _.isObject(blob)
+					? JSON.stringify(blob)
+					: blob.toString();
 
 		return new Promise((resolve, reject)=>{
 			const output={
@@ -50,10 +49,7 @@ class ModuleOs extends ModuleBase {
 				if(code>0) {
 					reject(new Error(output.err || output.out));
 				} else {
-					resolve({
-						data: output.out,
-						encoding: "utf8"
-					});
+					resolve(output.out);
 				}
 			});
 			if(input.length>0) {

@@ -45,7 +45,7 @@
  */
 
 /**
- * @typedef {{data:*, encoding:string}} DataBlob
+ * @typedef {*} DataBlob
  */
 
 /**

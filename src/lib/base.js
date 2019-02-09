@@ -37,17 +37,13 @@ class ModuleBase {
 
 	/**
 	 * Processes data for this module and passes results down the pipeline
-	 * @param {*} data
-	 * @param {string} encoding
+	 * @param {DataBlob} data
 	 * @returns Promise<DataBlob>
 	 */
-	async process({
-		data=undefined,
-		encoding="utf8"
-	}={}) {
+	async process(data=undefined) {
 		try {
 			log.verbose(`- preprocessing ${this.domain}.${this.action}`);
-			let blob=this._preprocessChunk({data, encoding});
+			let blob=this._preprocessChunk(data);
 			log.verbose(`- running ${this.domain}.${this.action}`);
 			blob=await this[this.method](blob);
 			return (this._output)

@@ -16,25 +16,23 @@ class ModuleStd extends ModuleBase {
 	/**
 	 * Writes output to stderr
 	 * @param {Object} data
-	 * @param {string} encoding
 	 * @returns {Promise<DataBlob>}
 	 */
-	async error({data, encoding}) {
+	async error(data) {
 		const writer=util.promisify(process.stderr.write.bind(process.stderr));
 		return writer(this._toString(data))
-			.then(()=>({data, encoding}));
+			.then(()=>data);
 	}
 
 	/**
 	 * Writes output to stdout
 	 * @param {Object} data
-	 * @param {string} encoding
 	 * @returns {Promise<DataBlob>}
 	 */
-	async out({data, encoding}) {
+	async out(data) {
 		const writer=util.promisify(process.stdout.write.bind(process.stdout));
 		return writer(this._toString(data))
-			.then(()=>({data, encoding}));
+			.then(()=>data);
 	}
 
 	/**************** Private Interface ****************/

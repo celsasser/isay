@@ -18,51 +18,31 @@ class ModuleString extends ModuleBase {
 	/**
 	 * Parses string to array using specified method in param[0]. Defaults to "white":
 	 * @supported {"delimiter"|"newline"|"shell"|"white"}
-	 * @param {Object} data
-	 * @param {string} encoding
+	 * @param {string} data
 	 * @returns {Promise<DataBlob>}
 	 */
-	async split({data, encoding}) {
+	async split(data) {
 		if(data==null) {
-			return {
-				data: [],
-				encoding: "object"
-			};
+			return [];
 		} else if(!_.isString(data)) {
-			log.warn(`parse.split - expecting string but found type=${util.name(data)}`);
-			return {
-				data: [],
-				encoding: "object"
-			};
+			throw new Error(`expecting string but found ${util.name(data)}`);
 		} else {
 			const method=_.get(this.params, "0", "white");
 			switch(method) {
 				case "delimiter": {
 					const delimiter=_.get(this.params, "1", "\\s*,\\s*"),
 						regex=new RegExp(delimiter);
-					return {
-						data: data.split(regex),
-						encoding: "object"
-					};
+					return data.split(regex);
 				}
 				case "newline": {
-					return {
-						data: data.split(/\s*\n\s*/),
-						encoding: "object"
-					};
+					return data.split(/\s*\n\s*/);
 				}
 				case "shell": {
-					return {
-						data: string.shell(data),
-						encoding: "object"
-					};
+					return string.shell(data);
 				}
 				case "white":
 				default: {
-					return {
-						data: data.split(/\s+/),
-						encoding: "object"
-					};
+					return data.split(/\s+/);
 				}
 			}
 		}

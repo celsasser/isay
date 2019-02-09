@@ -27,7 +27,7 @@ exports.notEqual=assert.notEqual;
 exports.notStrictEqual=assert.notStrictEqual;
 exports.ok=assert.ok;
 exports.strictEqual=assert.strictEqual;
-exports.throws=assert.throw;
+exports.throws=assert.throws;
 
 /**
  * We print out the expected as, in here at least, we frequently want to steal it.

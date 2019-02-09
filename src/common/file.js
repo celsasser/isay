@@ -43,6 +43,7 @@ async function readToJSON(uri, {
 	}
 	const parsed=path.parse(uri);
 	options=Object.assign({encoding, ...options});
+	// todo: why is this logging "(node:15295) DeprecationWarning: Deprecation Warning: Suites do not support a return value;load returned :[object Promise]"
 	return fs.readFile(uri, options)
 		.then(data=>{
 			if(parsed.ext.toLowerCase()===".yaml") {
