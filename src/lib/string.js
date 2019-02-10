@@ -7,7 +7,6 @@
 
 const _=require("lodash");
 const {ModuleBase}=require("./base");
-const log=require("../common/log");
 const string=require("../common/parse");
 const util=require("../common/util");
 

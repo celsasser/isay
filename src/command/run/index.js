@@ -17,7 +17,7 @@ const log=require("../../common/log");
 exports.run=async function(configuration) {
 	try {
 		log.verbose("- parsing script");
-		const descriptors=parseScript(configuration);
+		const descriptors=await parseScript(configuration);
 		log.verbose("- building pipeline");
 		const chain=createChain(descriptors);
 		log.verbose("- processing pipeline");

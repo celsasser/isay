@@ -5,7 +5,6 @@
  * Copyright @2019 by Xraymen Inc.
  */
 
-const _=require("lodash");
 const {XRayError}=require("../common/error");
 const log=require("../common/log");
 

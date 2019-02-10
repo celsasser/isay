@@ -16,9 +16,6 @@ exports.ACTIONS={
 		 * @throws {Error} - if you want to fail validation
 		 */
 		validate: function(position, options) {
-			if(position.length===0 && !options.hasOwnProperty("script")) {
-				throw new Error("no script specified");
-			}
 		}
 	}
 };
