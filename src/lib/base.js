@@ -5,7 +5,6 @@
  * Copyright @2019 by Xraymen Inc.
  */
 
-const {XRayError}=require("../common/error");
 const log=require("../common/log");
 
 /**
@@ -49,11 +48,12 @@ class ModuleBase {
 				? this._output.process(blob)
 				: Promise.resolve(blob);
 		} catch(error) {
-			return Promise.reject(new XRayError({
-				error,
-				instance: this,
-				message: `attempt to process ${this.domain}.${this.action} failed`
-			}));
+			// look to see whether this was reported by us. If so then it means that
+			// the chain was nested. We just want the top level error.
+			if(/\w+\.\w+ failed/.test(error.message)===false) {
+				error=new Error(`${this.domain}.${this.action} failed - ${error.message}`);
+			}
+			return Promise.reject(error);
 		}
 	}
 

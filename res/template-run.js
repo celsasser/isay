@@ -10,7 +10,7 @@
  *  - sort(predicate:function)
  * json:
  *  - get(propertyPath:string)
- *  - load(path:string)
+ *  - read(path:string)
  *  - merge(json:(Object|string))
  *  - parse(json:string)
  *  - set(propertyPath:string, value:*)

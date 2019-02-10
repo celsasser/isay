@@ -5,6 +5,7 @@
  * Copyright @2019 by Xraymen Inc.
  */
 
+const fs=require("fs-extra");
 const assert=require("../../support/assert");
 const {ModuleJson}=require("../../../src/lib/json");
 
@@ -59,20 +60,6 @@ describe("lib.ModuleJson", function() {
 		});
 	});
 
-	describe("load", function() {
-		it("should load and parse a valid path", async function() {
-			const instance=_createInstance({
-					params: ["./test/data/json-data-george.json"]
-				}),
-				result=await instance.load();
-			assert.deepEqual(result, {
-				"george": {
-					"type": "cat"
-				}
-			});
-		});
-	});
-
 	describe("merge", function() {
 		it("should merge json into json", async function() {
 			const jsonSource={property: "value"},
@@ -115,7 +102,75 @@ describe("lib.ModuleJson", function() {
 		});
 	});
 
-	describe("write", function() {
+	describe("read", function() {
+		it("should throw exception if path cannot be found", async function() {
+			const instance=_createInstance();
+			return instance.read()
+				.then(assert.fail)
+				.catch(error=>{
+					assert.ok(error.message.startsWith("expecting string"));
+				});
+		});
 
+		it("should use input data as path if specified", async function() {
+			const path="./test/data/data-george.json",
+				instance=_createInstance();
+			return instance.read(path)
+				.then(data=>{
+					assert.strictEqual(typeof (data), "object");
+					assert.deepEqual(data, fs.readJSONSync(path, "utf8"));
+				});
+		});
+
+		it("should use input data as path if specified", async function() {
+			const path="./test/data/data-george.json",
+				instance=_createInstance({
+					params: [path]
+				});
+			return instance.read()
+				.then(data=>{
+					assert.strictEqual(typeof (data), "object");
+					assert.deepEqual(data, fs.readJSONSync(path, "utf8"));
+				});
+		});
+	});
+
+	describe("write", function() {
+		it("should throw exception if path cannot be found", async function() {
+			const instance=_createInstance();
+			return instance.write()
+				.then(assert.fail)
+				.catch(error=>{
+					assert.ok(error.message.startsWith("expecting string"));
+				});
+		});
+
+		it("should save to an existing directory", async function() {
+			const data={"george": "cat"},
+				path="./test/data/output/file-save.json",
+				instance=_createInstance({
+					params: [path]
+				});
+			return instance.write(data)
+				.then(_data=>{
+					assert.strictEqual(_data, data);
+					assert.deepEqual(fs.readJSONSync(path, "utf8"), data);
+					fs.removeSync(path);
+				});
+		});
+
+		it("should create a directory that does not exist", async function() {
+			const data={"george": "cat"},
+				path="./test/data/output/new/file-save.json",
+				instance=_createInstance({
+					params: [path]
+				});
+			return instance.write(data)
+				.then(_data=>{
+					assert.strictEqual(_data, data);
+					assert.deepEqual(fs.readJSONSync(path, "utf8"), data);
+					fs.removeSync("./test/data/output/new");
+				});
+		});
 	});
 });

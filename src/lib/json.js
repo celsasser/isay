@@ -27,16 +27,6 @@ class ModuleJson extends ModuleBase {
 	}
 
 	/**
-	 * Loads and sets data to json or yaml file at path
-	 * @returns {Promise<DataBlob>}
-	 */
-	async load() {
-		const path=this.params[0],
-			result=await file.readToJSON(path);
-		return result;
-	}
-
-	/**
 	 * Merges param data in <code>params[0]</code> into <param>data</param>
 	 * @param {Object} data
 	 * @returns {Promise<DataBlob>}
@@ -74,12 +64,30 @@ class ModuleJson extends ModuleBase {
 	}
 
 	/**
+	 * Reads and parses specified json or yaml file. The path may either be specified as input data or param data:
+	 *  - if <code>this.param[0]</code> is not empty then it will be used as the path
+	 *  - if <code>this.param[0]</data> is empty then <param>data</param> will be used as the path
+	 * @param {string|undefined} data
+	 * @returns {Promise<DataBlob>}
+	 */
+	async read(data) {
+		const path=this.params[0] || data;
+		if(_.isString(path)===false) {
+			throw new Error(`expecting string as file-path but found ${util.name(path)}`);
+		}
+		return await file.readToJSON(path);
+	}
+
+	/**
 	 * Writes data to path
 	 * @param {Object} data
 	 * @returns {Promise<DataBlob>}
 	 */
 	async write(data) {
 		const path=this.params[0];
+		if(_.isString(path)===false) {
+			throw new Error(`expecting string as file-path but found ${util.name(path)}`);
+		}
 		await file.writeJSON({
 			async: true,
 			data: data,

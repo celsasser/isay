@@ -90,7 +90,7 @@ function readToJSONSync(uri, {
  * @returns {Promise<boolean>|undefined}
  * @throws {Error} only if in sync mode
  */
-function writeJSON({
+async function writeJSON({
 	uri, data,
 	async=true,
 	createPath=true,
@@ -101,11 +101,13 @@ function writeJSON({
 	if(typeof (data)!=="string") {
 		data=JSON.stringify(data);
 	}
-	return exports.writeFile({uri, data, async, createPath, encoding, flag, mode});
+	return writeFile({uri, data, async, createPath, encoding, flag, mode});
 }
 
 
 /**
+ * Works fine but it directly operates via fs.outputFile[Sync] or fs.writeFile[Sync].
+ * Chances are you are better off using these guys directly
  * @param {string} uri
  * @param {*} data
  * @param {Boolean} async
@@ -116,7 +118,7 @@ function writeJSON({
  * @returns {Promise<boolean>|undefined}
  * @throws {Error} only if in sync mode
  */
-function writeFile({
+async function writeFile({
 	uri, data,
 	async=true,
 	createPath=true,
@@ -124,23 +126,15 @@ function writeFile({
 	flag=undefined,
 	mode=undefined
 }) {
-	const parsed=path.parse(uri),
-		options=util.scrubObject({encoding, flag, mode});
+	const options=util.scrubObject({encoding, flag, mode});
 	if(async) {
-		return fs.pathExists(parsed.dir)
-			.then((exists)=>{
-				return (!exists && createPath)
-					? fs.mkdirs(parsed.dir)
-					: Promise.resolve();
-			})
-			.then(()=>fs.writeFile(uri, data, options));
+		return (createPath)
+			? fs.outputFile(uri, data, options)
+			: fs.writeFile(uri, data, options);
 	} else {
-		if(!fs.pathExistsSync(parsed.dir)) {
-			if(createPath) {
-				fs.mkdirsSync(parsed.dir);
-			}
-		}
-		fs.writeFileSync(uri, data, options);
+		return (createPath)
+			? fs.outputFileSync(uri, data, options)
+			: fs.writeFileSync(uri, data, options);
 	}
 }
 

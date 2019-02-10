@@ -9,6 +9,7 @@ const _=require("lodash");
 const {spawn}=require("child_process");
 const {ModuleBase}=require("./base");
 const parse=require("../common/parse");
+const log=require("../common/log");
 
 /**
  * @typedef {ModuleBase} ModuleStd
@@ -35,23 +36,36 @@ class ModuleOs extends ModuleBase {
 			const process=spawn(this.action, args, {
 				shell: true
 			});
+
+			resolve=_.once(resolve);
+			reject=_.once(reject);
+			// standard error: we track it and use it if our exit code is error
 			process.stderr.on("data", data=>{
 				data=data.toString("utf8");
 				output.err=`${output.err}${data}`;
-				// log.verbose(`- os.${this.action}.stderr: ${data}`);
 			});
+			// standard out: we track it and use it if our exit code is not in error
 			process.stdout.on("data", data=>{
 				data=data.toString("utf8");
 				output.out=`${output.out}${data.toString("utf8")}`;
-				// log.debug(`- os.${this.action}.stdout: ${data}`);
 			});
 			process.on("close", code=>{
 				if(code>0) {
-					reject(new Error(output.err || output.out));
+					const text=(output.err || output.out || "").trim();
+					reject(new Error(text));
 				} else {
 					resolve(output.out);
 				}
 			});
+			process.on("error", error=>{
+				reject(error);
+			});
+			["disconnect", "message"].forEach(event=>{
+				process.on(event, (...args)=>{
+					log.warn(`${this.domain}.${this.action}: received unhandled event=${event}, args=${JSON.stringify(args)}`);
+				});
+			});
+			// if there is input data then we assume that it is to be piped as input
 			if(input.length>0) {
 				process.stdin.write(input, "utf8");
 			}

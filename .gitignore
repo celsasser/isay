@@ -19,4 +19,4 @@ node_modules
 
 # and our own secrets
 **/output.mid
-test/data/_output
+test/data/output
