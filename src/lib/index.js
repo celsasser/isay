@@ -27,8 +27,8 @@ function loadLibrary() {
 		.filter(filename=>{
 			const parsed=path.parse(filename);
 			return parsed.ext===".js"
-				&& !parsed.name.startsWith("_")
-				&& !parsed.name!=="index";
+				&& parsed.name.startsWith("_")===false
+				&& parsed.name!=="index";
 		})
 		.reduce((result, filename)=>{
 			const module=require(path.join(libraryPath, filename));

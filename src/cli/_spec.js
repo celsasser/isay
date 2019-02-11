@@ -37,7 +37,7 @@ exports.OPTIONS=[
 	},
 	{
 		args: {
-			count: 0
+			count: 1
 		},
 		desc: "log level",
 		keys: {

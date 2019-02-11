@@ -42,9 +42,8 @@ class ModuleBase {
 	 */
 	async process(data=undefined) {
 		try {
-			log.verbose(`- preprocessing ${this.domain}.${this.action}`);
-			let blob=this._preprocessChunk(data);
 			log.verbose(`- running ${this.domain}.${this.action}`);
+			let blob=this._preprocessChunk(data);
 			blob=await this[this.method](blob);
 			return (this._output)
 				? this._output.process(blob)

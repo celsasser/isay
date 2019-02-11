@@ -21,7 +21,7 @@ class ModuleStd extends ModuleBase {
 	 */
 	async error(data) {
 		const writer=util.promisify(process.stderr.write.bind(process.stderr));
-		return writer(this._toString(data))
+		return writer(`${this._toString(data)}\n`)
 			.then(()=>data);
 	}
 
@@ -32,7 +32,7 @@ class ModuleStd extends ModuleBase {
 	 */
 	async out(data) {
 		const writer=util.promisify(process.stdout.write.bind(process.stdout));
-		return writer(this._toString(data))
+		return writer(`${this._toString(data)}\n`)
 			.then(()=>data);
 	}
 

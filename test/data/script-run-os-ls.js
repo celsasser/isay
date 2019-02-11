@@ -7,7 +7,8 @@
 
 os.ls(".")
 	.string.split("newline")
-	.map()
+	.filter(not.empty())
+	.map(std.out())
 	.sort()
 	.reverse()
 	.std.out();

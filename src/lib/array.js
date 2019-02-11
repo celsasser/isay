@@ -109,8 +109,18 @@ class ModuleArray extends ModuleBase {
 	 */
 	async sort(blob) {
 		const array=this._assertArray(blob);
-		// note: may optionally specify a property or function by which to sort
+		// note: sortBy acts like array.sort when the "by" param is undefined
 		return _.sortBy(array, this.params[0]);
+	}
+
+	/**
+	 * Returns uniq elements using a deep comparison of elements.
+	 * @param {DataBlob} blob
+	 * @returns {Promise<DataBlob>}
+	 */
+	async uniq(blob) {
+		const array=this._assertArray(blob);
+		return _.uniqWith(array, _.isEqual);
 	}
 
 	/********************* Private Interface *********************/
