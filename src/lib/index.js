@@ -7,7 +7,6 @@
  * We reserve this space for utils
  */
 
-const _=require("lodash");
 const fs=require("fs-extra");
 const path=require("path");
 const {toLocalPath}=require("../common/file");
@@ -25,7 +24,12 @@ const {toLocalPath}=require("../common/file");
 function loadLibrary() {
 	const libraryPath=toLocalPath("./src/lib");
 	return fs.readdirSync(toLocalPath("./src/lib"))
-		.filter(filename=>filename.endsWith(".js") && !_.includes(["base.js", "index.js"], filename))
+		.filter(filename=>{
+			const parsed=path.parse(filename);
+			return parsed.ext===".js"
+				&& !parsed.name.startsWith("_")
+				&& !parsed.name!=="index";
+		})
 		.reduce((result, filename)=>{
 			const module=require(path.join(libraryPath, filename));
 			const _processClassName=(name)=>{

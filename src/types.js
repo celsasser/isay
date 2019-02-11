@@ -45,6 +45,14 @@
  */
 
 /**
+ * @typedef {Array<*>} CsvRow
+ */
+
+/**
+ * @typedef {Array<Row>} CsvDoc
+ */
+
+/**
  * @typedef {*} DataBlob
  */
 

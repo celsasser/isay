@@ -166,7 +166,7 @@ function _buildModuleDescriptorSequence({library, script}) {
  */
 async function _loadScript(configuration) {
 	if(configuration.options.script) {
-		return fs.readFile(configuration.options.script, {encoding: "utf8"})
+		return fs.readFile(configuration.options.script, {encoding: "utf8"});
 	} else if(_.isEmpty(configuration.params[0])===false) {
 		return configuration.params[0];
 	} else {

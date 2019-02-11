@@ -7,7 +7,7 @@
 
 const _=require("lodash");
 const {spawn}=require("child_process");
-const {ModuleBase}=require("./base");
+const {ModuleBase}=require("./_base");
 const parse=require("../common/parse");
 const log=require("../common/log");
 

@@ -7,9 +7,10 @@
 
 const _=require("lodash");
 const util=require("util");
-const {ModuleBase}=require("./base");
+const {ModuleBase}=require("./_base");
 
 /**
+ * Basic stdio support
  * @typedef {ModuleBase} ModuleStd
  */
 class ModuleStd extends ModuleBase {

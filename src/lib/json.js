@@ -6,14 +6,13 @@
  */
 
 const _=require("lodash");
-const {ModuleBase}=require("./base");
+const {ModuleIO}=require("./_io");
 const file=require("../common/file");
-const util=require("../common/util");
 
 /**
- * @typedef {ModuleBase} ModuleJson
+ * @typedef {ModuleIO} ModuleJson
  */
-class ModuleJson extends ModuleBase {
+class ModuleJson extends ModuleIO {
 	/**
 	 * Gets value at property path
 	 * @param {Object} data
@@ -71,10 +70,7 @@ class ModuleJson extends ModuleBase {
 	 * @returns {Promise<DataBlob>}
 	 */
 	async read(data) {
-		const path=this.params[0] || data;
-		if(_.isString(path)===false) {
-			throw new Error(`expecting string as file-path but found ${util.name(path)}`);
-		}
+		const path=this._getReadPath(data);
 		return await file.readToJSON(path);
 	}
 
@@ -84,10 +80,7 @@ class ModuleJson extends ModuleBase {
 	 * @returns {Promise<DataBlob>}
 	 */
 	async write(data) {
-		const path=this.params[0];
-		if(_.isString(path)===false) {
-			throw new Error(`expecting string as file-path but found ${util.name(path)}`);
-		}
+		const path=this._getWritePath();
 		await file.writeJSON({
 			async: true,
 			data: data,
@@ -97,20 +90,6 @@ class ModuleJson extends ModuleBase {
 	}
 
 	/**************** Private Interface ****************/
-	/**
-	 * If the value is not a valid JSON object then we throw an exception
-	 * @param {*} value
-	 * @throws {Error}
-	 * @private
-	 */
-	_assertJson(value) {
-		if(value!==null
-			&& value!==undefined
-			&& _.isPlainObject(value)===false) {
-			throw new Error(`expecting JSON object but found ${util.name(value)}`);
-		}
-	}
-
 	/**
 	 * We always want this to be parsed.
 	 * @param {*} data

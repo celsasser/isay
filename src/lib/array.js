@@ -6,7 +6,7 @@
  */
 
 const _=require("lodash");
-const {ModuleBase}=require("./base");
+const {ModuleBase}=require("./_base");
 const util=require("../common/util");
 
 /**
@@ -127,28 +127,6 @@ class ModuleArray extends ModuleBase {
 			return [];
 		} else {
 			throw new Error(`expecting array but found ${util.name(blob)}`);
-		}
-	}
-
-	/**
-	 * Makes sure <param>predicate</param> is a function and that it is a promise
-	 * @param {Function} predicate
-	 * @returns {Promise<*>}
-	 * @private
-	 */
-	_conditionPredicate(predicate) {
-		if(predicate==null) {
-			throw new Error("missing predicate function");
-		} else if(_.isFunction(predicate)) {
-			if(predicate[Symbol.toStringTag]==="AsyncFunction") {
-				return predicate;
-			} else {
-				return async(...args)=>{
-					return predicate(...args);
-				};
-			}
-		} else {
-			throw new Error(`expecting predicate but found ${util.name(predicate)}`);
 		}
 	}
 }

@@ -5,15 +5,14 @@
  * Copyright @2019 by Xraymen Inc.
  */
 
-const _=require("lodash");
 const fs=require("fs-extra");
-const {ModuleBase}=require("./base");
-const util=require("../common/util");
+const {ModuleIO}=require("./_io");
 
 /**
- * @typedef {ModuleBase} ModuleFile
+ * read and write file support for any and all data types
+ * @typedef {ModuleIO} ModuleFile
  */
-class ModuleFile extends ModuleBase {
+class ModuleFile extends ModuleIO {
 	/**
 	 * Reads path specified as either input data or param data:
 	 *  - if <param>data</param> is not empty then it will be used as the path
@@ -24,17 +23,7 @@ class ModuleFile extends ModuleBase {
 	 * @returns {Promise<DataBlob>}
 	 */
 	async read(data) {
-		let path, encoding;
-		if(data) {
-			path=data;
-			encoding=this.params[0]||"utf8";
-		} else {
-			path=this.params[0];
-			encoding=this.params[1]||"utf8";
-		}
-		if(_.isString(path)===false) {
-			throw new Error(`expecting string as file-path but found ${util.name(path)}`);
-		}
+		const {path, encoding}=this._getReadPathAndEncoding(data);
 		return await fs.readFile(path, {encoding});
 	}
 
@@ -45,11 +34,7 @@ class ModuleFile extends ModuleBase {
 	 * @returns {Promise<DataBlob>}
 	 */
 	async write(data) {
-		const path=this.params[0],
-			encoding=this.params[1]||"utf8";
-		if(_.isString(path)===false) {
-			throw new Error(`expecting string but found ${util.name(path)}`);
-		}
+		const {encoding, path}=this._getWritePathAndEncoding();
 		await fs.outputFile(path, data, {encoding});
 		return data;
 	}
