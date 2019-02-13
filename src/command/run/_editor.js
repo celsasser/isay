@@ -37,7 +37,7 @@ async function _createTmpFile(data) {
 	const uri=path.join(os.tmpdir(), shortid.generate()+".js");
 	return fs.writeFile(uri, data, {
 		encoding: "utf8"
-	}).then(()=>uri);
+	}).then(Promise.resolve.bind(Promise, uri));
 }
 
 /**

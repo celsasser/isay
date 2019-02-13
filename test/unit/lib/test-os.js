@@ -6,7 +6,9 @@
  */
 
 const assert=require("../../support/assert");
+const proxy=require("../../support/proxy");
 const {ModuleOs}=require("../../../src/lib/os");
+const spawn=require("../../../src/common/spawn");
 
 describe("lib.ModuleOs", function() {
 	function _createInstance({
@@ -24,16 +26,43 @@ describe("lib.ModuleOs", function() {
 	}
 
 	describe("executionHandler", function() {
-		// There is no shell when run via the mocha test runner. Gonna let this guy go for now.
-		it.skip("should successfully return results with a valid command", async function() {
+		it("should properly ", async function() {
 			const instance=_createInstance({
-				params: ["ls"]
+				params: ["param"]
 			});
-			return instance.executionHandler()
+			proxy.stub(spawn, "command", async({args, command, stdin})=>{
+				assert.deepEqual(command, instance.action);
+				assert.deepEqual(args, instance.params);
+				assert.strictEqual(stdin, "input");
+				return Promise.resolve("result");
+			});
+			return instance.executionHandler("input")
 				.then(result=>{
-					assert.ok(result.indexOf("..")>-1);
-				})
-				.catch(assert.fail);
+					assert.strictEqual(result, "result");
+				});
+		});
+	});
+
+	describe("_paramsToArguments", function() {
+		it("should return params if length is 0", function() {
+			const instance=_createInstance({
+				params: []
+			});
+			assert.deepEqual(instance._paramsToArguments(), []);
+		});
+
+		it("should return params if length is greater than 1", function() {
+			const instance=_createInstance({
+				params: ["1", "2"]
+			});
+			assert.deepEqual(instance._paramsToArguments(), ["1", "2"]);
+		});
+
+		it("should parse params if length is 1", function() {
+			const instance=_createInstance({
+				params: ["1 2"]
+			});
+			assert.deepEqual(instance._paramsToArguments(), ["1", "2"]);
 		});
 	});
 });

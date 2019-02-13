@@ -43,16 +43,16 @@ describe("lib.ModuleIO", function() {
 		});
 	});
 
-	describe("_getReadPathAndEncoding", function() {
+	describe("_getReadPathAndOptions", function() {
 		it("should throw exception if path cannot be found", function() {
 			const instance=_createInstance();
-			assert.throws(()=>instance._getReadPathAndEncoding(),
+			assert.throws(()=>instance._getReadPathAndOptions(),
 				error=>error.message==="expecting string as file-path but found undefined");
 		});
 
 		it("should use input data as path if specified", function() {
 			const instance=_createInstance();
-			assert.deepEqual(instance._getReadPathAndEncoding("path"), {
+			assert.deepEqual(instance._getReadPathAndOptions("path"), {
 				"encoding": "utf8",
 				"path": "path"
 			});
@@ -62,7 +62,7 @@ describe("lib.ModuleIO", function() {
 			const instance=_createInstance({
 				params: ["path"]
 			});
-			assert.deepEqual(instance._getReadPathAndEncoding(), {
+			assert.deepEqual(instance._getReadPathAndOptions(), {
 				"encoding": "utf8",
 				"path": "path"
 			});
@@ -84,10 +84,10 @@ describe("lib.ModuleIO", function() {
 		});
 	});
 
-	describe("_getWritePathAndEncoding", function() {
+	describe("_getWritePathAndOptions", function() {
 		it("should throw exception if path cannot be found", function() {
 			const instance=_createInstance();
-			assert.throws(()=>instance._getWritePathAndEncoding(),
+			assert.throws(()=>instance._getWritePathAndOptions(),
 				error=>error.message==="expecting string as file-path but found undefined");
 		});
 
@@ -95,7 +95,7 @@ describe("lib.ModuleIO", function() {
 			const instance=_createInstance({
 				params: ["path"]
 			});
-			assert.deepEqual(instance._getWritePathAndEncoding(), {
+			assert.deepEqual(instance._getWritePathAndOptions(), {
 				"encoding": "utf8",
 				"path": "path"
 			});
@@ -103,10 +103,12 @@ describe("lib.ModuleIO", function() {
 
 		it("should use param[0] as path and param[1] for encoding", function() {
 			const instance=_createInstance({
-				params: ["path", "encoding"]
+				params: ["path", {
+					encoding: "utf8"
+				}]
 			});
-			assert.deepEqual(instance._getWritePathAndEncoding(), {
-				"encoding": "encoding",
+			assert.deepEqual(instance._getWritePathAndOptions(), {
+				"encoding": "utf8",
 				"path": "path"
 			});
 		});

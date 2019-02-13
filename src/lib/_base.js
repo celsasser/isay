@@ -60,9 +60,47 @@ class ModuleBase {
 
 	/**************** Protected Interface ****************/
 	/**
+	 * Asserts that <param>value</param> is one of the <param>allowed</param> types
+	 * @param {*} value
+	 * @param {string|Array<string>} allowed
+	 * @param {boolean} allowNull
+	 * @param {boolean} strict - if strict then will use value.constructor.name otherwise will use typedef(value)
+	 * @throws {Error}
+	 * @protected
+	 */
+	_assertType(value, allowed, {
+		allowNull=false,
+		strict=true
+	}={}) {
+		function _formatAllowed() {
+			return _.isArray(allowed)
+				? allowed.join(" or ")
+				: allowed;
+		}
+		if(value==null) {
+			if(!allowNull) {
+				throw new Error(`expecting ${_formatAllowed()} but found ${util.name(value)}`);
+			}
+		} else {
+			const type=(strict)
+				? value.constructor.name
+				: typeof(value);
+			if(_.isArray(allowed)) {
+				if(_.includes(allowed, type)===false) {
+					throw new Error(`expecting one of ${_formatAllowed()} but found ${util.name(value)}`);
+				}
+			} else {
+				if(type!==allowed) {
+					throw new Error(`expecting ${_formatAllowed()} but found ${util.name(value)}`);
+				}
+			}
+		}
+	}
+
+	/**
 	 * If the value is not a valid JSON object then we throw an exception
 	 * @param {*} value
-	 * @param {boolean} allowNull
+	 * @param {boolean} allowNull - this is a judgement call. We allow null because it is a valid JSON value.
 	 * @throws {Error}
 	 * @protected
 	 */

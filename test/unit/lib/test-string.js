@@ -23,6 +23,61 @@ describe("lib.ModuleString", function() {
 		});
 	}
 
+	describe("replace", function() {
+		[
+			["input", 0, "search", "replace"],
+			["search", "input", 0, "replace"],
+			["replace", "input", "search", 0]
+		].forEach(args=>{
+			it(`should reject unknown ${args[0]} type`, async function() {
+				const input=args[1],
+					search=args[2],
+					replace=args[3],
+					instance=new _createInstance({
+						params: [search, replace]
+					});
+				return instance.replace(input)
+					.then(assert.fail)
+					.catch(error=>{
+						assert.ok(error.message.startsWith("expecting"));
+					});
+			});
+		});
+
+		it("should successfully process valid string search", async function() {
+			const input="dog, cat, dog",
+				search="dog",
+				replace="bird",
+				instance=new _createInstance({
+					params: [search, replace]
+				});
+			return instance.replace(input)
+				.then(result=>assert.strictEqual(result, "bird, cat, bird"));
+		});
+
+		it("should successfully process valid non-global, regex search", async function() {
+			const input="dog, cat, dog",
+				search=/dog/,
+				replace="bird",
+				instance=new _createInstance({
+					params: [search, replace]
+				});
+			return instance.replace(input)
+				.then(result=>assert.strictEqual(result, "bird, cat, dog"));
+		});
+
+		it("should successfully process valid global, regex search", async function() {
+			const input="dog, cat, dog",
+				search=/dog/g,
+				replace="bird",
+				instance=new _createInstance({
+					params: [search, replace]
+				});
+			return instance.replace(input)
+				.then(result=>assert.strictEqual(result, "bird, cat, bird"));
+		});
+	});
+
 	describe("split", function() {
 		it("should use white method by default", async function() {
 			const instance=_createInstance({}),

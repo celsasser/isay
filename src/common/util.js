@@ -292,7 +292,7 @@ exports.inspect=function(object, options=undefined) {
  * @returns {string}
  */
 exports.name=function(object) {
-	if(object) {
+	if(object!=null) {
 		// I think that all possible values will have constructors.  We are playing it safe.
 		if(object.constructor) {
 			return object.constructor.name;

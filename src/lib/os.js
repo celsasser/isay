@@ -6,10 +6,9 @@
  */
 
 const _=require("lodash");
-const {spawn}=require("child_process");
 const {ModuleBase}=require("./_base");
 const parse=require("../common/parse");
-const log=require("../common/log");
+const spawn=require("../common/spawn");
 
 /**
  * @typedef {ModuleBase} ModuleStd
@@ -21,54 +20,16 @@ class ModuleOs extends ModuleBase {
 	 * @returns {Promise<DataBlob>}
 	 */
 	async executionHandler(blob) {
-		const args=this._parseParams(),
+		const args=this._paramsToArguments(),
 			input=_.isEmpty(blob)
 				? ""
 				: _.isObject(blob)
 					? JSON.stringify(blob)
-					: blob.toString();
-
-		return new Promise((resolve, reject)=>{
-			const output={
-				err: "",
-				out: ""
-			};
-			const process=spawn(this.action, args, {
-				shell: true
-			});
-
-			resolve=_.once(resolve);
-			reject=_.once(reject);
-			// standard error: we track it and use it if our exit code is error
-			process.stderr.on("data", data=>{
-				data=data.toString("utf8");
-				output.err=`${output.err}${data}`;
-			});
-			// standard out: we track it and use it if our exit code is not in error
-			process.stdout.on("data", data=>{
-				data=data.toString("utf8");
-				output.out=`${output.out}${data.toString("utf8")}`;
-			});
-			process.on("close", code=>{
-				if(code>0) {
-					const text=(output.err || output.out || "").trim();
-					reject(new Error(text));
-				} else {
-					resolve(output.out);
-				}
-			});
-			process.on("error", error=>{
-				reject(error);
-			});
-			["disconnect", "message"].forEach(event=>{
-				process.on(event, (...args)=>{
-					log.warn(`${this.domain}.${this.action}: received unhandled event=${event}, args=${JSON.stringify(args)}`);
-				});
-			});
-			// if there is input data then we assume that it is to be piped as input
-			if(input.length>0) {
-				process.stdin.write(input, "utf8");
-			}
+					: blob;
+		return spawn.command({
+			args: args,
+			command: this.action,
+			stdin: input
 		});
 	}
 
@@ -80,10 +41,10 @@ class ModuleOs extends ModuleBase {
 	 * @return {Array<string>}
 	 * @private
 	 */
-	_parseParams() {
-		return (this.params.length<=1)
-			? this.params
-			: parse.shell(this.params[0]);
+	_paramsToArguments() {
+		return (this.params.length===1)
+			? parse.shell(this.params[0])
+			: this.params;
 	}
 }
 

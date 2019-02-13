@@ -16,6 +16,18 @@ const util=require("../common/util");
  */
 class ModuleIO extends ModuleBase {
 	/**
+	 * Asserts that the path is a string type
+	 * @param value
+	 * @throws {Error}
+	 * @protected
+	 */
+	_assetPath(value) {
+		if(_.isString(value)===false) {
+			throw new Error(`expecting string as file-path but found ${util.name(value)}`);
+		}
+	}
+
+	/**
 	 * Finds the path as per the following rules
 	 *  - if <param>data</param> is not empty then it will be used as the path
 	 *  - if <param>data</param> is empty then <code>this.param[0]</data> will be used as the path
@@ -23,15 +35,14 @@ class ModuleIO extends ModuleBase {
 	 *  depending in where the path is specified
 	 * @param {string|undefined} data
 	 * @returns {string}
+	 * @throws {Error}
 	 * @protected
 	 */
 	_getReadPath(data) {
 		const path=(data)
 			? data
 			: this.params[0];
-		if(_.isString(path)===false) {
-			throw new Error(`expecting string as file-path but found ${util.name(path)}`);
-		}
+		this._assetPath(path);
 		return path;
 	}
 
@@ -42,54 +53,53 @@ class ModuleIO extends ModuleBase {
 	 *  Encoding data may be specified in either <code>this.param[0]</code> or <code>this.param[1]</code>
 	 *  depending in where the path is specified
 	 * @param {string|undefined} data
-	 * @param {string} defaultEncoding
-	 * @returns {{path:string, encoding:string}}
+	 * @param {Object} defaults
+	 * @returns {{path:string, encoding:string, ...options}}
+	 * @throws {Error}
 	 * @protected
 	 */
-	_getReadPathAndEncoding(data, defaultEncoding="utf8") {
+	_getReadPathAndOptions(data, defaults={
+		encoding: "utf8"
+	}) {
 		let result;
 		if(data) {
-			result={
-				path: data,
-				encoding: this.params[0] || defaultEncoding
-			};
+			result=Object.assign({
+				path: data
+			}, this.params[0] || defaults);
 		} else {
-			result={
-				path: this.params[0],
-				encoding: this.params[1] || defaultEncoding
-			};
+			result=Object.assign({
+				path: this.params[0]
+			}, this.params[1] || defaults);
 		}
-		if(_.isString(result.path)===false) {
-			throw new Error(`expecting string as file-path but found ${util.name(result.path)}`);
-		}
+		this._assetPath(result.path);
 		return result;
 	}
 
 	/**
 	 * Writes data to path that should be in <code>this.param[0]</code>.
 	 * @returns {string}
+	 * @throws {Error}
 	 */
 	_getWritePath() {
 		const path=this.params[0];
-		if(_.isString(path)===false) {
-			throw new Error(`expecting string as file-path but found ${util.name(path)}`);
-		}
+		this._assetPath(path);
 		return path;
 	}
 
 	/**
 	 * Writes data to path that should be in <code>this.param[0]</code>.
-	 * Encoding may optionally be in <code>this.param[1]</code>
-	 * @returns {{path:string, encoding:string}}
+	 * Write options may optionally be in <code>this.param[1]</code>
+	 * @param {Object} defaults
+	 * @returns {{path:string, encoding:string, ...options}}
+	 * @throws {Error}
 	 */
-	_getWritePathAndEncoding(defaultEncoding="utf8") {
-		const result={
-			path: this.params[0],
-			encoding: this.params[1] || defaultEncoding
-		};
-		if(_.isString(result.path)===false) {
-			throw new Error(`expecting string as file-path but found ${util.name(result.path)}`);
-		}
+	_getWritePathAndOptions(defaults={
+		encoding: "utf8"
+	}) {
+		const result=Object.assign({
+			path: this.params[0]
+		}, this.params[1] || defaults);
+		this._assetPath(result.path);
 		return result;
 	}
 }

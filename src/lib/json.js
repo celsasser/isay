@@ -71,7 +71,7 @@ class ModuleJson extends ModuleIO {
 	 */
 	async read(data) {
 		const path=this._getReadPath(data);
-		return await file.readToJSON(path);
+		return file.readToJSON(path);
 	}
 
 	/**

@@ -15,6 +15,27 @@ const util=require("../common/util");
  */
 class ModuleString extends ModuleBase {
 	/**
+	 * Replaces <code>params[0]</code> with <code>params[1]</code>. If <code>param[0]</code> then this guy is
+	 * going to apply it globally
+	 * @param {string} data - string to be replaced
+	 * @returns {Promise<DataBlob>}
+	 */
+	async replace(data) {
+		if(data!=null) {
+			let search=this.params[0],
+				replace=this.params[1];
+			this._assertType(data, "String");
+			this._assertType(search, ["RegExp", "String"], {allowNull: false}),
+			this._assertType(replace, ["String"], {allowNull: false});
+			if(search.constructor.name!=="RegExp") {
+				search=new RegExp(search, "g");
+			}
+			data=data.replace(search, replace);
+		}
+		return data;
+	}
+
+	/**
 	 * Parses string to array using specified method in param[0]. Defaults to "white":
 	 * @supported {"delimiter"|"newline"|"shell"|"white"}
 	 * @param {string} data
