@@ -33,11 +33,7 @@ class ModuleObject extends ModuleIO {
 	 */
 	async merge(data) {
 		let merge=this.params[0];
-		if(_.isString(merge)) {
-			merge=JSON.parse(merge);
-		} else {
-			this._assertJson(merge);
-		}
+		this._assertJson(merge);
 		return _.merge(data, merge);
 	}
 

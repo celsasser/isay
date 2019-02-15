@@ -1,47 +1,59 @@
 /**
  * mouse.js run script. Follows are the domains and actions at your disposal:
  * array:
- *  - each(predicate:function) <= data:Array<*>
- *  - filter(predicate:function) <= data:Array<*>
- *  - find(predicate:function) <= data:Array<*>
- *  - map(predicate:function) <= data:Array<*>
- *  - reduce(predicate:function) <= data:Array<*>
- *  - reverse(predicate:function) <= data:Array<*>
- *  - sort(predicate:function) <= data:Array<*>
- *  - uniq() <= Array<*>
+ *  - Array<*> -> each(predicate:function) -> Array<*>
+ *  - Array<*> -> filter(predicate:function) -> Array<*>
+ *  - Array<*> -> find(predicate:function) -> Array<*>
+ *  - Array<*> -> map(predicate:function) -> Array<*>
+ *  - Array<*> -> reduce(predicate:function) -> Array<*>
+ *  - Array<*> -> reverse(predicate:function) -> Array<*>
+ *  - Array<*> -> sort(predicate:function) -> Array<*>
+ *  - Array<*> -> uniq() -> Array<*>
  * csv:
- *  - read(pathOrOpts:(string|Object|undefined), opts:(Object|undefined}) <= path:(string|undefined)
- *  - write(data:Array<Array<*>>) <= path:string
+ *  - read(path:string, opts:(undefined|{delimiter:","}}) -> Array<Array<*>>
+ *  - path:string -> read(opts:(undefined|{delimiter:","}}) -> Array<Array<*>>
+ *  - data:Array<Array<*>> -> write(path:string, opts:(undefined|{delimiter:","}}) -> Array<Array<*>>
  * file:
- *  - copy(sourceOrTarget:string, target:(string|undefined)) <= source:(string|undefined)
- *  - create(path:(string|undefined)) <= path:(string|undefined)
- *  - delete(path:(string|undefined)) <= path:(string|undefined)
- *  - read(pathOrOpts:(string|Object|undefined), opts:(Object|undefined)) <= path:(string|undefined)
- *  - write(path:string, opts:(Object|undefined)) <= data:*
- *  - zip(archive:string, opts:(Object|undefined)) <= files:Array<string>
+ *  - copy(source:string, target:string) -> undefined
+ *  - source:string -> copy(target:string) -> string
+ *  - create(path:string) -> undefined
+ *  - path:string -> create() -> string
+ *  - delete(path:string) -> undefined
+ *  - path:string -> delete() -> string
+ *  - read(path:string, opts:(undefined|Object)) -> (string|Buffer)
+ *  - path:string -> read(opts:(undefined|Object)) -> (string|Buffer)
+ *  - data:* -> write(path:string, opts:(undefined|{encoding="utf8",append=false})) -> *
+ *  - files:Array<string> -> zip(archive:string, opts:(undefined|Object)) -> Array<string>
  * is:
- *  - empty() <= data:(string,Array,Buffer)
- *  - equal(comparedTo:*) <= comparedFrom:*
+ *  - (string|Array|Buffer) -> empty() -> boolean
+ *  - comparedFrom:* -> equal(comparedTo:*) -> boolean
  * json:
- *  - get(propertyPath:string) <= json:Object
- *  - merge(json:(Object|string)) <= json:Object
- *  - parse() <= data:(string|Buffer|Object)
- *  - set(propertyPath:string, value:*) <= json:Object
- *  - read(path:(string|undefined)) <= path:(string|undefined)
- *  - write(path:string) <= json:Object
+ *  - data:(string|Buffer) -> parse() -> Object
+ *  - read(path:string) -> Object
+ *  - path:string -> read() -> Object
+ *  - Object -> stringify(options:{compact:true}) -> string
+ *  - json:Object -> write(path:string) -> Object
  * midi:
- *  - read(path:(string|undefined)) <= path:(string|undefined)
- *  - write(path:string) <= data:MidiIoSong
+ *  - read(path:string) -> MidiIoSong
+ *  - path:string -> read() -> MidiIoSong
+ *  - data:MidiIoSong -> write(path:string) -> MidiIoSong
  * not:
- *  - empty() <= data:(string,Array,Buffer)
- *  - equal(comparedTo:*) <= comparedFrom:*
+ *  - (string|Array|Buffer) -> empty()
+ *  - comparedFrom:* -> equal(comparedTo:*) -> boolean
+ * object:
+ *  - Object -> get(propertyPath:string) -> *
+ *  - Object -> merge(json:Object) -> Object
+ *  - Object -> set(propertyPath:string, value:*) -> Object
+ *  - path:(string|undefined) -> read(path:(string|undefined))
  * os:
- *  - <command>(params:(string|...)) <= stdin:(string|Buffer|Object|undefined)
+ *  - stdin:(string|Buffer|undefined) -> <command>(params:string) -> *
+ *  - stdin:(string|Buffer|undefined) -> <command>(param1:string, param2:string, ...) -> *
  * std:
- *  - error() <= data:*
- *  - out() <= data:*
+ *  - (string|Buffer|Object) -> error() -> (string|Buffer|Object)
+ *  - (string|Buffer|Object) -> out() -> (string|Buffer|Object)
  * string:
- *  - split(search:(string|RegExp), replace:string) <= text:string
- *  - split(method:("delimiter"|"newline"|"shell"|"white"), delimiter:(string|undefined)) <= text:string
+ *  - string -> replace(search:(string|RegExp), replace:string) -> string
+ *  - string -> split(method:("newline"|"shell"|"white"))
+ *  - string -> split(method:"delimiter", delimiter:string="\s*,\s*")
  */
 

@@ -26,8 +26,7 @@ class ModuleJson extends ModuleIO {
 
 	/**
 	 * Reads and parses specified json or yaml file. The path may either be specified as input data or param data:
-	 *  - if <param>data</param> is not empty then it will be used as the path
-	 *  - if <param>data</param> is empty then <code>this.param[0]</data> will be used as the path
+	 * @resolves path:string in data|this.params[0]
 	 * @param {string|undefined} data
 	 * @returns {Promise<DataBlob>}
 	 * @throws {Error}
@@ -39,7 +38,8 @@ class ModuleJson extends ModuleIO {
 
 	/**
 	 * Converts object to JSON encoded string.
-	 * - <code>this.param[0]</code> may be used to specify options: {{compact:boolean}}
+	 * @resolves source:Object in data
+	 * @resolves options:{compact=false} in this.params[0]
 	 * @param {Object} data
 	 * @returns {Promise<void>}
 	 * @throws {Error} if not JSON object
@@ -55,6 +55,8 @@ class ModuleJson extends ModuleIO {
 
 	/**
 	 * Writes data to file
+	 * @resolves data:Object in data
+	 * @resolves path:string in this.params[0]
 	 * @param {Object} data
 	 * @returns {Promise<DataBlob>}
 	 * @throws {Error} if path cannot be found

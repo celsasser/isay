@@ -17,6 +17,7 @@ const util=require("../common/util");
 class ModuleArray extends ModuleBase {
 	/**
 	 * Calls predicate for every element in blob
+	 * @resolves predicate:ArrayPredicate in this.params[0]
 	 * @param {DataBlob} blob
 	 * @returns {Promise<DataBlob>}
 	 * @throws {Error} if <param>blob</param> cannot be treated as an array
@@ -31,7 +32,8 @@ class ModuleArray extends ModuleBase {
 	}
 
 	/**
-	 * Filters using param[0] as the predicate
+	 * Filters array selecting truthy returns by predicate
+	 * @resolves predicate:ArrayPredicate in this.params[0]
 	 * @param {DataBlob} blob
 	 * @returns {Promise<DataBlob>}
 	 * @throws {Error} if <param>blob</param> cannot be treated as an array
@@ -49,7 +51,8 @@ class ModuleArray extends ModuleBase {
 	}
 
 	/**
-	 * Finds element using param[0] as the predicate
+	 * Finds first element using predicate
+	 * @resolves predicate:ArrayPredicate in this.params[0]
 	 * @param {DataBlob} blob
 	 * @returns {Promise<DataBlob>}
 	 * @throws {Error} if <param>blob</param> cannot be treated as an array
@@ -66,7 +69,8 @@ class ModuleArray extends ModuleBase {
 	}
 
 	/**
-	 * Maps using param[0] as the predicate
+	 * Maps each element using predicate's results
+	 * @resolves predicate:ArrayPredicate in this.params[0]
 	 * @param {DataBlob} blob
 	 * @returns {Promise<DataBlob>}
 	 * @throws {Error} if <param>blob</param> cannot be treated as an array
@@ -82,7 +86,9 @@ class ModuleArray extends ModuleBase {
 	}
 
 	/**
-	 * Reduces array down to the little or big guy you make him. He will use <code>param[1]</code> as a default start value.
+	 * Reduces array down to the little or big guy you make him.
+	 * @resolves predicate:function(result:*, data:*, index:Number):* in this.params[0]
+	 * @resolves startingValue: in this.params[1] - defaults to []
 	 * @param {DataBlob} blob
 	 * @returns {Promise<DataBlob>}
 	 * @throws {Error} if <param>blob</param> cannot be treated as an array
@@ -110,6 +116,7 @@ class ModuleArray extends ModuleBase {
 
 	/**
 	 * Sorts array elements. By default it sorts using lodash's default comparison operator.
+	 * @resolves sortBy:(string|function) in this.params[0] - defaults to undefined
 	 * @param {DataBlob} blob
 	 * @returns {Promise<DataBlob>}
 	 * @throws {Error} if <param>blob</param> cannot be treated as an array

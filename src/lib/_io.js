@@ -30,9 +30,8 @@ class ModuleIO extends ModuleBase {
 	/**
 	 * Finds the path as per the following rules
 	 *  - if <param>data</param> is not empty then it will be used as the path
-	 *  - if <param>data</param> is empty then <code>this.param[0]</data> will be used as the path
-	 *  Encoding data may be specified in either <code>this.param[0]</code> or <code>this.param[1]</code>
-	 *  depending in where the path is specified
+	 *  - if <param>data</param> is empty then <code>this.params[0]</data> will be used as the path
+	 * @resolves path:string in data|this.params[0]
 	 * @param {string|undefined} data
 	 * @returns {string}
 	 * @throws {Error}
@@ -49,9 +48,9 @@ class ModuleIO extends ModuleBase {
 	/**
 	 * Finds the path as per the following rules
 	 *  - if <param>data</param> is not empty then it will be used as the path
-	 *  - if <param>data</param> is empty then <code>this.param[0]</data> will be used as the path
-	 *  Encoding data may be specified in either <code>this.param[0]</code> or <code>this.param[1]</code>
-	 *  depending in where the path is specified
+	 *  - if <param>data</param> is empty then <code>this.params[0]</data> will be used as the path
+	 * @resolves path:string in data|this.params[0]
+	 * @resolves options:(Object|undefined) in this.params[0]|this.params[1]
 	 * @param {string|undefined} data
 	 * @param {Object} defaults
 	 * @returns {{path:string, encoding:string, ...options}}
@@ -76,7 +75,7 @@ class ModuleIO extends ModuleBase {
 	}
 
 	/**
-	 * Writes data to path that should be in <code>this.param[0]</code>.
+	 * Writes data to path that should be in <code>this.params[0]</code>.
 	 * @returns {string}
 	 * @throws {Error}
 	 */
@@ -87,8 +86,8 @@ class ModuleIO extends ModuleBase {
 	}
 
 	/**
-	 * Writes data to path that should be in <code>this.param[0]</code>.
-	 * Write options may optionally be in <code>this.param[1]</code>
+	 * Writes data to path that should be in <code>this.params[0]</code>.
+	 * Write options may optionally be in <code>this.params[1]</code>
 	 * @param {Object} defaults
 	 * @returns {{path:string, encoding:string, ...options}}
 	 * @throws {Error}

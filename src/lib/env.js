@@ -14,7 +14,7 @@ const {ModuleBase}=require("./_base");
 class ModuleEnv extends ModuleBase {
 	/**
 	 * Sets env variable to value. The rules for where it finds it's operands are as follows:
-	 * @finds variable:string in this.param[0]
+	 * @resolves variable:string in this.params[0]
 	 * @param {*} data
 	 * @return {Promise<*>}
 	 */
@@ -35,8 +35,8 @@ class ModuleEnv extends ModuleBase {
 
 	/**
 	 * Sets env variable to value. The rules for where it finds it's operands are as follows:
-	 * @finds variable:string in this.param[0]
-	 * @finds value:(string|number|boolean) in this.param[1]|data
+	 * @resolves variable:string in this.params[0]
+	 * @resolves value:(string|number|boolean) in this.params[1]|data
 	 * @param {string|undefined} data
 	 * @return {Promise<*>}
 	 */

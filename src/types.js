@@ -18,7 +18,7 @@
  */
 
 
-/********************* CLI types *********************/
+/********************* Complex Types *********************/
 /**
  * @typedef {Object} CliAction
  * @property {string} args - text description of expected args
@@ -45,11 +45,15 @@
  */
 
 /**
+ * @typedef {function(data:*, index:Number):*} ArrayPredicate
+ */
+
+/**
  * @typedef {Array<*>} CsvRow
  */
 
 /**
- * @typedef {Array<Row>} CsvDoc
+ * @typedef {Array<CsvRow>} CsvDoc
  */
 
 /**

@@ -47,12 +47,73 @@ os.ls(".")
 
 Note: it may be helpful to think of a function - `<domain>.<action>(params)` as a function that returns a hybrid object that acts both as an instance of the _domain_ as well as a function that takes, as input, the results of the previous function.
 
-#### Domains
-- array
-- json
-- os
-- std
-- string
+### Domains
+
+#### array
+- each: `Array<*> -> each(predicate:function) -> Array<*>`
+- filter: `Array<*> -> filter(predicate:function) -> Array<*>`
+- find: `Array<*> -> find(predicate:function) -> Array<*>`
+- map: `Array<*> -> map(predicate:function) -> Array<*>`
+- reduce: `Array<*> -> reduce(predicate:function) -> Array<*>`
+- reverse: `Array<*> -> reverse(predicate:function) -> Array<*>`
+- sort: `Array<*> -> sort(predicate:function) -> Array<*>`
+- uniq: `Array<*> -> uniq() -> Array<*>`
+
+#### csv
+- read: `read(path:string, opts:(undefined|{delimiter:","}}) -> Array<Array<*>>`
+- read: `path:string -> read(opts:(undefined|{delimiter:","}}) -> Array<Array<*>>`
+- write: `data:Array<Array<*>> -> write(path:string, opts:(undefined|{delimiter:","}}) -> Array<Array<*>>`
+
+#### file
+- copy: `copy(source:string, target:string) -> undefined`
+- copy: `source:string -> copy(target:string) -> string`
+- create: `create(path:string) -> undefined`
+- create: `path:string -> create() -> string`
+- delete: `delete(path:string) -> undefined`
+- delete: `path:string -> delete() -> string`
+- read: `read(path:string, opts:(undefined|Object)) -> (string|Buffer)`
+- read: `path:string -> read(opts:(undefined|Object)) -> (string|Buffer)`
+- write: `data:* -> write(path:string, opts:(undefined|{encoding="utf8",append=false})) -> *`
+- zip: `files:Array<string> -> zip(archive:string, opts:(undefined|Object)) -> Array<string>`
+
+#### is
+- empty: `(string|Array|Buffer) -> empty() -> boolean`
+- equal: `comparedFrom:* -> equal(comparedTo:*) -> boolean`
+
+#### json
+- parse: `data:(string|Buffer) -> parse() -> Object`
+- read: `read(path:string) -> Object`
+- read: `path:string -> read() -> Object`
+- stringify: `Object -> stringify(options:{compact:true}) -> string`
+- write: `json:Object -> write(path:string) -> Object`
+
+#### midi:
+- read: `read(path:string) -> MidiIoSong`
+- read: `path:string -> read() -> MidiIoSong`
+- write: `data:MidiIoSong -> write(path:string) -> MidiIoSong`
+
+#### not:
+- empty: `(string|Array|Buffer) -> empty()`
+- equal: `comparedFrom:* -> equal(comparedTo:*) -> boolean`
+
+#### object:
+- get: `Object -> get(propertyPath:string) -> *`
+- merge: `Object -> merge(json:Object) -> Object`
+- set: `Object -> set(propertyPath:string, value:*) -> Object`
+- read: `path:(string|undefined) -> read(path:(string|undefined))`
+
+#### os:
+- <command>: `stdin:(string|Buffer|undefined) -> <command>(params:string) -> *`
+- <command>: `stdin:(string|Buffer|undefined) -> <command>(param1:string, param2:string, ...) -> *`
+
+#### std:
+- error: `(string|Buffer|Object) -> error() -> (string|Buffer|Object)`
+- out: `(string|Buffer|Object) -> out() -> (string|Buffer|Object)`
+
+#### string:
+- replace: `string -> replace(search:(string|RegExp), replace:string) -> string`
+- split: `string -> split(method:("newline"|"shell"|"white"))`
+- split: `string -> split(method:"delimiter", delimiter:string="\s*,\s*")`
 
 ### A _script_
 You may optionally place a _chain_ in a containing _script_. The script may contain globally (outside of the _chain_) defined variables and functions but should assume nothing about the environment.  These variables and functions may be referenced by the script's _chain_.  

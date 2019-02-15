@@ -19,7 +19,8 @@ class ModuleFile extends ModuleIO {
 	/**
 	 * It copies the source file or directory to the target path.  The rules for finding the source and target
 	 * path treat the params as a sequence: [source, target]. And it looks for them in the following order:
-	 * [data, params[0], params[1]]
+	 * @resolves source:string in data|this.params[0]
+	 * @resolves target:string in this.params[0]|this.params[1]
 	 * @param {DataBlob} data
 	 * @return {Promise<void>}
 	 * @throws {Error}
@@ -58,8 +59,7 @@ class ModuleFile extends ModuleIO {
 	 * - created because it doesn't exist
 	 * - truncated to 0 length and saved
 	 * It looks for the path as follows:
-	 *  - if <param>data</param> is not empty then it will be used as the path
-	 *  - if <param>data</param> is empty then <code>this.param[0]</data> will be used as the path
+	 * @resolves path:string in data|this.params[0]
 	 * @param data
 	 * @return {Promise<void>}
 	 * @throws {Error}
@@ -78,10 +78,7 @@ class ModuleFile extends ModuleIO {
 
 	/**
 	 * Removes the file or directory if it exists. Rules for finding path:
-	 *  - if <param>data</param> is not empty then it will be used as the path
-	 *  - if <param>data</param> is empty then <code>this.param[0]</data> will be used as the path
-	 *  Encoding data may be specified in either <code>this.param[0]</code> or <code>this.param[1]</code>
-	 *  depending in where the path is specified
+	 * @resolves path:string in data|this.params[0]
 	 * @param {string|undefined} data
 	 * @returns {Promise<DataBlob>}
 	 * @throws {Error}
@@ -94,10 +91,8 @@ class ModuleFile extends ModuleIO {
 
 	/**
 	 * Reads path specified as either input data or param data:
-	 *  - if <param>data</param> is not empty then it will be used as the path
-	 *  - if <param>data</param> is empty then <code>this.param[0]</data> will be used as the path
-	 *  Encoding data may be specified in either <code>this.param[0]</code> or <code>this.param[1]</code>
-	 *  depending in where the path is specified
+	 * @resolves path:string in data|this.params[0]
+	 * @resolves options:(Object|undefined) in this.params[0]|this.params[1]
 	 * @param {string|undefined} data
 	 * @returns {Promise<DataBlob>}
 	 * @throws {Error}
@@ -108,8 +103,9 @@ class ModuleFile extends ModuleIO {
 	}
 
 	/**
-	 * Writes data to path that should be in <code>this.param[0]</code>.
-	 * Encoding and append options may be in <code>this.param[1]</code>: ["append", "encoding"]
+	 * Writes data to file
+	 * @resolves path:string in this.params[0]
+	 * @resolves options:(undefined|Object) in this.params[1]
 	 * @param {Object} data
 	 * @returns {Promise<DataBlob>}
 	 * @throws {Error}
@@ -126,15 +122,16 @@ class ModuleFile extends ModuleIO {
 	}
 
 	/**
-	 * Zips up all file paths in <param>blob</param>. It expects the target archive to be in <code>params[0]</code>
-	 * and optional options in <code>params[1]</code>
-	 * Note: this guy assumes that zip is in the user's path. It's a cheap and light weight way of pulling off zip
-	 * @param {DataBlob} blob
+	 * Zips up all file paths
+	 * @resolves files:Array<string> in data
+	 * @resolves archive:string in this.params[0]
+	 * @resolves options:(undefined|Object) this.params[1]
+	 * @param {DataBlob} data
 	 * @returns {Promise<DataBlob>}
 	 * @throws {Error}
 	 */
-	async zip(blob) {
-		this._assertType(blob, ["String", "Array"]);
+	async zip(data) {
+		this._assertType(data, ["String", "Array"]);
 		this._assertType(this.params[0], "String");
 		// if we don't terminate it with .zip then zip will. We want the final name so that we may
 		// find it when we want to remove it (if we remove it)
@@ -144,9 +141,9 @@ class ModuleFile extends ModuleIO {
 		const {replace}=Object.assign({
 			replace: true
 		}, this.params[1]);
-		const files=_.isArray(blob)
-			? blob
-			: [blob];
+		const files=_.isArray(data)
+			? data
+			: [data];
 		const options=["-q"];
 		const _preprocess=()=>(replace)
 			? fs.remove(archive)
@@ -159,7 +156,7 @@ class ModuleFile extends ModuleIO {
 					.concat(files),
 				command: "zip"
 			}))
-			.then(Promise.resolve.bind(Promise, blob));
+			.then(Promise.resolve.bind(Promise, data));
 	}
 }
 

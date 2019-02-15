@@ -42,8 +42,7 @@ class ModuleCsv extends ModuleIO {
 
 	/**
 	 * Reads and parses specified csv file. The path may either be specified as input data or param data:
-	 *  - if <param>data</param> is not empty then it will be used as the path
-	 *  - if <param>data</param> is empty then <code>this.param[0]</data> will be used as the path
+	 * @resolves path:string in data|this.params[0]
 	 * @param {string|undefined} data
 	 * @returns {Promise<CsvDoc>}
 	 * @throws {Error}
@@ -55,8 +54,9 @@ class ModuleCsv extends ModuleIO {
 	}
 
 	/**
-	 * Writes data to path that should be in <code>this.param[0]</code>. Options may optionally
-	 * be in <code>this.param[1]</code>
+	 * Writes data to path
+	 * @resolves path:string in this.params[0]
+	 * @resolves options:(undefined|Object) in this.params[1]
 	 * @param {CsvDoc} data
 	 * @returns {Promise<CsvDoc>}
 	 * @throws {Error}
