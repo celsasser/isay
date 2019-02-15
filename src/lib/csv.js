@@ -21,6 +21,7 @@ class ModuleCsv extends ModuleIO {
 	 * where the input path is specified.
 	 * @param {string} data
 	 * @returns {Promise<CsvDoc>}
+	 * @throws {Error}
 	 */
 	async parse(data) {
 		const options=(data)
@@ -41,10 +42,11 @@ class ModuleCsv extends ModuleIO {
 
 	/**
 	 * Reads and parses specified csv file. The path may either be specified as input data or param data:
-	 *  - if <code>this.param[0]</code> is not empty then it will be used as the path
-	 *  - if <code>this.param[0]</data> is empty then <param>data</param> will be used as the path
+	 *  - if <param>data</param> is not empty then it will be used as the path
+	 *  - if <param>data</param> is empty then <code>this.param[0]</data> will be used as the path
 	 * @param {string|undefined} data
 	 * @returns {Promise<CsvDoc>}
+	 * @throws {Error}
 	 */
 	async read(data) {
 		const path=this._getReadPath(data);
@@ -57,6 +59,7 @@ class ModuleCsv extends ModuleIO {
 	 * be in <code>this.param[1]</code>
 	 * @param {CsvDoc} data
 	 * @returns {Promise<CsvDoc>}
+	 * @throws {Error}
 	 */
 	async write(data) {
 		const path=this._getWritePath(),

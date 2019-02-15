@@ -19,6 +19,7 @@ class ModuleString extends ModuleBase {
 	 * going to apply it globally
 	 * @param {string} data - string to be replaced
 	 * @returns {Promise<DataBlob>}
+	 * @throws {Error}
 	 */
 	async replace(data) {
 		if(data!=null) {
@@ -40,13 +41,13 @@ class ModuleString extends ModuleBase {
 	 * @supported {"delimiter"|"newline"|"shell"|"white"}
 	 * @param {string} data
 	 * @returns {Promise<DataBlob>}
+	 * @throws {Error}
 	 */
 	async split(data) {
 		if(data==null) {
 			return [];
-		} else if(!_.isString(data)) {
-			throw new Error(`expecting string but found ${util.name(data)}`);
 		} else {
+			this._assertType(data, "String");
 			const method=_.get(this.params, "0", "white");
 			switch(method) {
 				case "delimiter": {

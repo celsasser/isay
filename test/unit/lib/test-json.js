@@ -24,81 +24,12 @@ describe("lib.ModuleJson", function() {
 		});
 	}
 
-	describe("get", function() {
-		it("should throw exception if data is not JSON", async function() {
-			const instance=_createInstance();
-			instance.get("string")
-				.then(assert.fail)
-				.catch(()=>{
-
-				});
-			instance.get(10)
-				.then(assert.fail)
-				.catch(()=>{
-
-				});
-		});
-
-		it("should return input data if no params are specified", async function() {
-			const instance=_createInstance(),
-				data={
-					property: "value"
-				},
-				result=await instance.get(data);
-			assert.deepEqual(result, data);
-		});
-
-		it("should return property if one is specified", async function() {
-			const instance=_createInstance({
-					params: ["property"]
-				}),
-				data={
-					property: "value"
-				},
-				result=await instance.get(data);
-			assert.strictEqual(result, "value");
-		});
-	});
-
-	describe("merge", function() {
-		it("should merge json into json", async function() {
-			const jsonSource={property: "value"},
-				jsonMerge={merge: "data"},
-				instance=_createInstance({
-					params: [jsonMerge]
-				}),
-				result=await instance.merge(jsonSource);
-			assert.deepEqual(result, {
-				"merge": "data",
-				"property": "value"
-			});
-		});
-	});
-
 	describe("parse", function() {
 		it("should parse input string data", async function() {
 			const instance=_createInstance(),
 				json={property: "value"},
 				result=await instance.parse(JSON.stringify(json));
 			assert.deepEqual(result, json);
-		});
-	});
-
-	describe("set", function() {
-		it("should properly set specified path", async function() {
-			const instance=_createInstance({
-					params: ["set.path", "data"]
-				}),
-				data={
-					property: "value"
-				},
-				result=await instance.set(data);
-			assert.deepEqual(result, {
-				"property": "value",
-				"set": {
-					"path": "data"
-				}
-			});
 		});
 	});
 
@@ -131,6 +62,47 @@ describe("lib.ModuleJson", function() {
 				.then(data=>{
 					assert.strictEqual(typeof (data), "object");
 					assert.deepEqual(data, fs.readJSONSync(path, "utf8"));
+				});
+		});
+	});
+
+	describe("stringify", function() {
+		it("should throw exception if input is not a JSON object", async function() {
+			const instance=_createInstance();
+			return instance.stringify("string")
+				.catch(error=>{
+					assert.strictEqual(error.message, "expecting JSON object but found String");
+				});
+		});
+
+		it("should encode as 'compact' by default", function() {
+			const instance=_createInstance(),
+				data={a: 1};
+			return instance.stringify(data)
+				.then(result=>{
+					assert.strictEqual(result, '{"a":1}');
+				});
+		});
+
+		it("should encode as 'compact' if explicit", function() {
+			const instance=_createInstance({
+					params: [{compact: true}]
+				}),
+				data={a: 1};
+			return instance.stringify(data)
+				.then(result=>{
+					assert.strictEqual(result, '{"a":1}');
+				});
+		});
+
+		it("should encode as 'spacious' if !compact", function() {
+			const instance=_createInstance({
+					params: [{compact: false}]
+				}),
+				data={a: 1};
+			return instance.stringify(data)
+				.then(result=>{
+					assert.strictEqual(result, '{\\n\\t"a": 1\\n}');
 				});
 		});
 	});

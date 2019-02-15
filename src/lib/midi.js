@@ -29,10 +29,11 @@ class ModuleMidi extends ModuleIO {
 
 	/**
 	 * Reads and parses specified midi file. The path may either be specified as input data or param data:
-	 *  - if <code>this.param[0]</code> is not empty then it will be used as the path
-	 *  - if <code>this.param[0]</data> is empty then <param>data</param> will be used as the path
+	 *  - if <param>data</param> is not empty then it will be used as the path
+	 *  - if <param>data</param> is empty then <code>this.param[0]</data> will be used as the path
 	 * @param {string|undefined} data
 	 * @returns {Promise<MidiIoSong>}
+	 * @throws {Error}
 	 */
 	async read(data) {
 		const path=this._getReadPath(data);
@@ -43,6 +44,7 @@ class ModuleMidi extends ModuleIO {
 	 * Writes data to path that should be in <code>this.param[0]</code>
 	 * @param {MidiIoSong} data
 	 * @returns {Promise<MidiIoSong>}
+	 * @throws {Error}
 	 */
 	async write(data) {
 		const uri=this._getWritePath();

@@ -22,6 +22,7 @@ class ModuleFile extends ModuleIO {
 	 * [data, params[0], params[1]]
 	 * @param {DataBlob} data
 	 * @return {Promise<void>}
+	 * @throws {Error}
 	 */
 	async copy(data) {
 		let source, target;
@@ -61,6 +62,7 @@ class ModuleFile extends ModuleIO {
 	 *  - if <param>data</param> is empty then <code>this.param[0]</data> will be used as the path
 	 * @param data
 	 * @return {Promise<void>}
+	 * @throws {Error}
 	 */
 	async create(data) {
 		const path=this._getReadPath(data);
@@ -82,6 +84,7 @@ class ModuleFile extends ModuleIO {
 	 *  depending in where the path is specified
 	 * @param {string|undefined} data
 	 * @returns {Promise<DataBlob>}
+	 * @throws {Error}
 	 */
 	async delete(data) {
 		const path=this._getReadPath(data);
@@ -97,6 +100,7 @@ class ModuleFile extends ModuleIO {
 	 *  depending in where the path is specified
 	 * @param {string|undefined} data
 	 * @returns {Promise<DataBlob>}
+	 * @throws {Error}
 	 */
 	async read(data) {
 		const {path, encoding}=this._getReadPathAndOptions(data);
@@ -108,6 +112,7 @@ class ModuleFile extends ModuleIO {
 	 * Encoding and append options may be in <code>this.param[1]</code>: ["append", "encoding"]
 	 * @param {Object} data
 	 * @returns {Promise<DataBlob>}
+	 * @throws {Error}
 	 */
 	async write(data) {
 		const {append, encoding, path}=this._getWritePathAndOptions({
@@ -126,6 +131,7 @@ class ModuleFile extends ModuleIO {
 	 * Note: this guy assumes that zip is in the user's path. It's a cheap and light weight way of pulling off zip
 	 * @param {DataBlob} blob
 	 * @returns {Promise<DataBlob>}
+	 * @throws {Error}
 	 */
 	async zip(blob) {
 		this._assertType(blob, ["String", "Array"]);

@@ -6,6 +6,6 @@
  */
 
 json.read("./test/data/data-george.json")
-	json.set("helen", {type: "cat"})
+	object.set("helen", {type: "cat"})
 	.get("george")
 	.std.out();

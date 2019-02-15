@@ -19,6 +19,7 @@ class ModuleArray extends ModuleBase {
 	 * Calls predicate for every element in blob
 	 * @param {DataBlob} blob
 	 * @returns {Promise<DataBlob>}
+	 * @throws {Error} if <param>blob</param> cannot be treated as an array
 	 */
 	async each(blob) {
 		const array=this._assertArray(blob),
@@ -33,6 +34,7 @@ class ModuleArray extends ModuleBase {
 	 * Filters using param[0] as the predicate
 	 * @param {DataBlob} blob
 	 * @returns {Promise<DataBlob>}
+	 * @throws {Error} if <param>blob</param> cannot be treated as an array
 	 */
 	async filter(blob) {
 		const array=this._assertArray(blob),
@@ -50,6 +52,7 @@ class ModuleArray extends ModuleBase {
 	 * Finds element using param[0] as the predicate
 	 * @param {DataBlob} blob
 	 * @returns {Promise<DataBlob>}
+	 * @throws {Error} if <param>blob</param> cannot be treated as an array
 	 */
 	async find(blob) {
 		const array=this._assertArray(blob),
@@ -66,6 +69,7 @@ class ModuleArray extends ModuleBase {
 	 * Maps using param[0] as the predicate
 	 * @param {DataBlob} blob
 	 * @returns {Promise<DataBlob>}
+	 * @throws {Error} if <param>blob</param> cannot be treated as an array
 	 */
 	async map(blob) {
 		const array=this._assertArray(blob),
@@ -81,6 +85,7 @@ class ModuleArray extends ModuleBase {
 	 * Reduces array down to the little or big guy you make him. He will use <code>param[1]</code> as a default start value.
 	 * @param {DataBlob} blob
 	 * @returns {Promise<DataBlob>}
+	 * @throws {Error} if <param>blob</param> cannot be treated as an array
 	 */
 	async reduce(blob) {
 		const array=this._assertArray(blob),
@@ -96,6 +101,7 @@ class ModuleArray extends ModuleBase {
 	 * Reverses elements. No params supported
 	 * @param {DataBlob} blob
 	 * @returns {Promise<DataBlob>}
+	 * @throws {Error} if <param>blob</param> cannot be treated as an array
 	 */
 	async reverse(blob) {
 		const array=this._assertArray(blob);
@@ -106,6 +112,7 @@ class ModuleArray extends ModuleBase {
 	 * Sorts array elements. By default it sorts using lodash's default comparison operator.
 	 * @param {DataBlob} blob
 	 * @returns {Promise<DataBlob>}
+	 * @throws {Error} if <param>blob</param> cannot be treated as an array
 	 */
 	async sort(blob) {
 		const array=this._assertArray(blob);
@@ -117,6 +124,7 @@ class ModuleArray extends ModuleBase {
 	 * Returns uniq elements using a deep comparison of elements.
 	 * @param {DataBlob} blob
 	 * @returns {Promise<DataBlob>}
+	 * @throws {Error} if <param>blob</param> cannot be treated as an array
 	 */
 	async uniq(blob) {
 		const array=this._assertArray(blob);
