@@ -102,7 +102,7 @@ describe("lib.ModuleJson", function() {
 				data={a: 1};
 			return instance.stringify(data)
 				.then(result=>{
-					assert.strictEqual(result, '{\\n\\t"a": 1\\n}');
+					assert.strictEqual(result, '{\n\t"a": 1\n}');
 				});
 		});
 	});

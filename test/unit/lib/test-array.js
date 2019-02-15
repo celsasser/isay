@@ -138,7 +138,7 @@ describe("lib.ModuleArray", function() {
 	describe("map", function() {
 		it("should map predicate for every element in the array", async function() {
 			const instance=_createInstance({
-					params: [(value, index)=>value+value]
+					params: [(value)=>value+value]
 				});
 			const result=await instance.map(["a", "b"]);
 			assert.deepEqual(result, ["aa", "bb"]);

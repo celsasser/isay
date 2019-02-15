@@ -14,8 +14,8 @@ const file=require("../common/file");
  */
 class ModuleJson extends ModuleIO {
 	/**
-	 * Parses the input parameter
-	 * @param {String|Buffer} data
+	 * Parses <param>data</param>
+	 * @param {string|Buffer} data
 	 * @returns {Promise<DataBlob>}
 	 * @throws {Error}
 	 */
@@ -66,22 +66,6 @@ class ModuleJson extends ModuleIO {
 			data: data,
 			uri: path
 		});
-		return data;
-	}
-
-	/**************** Private Interface ****************/
-	/**
-	 * We always want this to be parsed.
-	 * @param {*} data
-	 * @returns {DataBlob}
-	 * @private
-	 */
-	_preprocessChunk(data) {
-		if(_.isString(data)) {
-			return JSON.parse(data);
-		} else if(Buffer.isBuffer(data)) {
-			return JSON.parse(data.toString("utf8"));
-		}
 		return data;
 	}
 }
