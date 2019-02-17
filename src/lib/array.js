@@ -24,7 +24,7 @@ class ModuleArray extends ModuleBase {
 	 */
 	async each(blob) {
 		const array=this._assertArray(blob),
-			predicate=this._conditionPredicate(this.params[0]);
+			predicate=this._assertPredicate(this.params[0]);
 		for(let index=0; index<array.length; index++) {
 			await predicate(array[index], index);
 		}
@@ -40,7 +40,7 @@ class ModuleArray extends ModuleBase {
 	 */
 	async filter(blob) {
 		const array=this._assertArray(blob),
-			predicate=this._conditionPredicate(this.params[0]),
+			predicate=this._assertPredicate(this.params[0]),
 			result=[];
 		for(let index=0; index<array.length; index++) {
 			if(await predicate(array[index], index)) {
@@ -59,7 +59,7 @@ class ModuleArray extends ModuleBase {
 	 */
 	async find(blob) {
 		const array=this._assertArray(blob),
-			predicate=this._conditionPredicate(this.params[0]);
+			predicate=this._assertPredicate(this.params[0]);
 		for(let index=0; index<array.length; index++) {
 			if(await predicate(array[index], index)) {
 				return array[index];
@@ -77,7 +77,7 @@ class ModuleArray extends ModuleBase {
 	 */
 	async map(blob) {
 		const array=this._assertArray(blob),
-			predicate=this._conditionPredicate(this.params[0]),
+			predicate=this._assertPredicate(this.params[0]),
 			result=[];
 		for(let index=0; index<array.length; index++) {
 			result.push(await predicate(array[index], index));
@@ -95,7 +95,7 @@ class ModuleArray extends ModuleBase {
 	 */
 	async reduce(blob) {
 		const array=this._assertArray(blob),
-			predicate=this._conditionPredicate(this.params[0]);
+			predicate=this._assertPredicate(this.params[0]);
 		let result=_.get(this.params, 1, []);
 		for(let index=0; index<array.length; index++) {
 			result=await predicate(result, array[index], index);

@@ -101,6 +101,7 @@ Note: it may be helpful to think of a function - `<domain>.<action>(params)` as 
 - merge: `Object -> merge(json:Object) -> Object`
 - set: `Object -> set(propertyPath:string, value:*) -> Object`
 - read: `path:(string|undefined) -> read(path:(string|undefined))`
+- toArray: `Object -> toString(predicate:function(Object, key:string):Object) -> Array<*>`
 
 #### os:
 - <command>: `stdin:(string|Buffer|undefined) -> <command>(params:string) -> *`

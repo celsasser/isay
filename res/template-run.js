@@ -45,6 +45,7 @@
  *  - Object -> merge(json:Object) -> Object
  *  - Object -> set(propertyPath:string, value:*) -> Object
  *  - path:(string|undefined) -> read(path:(string|undefined))
+ *  - Object -> toString(predicate:function(Object, key:string):Object) -> Array<*>
  * os:
  *  - stdin:(string|Buffer|undefined) -> <command>(params:string) -> *
  *  - stdin:(string|Buffer|undefined) -> <command>(param1:string, param2:string, ...) -> *

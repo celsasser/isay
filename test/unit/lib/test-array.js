@@ -36,16 +36,16 @@ describe("lib.ModuleArray", function() {
 		});
 	});
 
-	describe("_conditionPredicate", function() {
+	describe("_assertPredicate", function() {
 		it("should throw exception if not a function", function() {
 			const instance=_createInstance();
-			assert.throws(()=>instance._conditionPredicate("string"));
+			assert.throws(()=>instance._assertPredicate("string"));
 		});
 
 		it("should return input if the function is a promise", async function() {
 			const instance=_createInstance(),
 				predicate=async(value)=>value,
-				conditioned=instance._conditionPredicate(predicate);
+				conditioned=instance._assertPredicate(predicate);
 			assert.strictEqual(conditioned, predicate);
 			return conditioned("george")
 				.then(value=>assert.strictEqual(value, "george"));
@@ -54,7 +54,7 @@ describe("lib.ModuleArray", function() {
 		it("should wrap function if it is note a promise", async function() {
 			const instance=_createInstance(),
 				predicate=(value)=>value,
-				conditioned=instance._conditionPredicate(predicate);
+				conditioned=instance._assertPredicate(predicate);
 			assert.notEqual(conditioned, predicate);
 			return conditioned("george")
 				.then(value=>assert.strictEqual(value, "george"));

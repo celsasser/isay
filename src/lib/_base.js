@@ -117,6 +117,29 @@ class ModuleBase {
 	}
 
 	/**
+	 * A "predicate" is a function that takes 1 or more arguments and returns a single value. They are
+	 * designed to be used with our API. So that they are fully compatible and in parity we make sure that
+	 * the are asynchronous. If <param>predicate</param> is not found to be async then we make him async
+	 * @param {Function} predicate
+	 * @returns {Promise<*>}
+	 * @protected
+	 */
+	_assertPredicate(predicate) {
+		if(predicate==null) {
+			throw new Error("missing predicate function");
+		} else if(_.isFunction(predicate)) {
+			if(predicate[Symbol.toStringTag]==="AsyncFunction") {
+				return predicate;
+			} else {
+				return async(...args)=>{
+					return predicate(...args);
+				};
+			}
+		} else {
+			throw new Error(`expecting predicate but found ${util.name(predicate)}`);
+		}
+	}
+	/**
 	 * He will make an attempt to ensure that the object is parsed JSON.
 	 * @param {*} data
 	 * @returns {Object}
@@ -131,29 +154,6 @@ class ModuleBase {
 			throw new Error("expected valid JSON object but found function");
 		}
 		return data;
-	}
-
-	/**
-	 * Here we are considering a "predicate" to be any function we want to behave like an "action": async function(blob):DataBlob.
-	 * So, we make sure <param>predicate</param> is a function and that it is <code>async</code>
-	 * @param {Function} predicate
-	 * @returns {Promise<*>}
-	 * @protected
-	 */
-	_conditionPredicate(predicate) {
-		if(predicate==null) {
-			throw new Error("missing predicate function");
-		} else if(_.isFunction(predicate)) {
-			if(predicate[Symbol.toStringTag]==="AsyncFunction") {
-				return predicate;
-			} else {
-				return async(...args)=>{
-					return predicate(...args);
-				};
-			}
-		} else {
-			throw new Error(`expecting predicate but found ${util.name(predicate)}`);
-		}
 	}
 
 	/**

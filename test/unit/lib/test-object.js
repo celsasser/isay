@@ -91,4 +91,53 @@ describe("lib.ModuleObject", function() {
 			});
 		});
 	});
+
+	describe("toArray", function() {
+		it("should return empty array when blob is null", async function() {
+			const instance=_createInstance(),
+				result=await instance.toArray(null);
+			assert.deepEqual(result, []);
+		});
+
+		it("should by default return array elements without keys", async function() {
+			const instance=_createInstance(),
+				object={
+					a: 1,
+					b: 2
+				},
+				result=await instance.toArray(object);
+			assert.deepEqual(result, [1, 2]);
+		});
+
+		it("should use predicate if provided", async function() {
+			const instance=_createInstance({
+					params: [
+						(object, key)=>{
+							return Object.assign({
+								key
+							}, object);
+						}
+					]
+				}),
+				object={
+					a: {
+						value: 1
+					},
+					b: {
+						value: 2
+					}
+				},
+				result=await instance.toArray(object);
+			assert.deepEqual(result, [
+				{
+					"key": "a",
+					"value": 1
+				},
+				{
+					"key": "b",
+					"value": 2
+				}
+			]);
+		});
+	});
 });

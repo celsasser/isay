@@ -48,6 +48,26 @@ class ModuleObject extends ModuleIO {
 		return _.set(data, path, value);
 	}
 
+	/**
+	 * It transforms the top level of properties into an array. One may alter the default results by specifying a
+	 * a predicate function that returns the per array element object.
+	 * Why is he here? Because occasionally databases are keyed by arrays. But it happens that one wants to to treat as arrays
+	 * so that they may iterate over them. Our <code>array</code> domain is rich with iteration functionality. Here, we are
+	 * isolating any and all iteration to this one function.
+	 * @resolves predicate:function(object:Object, key:string):Object in this.params[0]
+	 * @param {Object} data
+	 * @returns {Promise<void>}
+	 */
+	async toArray(data) {
+		const result=[],
+			predicate=this._assertPredicate(_.get(this.params, 0, object=>object));
+		this._assertJson(data);
+		for(let key in data) {
+			result.push(await predicate(data[key], key));
+		}
+		return result;
+	}
+
 	/**************** Private Interface ****************/
 	/**
 	 * We always want this to be parsed.
