@@ -10,11 +10,8 @@
  */
 
 const _=require("lodash");
-const fs=require("fs-extra");
 const vm=require("vm");
 const {createChain}=require("./_chain");
-const editor=require("./_editor");
-const {toLocalPath}=require("../../common/file");
 const {loadLibrary}=require("../../lib");
 const lib_os=require("../../lib/os");
 
@@ -31,13 +28,12 @@ const lib_os=require("../../lib/os");
 /**************** Public Interface  ****************/
 /**
  * Parses the script and returns a description of the sequence
- * @param {CliParsed} configuration
+ * @param {string} script
  * @returns {Array<ModuleDescriptor>}
  * @throws {Error}
  */
-exports.parseScript=async function(configuration) {
-	const script=await _loadScript(configuration),
-		library=loadLibrary();
+exports.parseScript=function(script) {
+	const library=loadLibrary();
 	return _buildModuleDescriptorSequence({library, script});
 };
 
@@ -157,22 +153,3 @@ function _buildModuleDescriptorSequence({library, script}) {
 	return callSequence;
 }
 
-/**
- * Finds the "run" script and returns it if it is in our configuration otherwise launches
- * the users preferred terminal editor to get it.
- * @param {CliParsed} configuration
- * @returns {string}
- * @private
- */
-async function _loadScript(configuration) {
-	if(configuration.options.script) {
-		return fs.readFile(configuration.options.script, {encoding: "utf8"});
-	} else if(_.isEmpty(configuration.params[0])===false) {
-		return configuration.params[0];
-	} else {
-		return fs.readFile(toLocalPath("./res/template-run.js"), {encoding: "utf8"})
-			.then(template=>editor.getScript({
-				template
-			}));
-	}
-}
