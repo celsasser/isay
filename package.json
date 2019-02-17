@@ -8,7 +8,7 @@
 		"fs-extra": "7.0.1",
 		"js-yaml": "3.12.1",
 		"lodash": "4.17.11",
-		"midi-file-io": "git+https://github.com/hbo-curt/midi-file-io.git",
+		"midi-file-io": "git+https://github.com/celsasser/midi-file-io.git",
 		"shortid": "2.2.14"
 	},
 	"devDependencies": {
