@@ -38,7 +38,7 @@ class ModuleBase {
 	/**
 	 * Processes data for this module and passes results down the pipeline
 	 * @param {DataBlob} data
-	 * @returns Promise<DataBlob>
+	 * @returns {Promise<DataBlob>}
 	 */
 	async process(data=undefined) {
 		try {

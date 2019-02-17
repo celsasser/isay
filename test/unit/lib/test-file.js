@@ -198,7 +198,6 @@ describe("lib.ModuleFile", function() {
 			await _write(true);
 			assert.strictEqual(fs.readFileSync(path, "utf8"), "georgegeorge");
 			return fs.remove(path);
-
 		});
 	});
 

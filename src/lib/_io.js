@@ -17,7 +17,7 @@ const util=require("../common/util");
 class ModuleIO extends ModuleBase {
 	/**
 	 * Asserts that the path is a string type
-	 * @param value
+	 * @param {*} value
 	 * @throws {Error}
 	 * @protected
 	 */

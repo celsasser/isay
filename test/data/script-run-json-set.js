@@ -5,7 +5,6 @@
  * Copyright @2019 by Xraymen Inc.
  */
 
-json.invalid("./test/data/data-george.json")
-	.set("helen", {type: "cat"})
-	.get("george")
+json.read("./test/data/data-george.json")
+	object.set("helen", {type: "cat"})
 	.std.out();

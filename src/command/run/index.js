@@ -5,6 +5,7 @@
  * Copyright @2019 by Xraymen Inc.
  */
 
+const _=require("lodash");
 const fs=require("fs-extra");
 const {createChain}=require("./_chain");
 const editor=require("./_editor");
@@ -89,4 +90,4 @@ async function _readStdin() {
 			});
 		}
 	});
-};
+}

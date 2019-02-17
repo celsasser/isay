@@ -60,7 +60,7 @@ class ModuleFile extends ModuleIO {
 	 * - truncated to 0 length and saved
 	 * It looks for the path as follows:
 	 * @resolves path:string in data|this.params[0]
-	 * @param data
+	 * @param {string|undefined} data
 	 * @return {Promise<void>}
 	 * @throws {Error}
 	 */

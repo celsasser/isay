@@ -37,6 +37,13 @@ class ModuleStd extends ModuleBase {
 	}
 
 	/**************** Private Interface ****************/
+	/**
+	 * Converts data blob into a string representation if it is not one already
+	 * @param {DataBlob} data
+	 * @param {boolean} compact
+	 * @returns {string}
+	 * @private
+	 */
 	_toString(data, compact=false) {
 		if(_.isObject(data)) {
 			return (compact)

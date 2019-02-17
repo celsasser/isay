@@ -31,10 +31,10 @@ exports.parse=function() {
 		 * @throws {Error}
 		 */
 		constructor() {
-			this._runner=null;
-			this._action=null;
-			this._options={};
-			this._position=[];
+			this.action=null;
+			this.options={};
+			this.positions=[];
+			this.runner=null;
 		}
 
 		/**
@@ -46,12 +46,12 @@ exports.parse=function() {
 				if(_.startsWith(process.argv[index], "-")) {
 					index=this._processOption(index);
 				} else {
-					this._position.push(process.argv[index]);
+					this.positions.push(process.argv[index]);
 					index++;
 				}
 			}
-			this._runner=path.parse(this._position.shift()).base;
-			this._action=this._position.shift();
+			this.runner=path.parse(this.positions.shift()).base;
+			this.action=this.positions.shift();
 		}
 
 		/**
@@ -59,40 +59,38 @@ exports.parse=function() {
 		 * @throw {Error}
 		 */
 		validate() {
-			if(!("help" in this._options)) {
-				if(!this._action) {
-					throw new Error(`${this._runner}: no command specified`);
-				}
-				const action=findAction(this._action);
-				if(!action) {
-					throw new Error(`${this._runner}: unknown command "${this._action}"`);
-				}
-				const allSupportedOptions=OPTIONS.filter(option=>_.isEmpty(option.actions) || _.includes(option.actions, this._action)),
-					allRequiredOptions=_.filter(allSupportedOptions, {required: true}),
-					userUnsupportedOptions=_.difference(Object.keys(this._options), _.map(allSupportedOptions, "keys.long")),
-					userMissingOptions=_.difference(_.map(allRequiredOptions, "keys.long"), Object.keys(this._options));
-				if(userUnsupportedOptions.length>0) {
-					throw new XRayError({
-						action: this._action,
-						message: `${this._runner} ${this._action}: options ${userUnsupportedOptions.map(name=>`--${name}`)
-							.join("|")} not supported by "${this._action}" command`
-					});
-				}
-				if(userMissingOptions.length>0) {
-					throw new XRayError({
-						action: this._action,
-						message: `${this._runner} ${this._action}: required options ${userMissingOptions.map(name=>`--${name}`)
-							.join("|")} for "${this._action}" are missing`
-					});
-				}
-				try {
-					action.validate(this._position, this._options);
-				} catch(error) {
-					throw new XRayError({
-						action: this._action,
-						message: `${this._runner} ${this._action}: ${error.message}`
-					});
-				}
+			if(!this.action) {
+				throw new Error(`${this.runner}: no command specified`);
+			}
+			const action=findAction(this.action);
+			if(!action) {
+				throw new Error(`${this.runner}: unknown command "${this.action}"`);
+			}
+			const allSupportedOptions=OPTIONS.filter(option=>_.isEmpty(option.actions) || _.includes(option.actions, this.action)),
+				allRequiredOptions=_.filter(allSupportedOptions, {required: true}),
+				userUnsupportedOptions=_.difference(Object.keys(this.options), _.map(allSupportedOptions, "keys.long")),
+				userMissingOptions=_.difference(_.map(allRequiredOptions, "keys.long"), Object.keys(this.options));
+			if(userUnsupportedOptions.length>0) {
+				throw new XRayError({
+					action: this.action,
+					message: `${this.runner} ${this.action}: options ${userUnsupportedOptions.map(name=>`--${name}`)
+						.join("|")} not supported by "${this.action}" command`
+				});
+			}
+			if(userMissingOptions.length>0) {
+				throw new XRayError({
+					action: this.action,
+					message: `${this.runner} ${this.action}: required options ${userMissingOptions.map(name=>`--${name}`)
+						.join("|")} for "${this.action}" are missing`
+				});
+			}
+			try {
+				action.validate(this.positions, this.options);
+			} catch(error) {
+				throw new XRayError({
+					action: this.action,
+					message: `${this.runner} ${this.action}: ${error.message}`
+				});
 			}
 		}
 
@@ -102,8 +100,8 @@ exports.parse=function() {
 		updateEnvironment() {
 			const defaults=file.readToJSONSync("./res/defaults.json", {local: true});
 			log.configure({
-				applicationName: this._action,
-				logLevel: _.get(this._options, "log.level", defaults.log.level)
+				applicationName: this.action,
+				logLevel: _.get(this.options, "log.level", defaults.log.level)
 			});
 		}
 
@@ -115,18 +113,18 @@ exports.parse=function() {
 			const result=Object.assign({
 					options: {}
 				},
-				file.readToJSONSync("./res/defaults.json", {local: true}).command[this._action],
+				file.readToJSONSync("./res/defaults.json", {local: true}).command[this.action],
 				{
-					action: this._action,
-					params: this._position
+					action: this.action,
+					params: this.positions
 				});
 			// setup options. We isolate those that apply to the action being taken. We assume that
 			// global options apply to the environment.
-			OPTIONS.filter(optionCfg=>_.includes(optionCfg.actions, this._action))
+			OPTIONS.filter(optionCfg=>_.includes(optionCfg.actions, this.action))
 				.forEach(optionCfg=>{
 					const key=optionCfg.keys.long;
-					if(this._options[key]) {
-						_.set(result.options, key, this._options[key]);
+					if(this.options[key]) {
+						_.set(result.options, key, this.options[key]);
 					}
 				});
 			return result;
@@ -152,7 +150,7 @@ exports.parse=function() {
 				} else if(option.args.count===1 && value.length===0) {
 					throw new Error(`option "${key}" missing required argument`);
 				} else {
-					this._options[option.keys.long]=(value==null)
+					this.options[option.keys.long]=(value==null)
 						? true
 						: value;
 				}
@@ -165,7 +163,7 @@ exports.parse=function() {
 				} else if(process.argv.length<index+option.args.count) {
 					throw new Error(`option "${key}" missing required argument`);
 				} else {
-					this._options[option.keys.long]=(option.args.count===0)
+					this.options[option.keys.long]=(option.args.count===0)
 						? true
 						: process.argv[++index];
 				}
@@ -233,6 +231,7 @@ exports.parse=function() {
 			OPTIONS.forEach(option=>{
 				log.info(`   -${option.keys.short}|--${option.keys.long}: ${option.desc}`);
 			});
+			log.info("Commands:");
 			Object.keys(ACTIONS).sort().forEach(actionName=>{
 				const action=findAction(actionName);
 				log.info(`   ${actionName}: ${action.desc}`);
@@ -244,9 +243,14 @@ exports.parse=function() {
 	try {
 		const commandLine=new CommandLine();
 		commandLine.parse();
-		commandLine.validate();
-		commandLine.updateEnvironment();
-		return commandLine.toResponse();
+		if(commandLine.options["help"]) {
+			reportUsage(commandLine.action);
+			process.exit(1);
+		} else {
+			commandLine.validate();
+			commandLine.updateEnvironment();
+			return commandLine.toResponse();
+		}
 	} catch(error) {
 		log.error(`Error: ${format.errorToString(error)}`);
 		reportUsage(error.action);

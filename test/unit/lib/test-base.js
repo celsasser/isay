@@ -32,7 +32,7 @@ describe("lib.ModuleBase", function() {
 		it("should throw exception if null and not allowed", function() {
 			const instance=_createInstance();
 			assert.throws(()=>{
-				instance._assertType(null, "String", {allowNull: false})
+				instance._assertType(null, "String", {allowNull: false});
 			}, error=>error.message==="expecting String but found null");
 		});
 
@@ -47,6 +47,5 @@ describe("lib.ModuleBase", function() {
 				instance._assertType("value", "Number");
 			}, error=>error.message==="expecting Number but found String");
 		});
-
 	});
 });
