@@ -11,29 +11,60 @@
 
 const _=require("lodash");
 const vm=require("vm");
-const {createChain}=require("./_chain");
-const {loadLibrary}=require("../../lib");
 const lib_os=require("../../lib/os");
 
 
 /**************** Public Interface  ****************/
 /**
  * Parses the script and returns a description of the sequence
+ * @param {string|Buffer} input
+ * @param {Array<LibraryNode>} Library
  * @param {string} script
- * @returns {Array<ModuleDescriptor>}
+ * @returns {Promise<DataBlob>}
  * @throws {Error}
  */
-exports.parseScript=function(script) {
-	const library=loadLibrary();
-	return _buildModuleDescriptorSequence({library, script});
+exports.runScript=async function({input=undefined, library, script}) {
+	const parsed=_parseChain({library, script}),
+		chain=_buildChain(parsed);
+	return chain.process(input);
 };
 
+/**
+ * Translates parsed script into a sequence of modules
+ * @param {Array<ModuleDescriptor>} descriptors
+ * @returns {ModuleBase}
+ */
+function _buildChain(descriptors) {
+	/**
+	 * Builds chain of modules. Works it's way forward
+	 * @param {number} index
+	 * @param {ModuleBase} next
+	 * @returns {ModuleBase}
+	 */
+	function _build(index, next=undefined) {
+		if(index<0) {
+			return next;
+		} else {
+			const descriptor=descriptors[index];
+			const instance=new descriptor.class({
+				action: descriptor.action,
+				domain: descriptor.domain,
+				method: descriptor.method,
+				output: next,
+				params: descriptor.params
+			});
+			return _build(index-1, instance);
+		}
+	}
 
-/********************* Private Interface *********************/
+	return _build(descriptors.length-1);
+}
+
+
 /**
  * Builds a "library graph". It graphs the various routes that a single function call may make into our library.
  * And at each one of of the terminal nodes lies functionality that will allow us to track function call sequence.
- * Which in our world is a sequence of ModuleDescriptor. See <code>_buildModuleDescriptorSequence</code> to see how that works.
+ * Which in our world is a sequence of ModuleDescriptor. See <code>_parseChain</code> to see how that works.
  * And then uses vm.runInContext to steal the sequence
  * @param {Array<LibraryNode>} library
  * @param {string} script
@@ -41,18 +72,19 @@ exports.parseScript=function(script) {
  * @throws {Error}
  * @private
  */
-function _buildModuleDescriptorSequence({library, script}) {
+function _parseChain({library, script}) {
 	/**
 	 * This array will be populated when the graph is "run"
 	 * @type {Array<ModuleDescriptor>}
 	 */
-	let callSequence=[];
+	let callSequence=[],
+		graphProxy;
 
 	/**
 	 * Creates and adds a ModuleDescriptor to our call-sequence
 	 * @param {LibraryNode} node
 	 * @param {Array<string>} args
-	 * @returns {graphProxy}
+	 * @returns {Proxy}
 	 */
 	function _addCall(node, ...args) {
 		// if his argument is a graph proxy then that means the user is creating a chain which will take
@@ -62,6 +94,13 @@ function _buildModuleDescriptorSequence({library, script}) {
 				chainHead=createChain(callSequence.slice(index));
 			args[0]=chainHead.process.bind(chainHead);
 			callSequence=callSequence.slice(0, index);
+		} else if(_.isFunction(args[0])) {
+			const proxied=args[0];
+			console.log(proxied.toString());
+			args[0]=function(...args) {
+				console.log("calling", JSON.stringify(args));
+				return proxied.call(graphProxy, ...args);
+			}
 		}
 
 		// todo: last call processing is flawed when the chain we are processing is a newly defined chain
@@ -78,9 +117,11 @@ function _buildModuleDescriptorSequence({library, script}) {
 			params: args
 		});
 		// what are we doing here? We want to stash the descriptor so that we may be able to identify
-		// a module (and it's chain) should it be used as an argument.
+		// a module (and it's chain) should it be used as an argument. To do so we are creating a new
+		// proxy object so that
 		graphProxy._descriptor=_.last(callSequence);
-		return _.clone(graphProxy);
+		graphProxy=new Proxy(graphObject, proxyTop);
+		return graphProxy;
 	}
 
 	/**
@@ -133,7 +174,7 @@ function _buildModuleDescriptorSequence({library, script}) {
 		_id: "urn:graph:proxy",
 		os: new Proxy({}, proxyOS)
 	});
-	let graphProxy=new Proxy(graphObject, proxyTop);
+	graphProxy=new Proxy(graphObject, proxyTop);
 
 	// this is the crank that gets everything up above rolling. We use our graph-proxy as the context in
 	// which our scripts is run so that we may intercept all calls. What does this buy us? Everything:

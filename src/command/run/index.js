@@ -7,12 +7,12 @@
 
 const _=require("lodash");
 const fs=require("fs-extra");
-const {createChain}=require("./_chain");
 const editor=require("./_editor");
-const {parseScript}=require("./_parse");
+const {runScript}=require("./_execute");
 const {XRayError}=require("../../common/error");
 const {toLocalPath}=require("../../common/file");
 const log=require("../../common/log");
+const {loadLibrary}=require("../../lib");
 
 /**
  * @param {CliParsed} configuration
@@ -20,14 +20,14 @@ const log=require("../../common/log");
  */
 exports.run=async function(configuration) {
 	try {
-		log.verbose("- parsing script");
-		const script=await _loadScript(configuration),
-			descriptors=parseScript(script);
-		log.verbose("- building pipeline");
-		const chain=createChain(descriptors),
-			stdin=await _readStdin();
-		log.verbose("- processing pipeline");
-		return chain.process(stdin);
+		log.verbose("- loading library");
+		const library=loadLibrary();
+		log.verbose("- loading script");
+		const script=await _loadScript(configuration);
+		log.verbose("- loading stdin");
+		const input=await _readStdin();
+		log.verbose("- running script");
+		return runScript({input, library, script});
 	} catch(error) {
 		return Promise.reject(new XRayError({
 			error,
