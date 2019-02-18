@@ -1,5 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="run: json-invalid" type="NodeJSConfigurationType" folderName="run" application-parameters="run -s ./test/data/script-run-json-invalid.js" path-to-js-file="mouse.js" working-dir="$PROJECT_DIR$">
-    <method v="2" />
-  </configuration>
-</component>

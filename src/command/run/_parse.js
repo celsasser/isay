@@ -16,15 +16,6 @@ const {loadLibrary}=require("../../lib");
 const lib_os=require("../../lib/os");
 
 
-/********************* Local Types *********************/
-/**
- * @typedef {Object} LibraryNode
- * @property {string} action
- * @property {class} class
- * @property {string} domain
- */
-
-
 /**************** Public Interface  ****************/
 /**
  * Parses the script and returns a description of the sequence
@@ -93,7 +84,7 @@ function _buildModuleDescriptorSequence({library, script}) {
 	}
 
 	/**
-	 * Proxies all attempts to dereference properties at the tippy top. The only reason we need this is for
+	 * Proxies all attempts to dereference properties at the tippy-top. The only reason we need this is for
 	 * our "os" friend. If an action is requested of us and we don't know about it and the last call was on
 	 * domain="os" then we assume that the property is an "os" action. */
 	const proxyTop={

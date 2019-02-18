@@ -51,6 +51,7 @@
  *  - stdin:(string|Buffer|undefined) -> <command>(param1:string, param2:string, ...) -> *
  * std:
  *  - (string|Buffer|Object) -> error() -> (string|Buffer|Object)
+ *  - in(data:*) -> *
  *  - (string|Buffer|Object) -> out() -> (string|Buffer|Object)
  * string:
  *  - string -> replace(search:(string|RegExp), replace:string) -> string

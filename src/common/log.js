@@ -73,14 +73,13 @@ exports.configure=function({applicationName, logLevel}) {
 exports.console=function(text, {
 	meta=undefined,
 	stack=false,
-	stream=console.error
+	stream=process.stderr
 }={}) {
 	text=format.messageToString(text, {stack});
 	if(meta) {
 		text=`${text}\n${JSON.stringify(text, null, "\t")}`;
 	}
-	stream(text);
-	return Promise.resolve();
+	return stream.write(`${text}\n`);
 };
 
 /**

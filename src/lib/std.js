@@ -26,6 +26,17 @@ class ModuleStd extends ModuleBase {
 	}
 
 	/**
+	 * "stdin?" you may be wondering. Well, not exactly. It is simply another way for you to introduce data (most likely in memory) into a chain.
+	 * You may think of it a pipe or file redirection in the shell world.
+	 * Note: There probably are not may use cases at the top but it can be useful when you are working with an embedded chain.
+	 * @resolves result:* in this.params[0]
+	 * @returns {Promise<*>}
+	 */
+	async in() {
+		return this.params[0];
+	}
+
+	/**
 	 * Writes output to stdout
 	 * @param {Object} data
 	 * @returns {Promise<DataBlob>}

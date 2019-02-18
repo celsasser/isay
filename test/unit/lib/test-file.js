@@ -26,31 +26,31 @@ describe("lib.ModuleFile", function() {
 
 	describe("copy", function() {
 		it("should copy with source file as input and target as param", async function() {
-			const source="./test/data/data-george.csv",
+			const source="./test/data/data-pets.csv",
 				target="./test/data/output/",
 				instance=_createInstance({
 					params: [target]
 				});
 			const result=await instance.copy(source),
 				sourceData=await fs.readFile(source, {encoding: "utf8"}),
-				targetData=await fs.readFile(`${target}data-george.csv`, {encoding: "utf8"});
+				targetData=await fs.readFile(`${target}data-pets.csv`, {encoding: "utf8"});
 			assert.strictEqual(result, source);
 			assert.deepEqual(sourceData, targetData);
-			return fs.remove(`${target}data-george.csv`);
+			return fs.remove(`${target}data-pets.csv`);
 		});
 
 		it("should copy with source file as param and target as param", async function() {
-			const source="./test/data/data-george.csv",
+			const source="./test/data/data-pets.csv",
 				target="./test/data/output/",
 				instance=_createInstance({
 					params: [source, target]
 				});
 			const result=await instance.copy(),
 				sourceData=await fs.readFile(source, {encoding: "utf8"}),
-				targetData=await fs.readFile(`${target}data-george.csv`, {encoding: "utf8"});
+				targetData=await fs.readFile(`${target}data-pets.csv`, {encoding: "utf8"});
 			assert.strictEqual(result, undefined);
 			assert.deepEqual(sourceData, targetData);
-			return fs.remove(`${target}data-george.csv`);
+			return fs.remove(`${target}data-pets.csv`);
 		});
 
 		it("should copy entire directory to target directory", async function() {
@@ -126,7 +126,7 @@ describe("lib.ModuleFile", function() {
 		});
 
 		it("should use input data as path if specified", async function() {
-			const path="./test/data/data-george.txt",
+			const path="./test/data/data-pet.txt",
 				instance=_createInstance();
 			return instance.read(path)
 				.then(data=>{
@@ -136,7 +136,7 @@ describe("lib.ModuleFile", function() {
 		});
 
 		it("should use input data as path if specified", async function() {
-			const path="./test/data/data-george.txt",
+			const path="./test/data/data-pet.txt",
 				instance=_createInstance({
 					params: [path]
 				});
@@ -239,9 +239,9 @@ describe("lib.ModuleFile", function() {
 			const archive="./test/data/output/archive.zip",
 				files=[
 					"package.json",
-					"test/data/data-george.csv",
-					"test/data/data-george.json",
-					"test/data/data-george.txt"
+					"test/data/data-pets.csv",
+					"test/data/data-pet.json",
+					"test/data/data-pet.txt"
 				],
 				instance=_createInstance({
 					params: [archive]

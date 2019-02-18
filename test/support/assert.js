@@ -50,10 +50,7 @@ exports.deepEqual=function(actual, expected, {
 		expected=util.objectToData(expected, {sort: true});
 		assert.deepEqual(actual, expected, message);
 	} catch(error) {
-		// log.console returns a Promise. We would like to respond asynchronously so that we could be sure that
-		// the buffer is entirely written. But cannot assume async behavior at this level. Let's see how it goes.
-		log.console(`assert.deepEqual() failed: actual=\n${JSON.stringify(actual, null, "\t")}`);
-		throw error;
+		throw new Error(`assert.deepEqual() failed: actual=\n${JSON.stringify(actual, null, "\t")}`);
 	}
 };
 

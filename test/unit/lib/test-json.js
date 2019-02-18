@@ -44,7 +44,7 @@ describe("lib.ModuleJson", function() {
 		});
 
 		it("should use input data as path if specified", async function() {
-			const path="./test/data/data-george.json",
+			const path="./test/data/data-pet.json",
 				instance=_createInstance();
 			return instance.read(path)
 				.then(data=>{
@@ -54,7 +54,7 @@ describe("lib.ModuleJson", function() {
 		});
 
 		it("should use input data as path if specified", async function() {
-			const path="./test/data/data-george.json",
+			const path="./test/data/data-pet.json",
 				instance=_createInstance({
 					params: [path]
 				});

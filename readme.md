@@ -109,6 +109,7 @@ Note: it may be helpful to think of a function - `<domain>.<action>(params)` as 
 
 #### std:
 - error: `(string|Buffer|Object) -> error() -> (string|Buffer|Object)`
+- in: `in(data:*) -> *`
 - out: `(string|Buffer|Object) -> out() -> (string|Buffer|Object)`
 
 #### string:

@@ -27,16 +27,16 @@ describe("lib.ModuleCsv", function() {
 	describe("parse", function() {
 		it("should parse input string data properly", async function() {
 			const instance=_createInstance(),
-				csv=fs.readFileSync("./test/data/data-george.csv", {encoding: "utf8"}),
+				csv=fs.readFileSync("./test/data/data-pets.csv", {encoding: "utf8"}),
 				result=await instance.parse(csv);
-			assert.deepEqual(result, [
+			assert.deepEqual(result.slice(0, 2), [
 				[
 					"name",
 					"species",
 					"age"
 				],
 				[
-					"george",
+					"George",
 					"cat",
 					"5"
 				]
@@ -55,18 +55,18 @@ describe("lib.ModuleCsv", function() {
 		});
 
 		it("should load and parse data", async function() {
-			const path="./test/data/data-george.csv",
+			const path="./test/data/data-pets.csv",
 				instance=_createInstance();
 			return instance.read(path)
 				.then(result=>{
-					assert.deepEqual(result, [
+					assert.deepEqual(result.slice(0, 2), [
 						[
 							"name",
 							"species",
 							"age"
 						],
 						[
-							"george",
+							"George",
 							"cat",
 							"5"
 						]

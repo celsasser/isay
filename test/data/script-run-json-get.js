@@ -5,5 +5,9 @@
  * Copyright @2019 by Xraymen Inc.
  */
 
-json.read("./test/data/data-george.json")
-	object.get("george.type")
+/**
+ * Example of loading and extracting data from a json file and writing it to stdout
+ */
+json.read("./test/data/data-pet.json")
+	.object.get("george.type")
+	.std.out()
