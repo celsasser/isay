@@ -24,8 +24,8 @@ const lib_os=require("../../lib/os");
  * @throws {Error}
  */
 exports.runScript=async function({input=undefined, library, script}) {
-	const parsed=_parseChain({library, script}),
-		chain=_buildChain(parsed);
+	const {sequence}=_parseChain({library, script}),
+		chain=_buildChain(sequence);
 	return chain.process(input);
 };
 
@@ -68,7 +68,7 @@ function _buildChain(descriptors) {
  * And then uses vm.runInContext to steal the sequence
  * @param {Array<LibraryNode>} library
  * @param {string} script
- * @returns {Array<ModuleDescriptor>}
+ * @returns {{result:*, sequence:Array<ModuleDescriptor>}}
  * @throws {Error}
  * @private
  */
@@ -87,23 +87,39 @@ function _parseChain({library, script}) {
 	 * @returns {Proxy}
 	 */
 	function _addCall(node, ...args) {
-		// if his argument is a graph proxy then that means the user is creating a chain which will take
-		// the calling functions output as input. We build the chain and remove him from the call sequence.
 		if(_.get(args, "0._id")==="urn:graph:proxy") {
+			// The call's first argument is a graph proxy so that means the user is creating a "piped" chain
+			// as an an argument. This means that the "piped" chain will take the calling functions output as input.
+			// We build the chain and remove him from the call sequence.
 			const index=callSequence.indexOf(args[0]._descriptor),
-				chainHead=createChain(callSequence.slice(index));
-			args[0]=chainHead.process.bind(chainHead);
+				chain=_buildChain(callSequence.slice(index));
+			args[0]=chain.process.bind(chain);
 			callSequence=callSequence.slice(0, index);
 		} else if(_.isFunction(args[0])) {
-			const proxied=args[0];
-			console.log(proxied.toString());
-			args[0]=function(...args) {
-				console.log("calling", JSON.stringify(args));
-				return proxied.call(graphProxy, ...args);
-			}
+			// the call's first argument is a function (predicate). Our only concern here is whether it includes a chain (which is
+			// not real javascript). We parse him as we did the top level chain and then inspect the results and act accordingly:
+			// First, capture the function script so that we may run it later
+			const script=args[0].toString();
+			// intercept the call so that we may steal and describe the function with params, parse and run it ourselves
+			args[0]=function(...input) {
+				const params=input
+					.map(JSON.stringify)
+					.join(",");
+				const {sequence, result}=_parseChain({
+					library,
+					script: `(${script})(${params})`
+				});
+				// now we either have found a chain or we have run a chain free function and have what we need.
+				if(sequence.length>0) {
+					const chain=_buildChain(sequence);
+					return chain.process.call(chain, input);
+				} else {
+					return result;
+				}
+			};
 		}
 
-		// todo: last call processing is flawed when the chain we are processing is a newly defined chain
+		// todo: last call processing is flawed when the chain we are processing is a "piped" chain
 		// serving as an argument to an existing chain - as we just processed up there ^.
 		const lastCall=_.last(callSequence);
 		if(node.domain===undefined && lastCall===null) {
@@ -118,7 +134,7 @@ function _parseChain({library, script}) {
 		});
 		// what are we doing here? We want to stash the descriptor so that we may be able to identify
 		// a module (and it's chain) should it be used as an argument. To do so we are creating a new
-		// proxy object so that
+		// proxy object so that we may accomplish this.
 		graphProxy._descriptor=_.last(callSequence);
 		graphProxy=new Proxy(graphObject, proxyTop);
 		return graphProxy;
@@ -181,7 +197,10 @@ function _parseChain({library, script}) {
 	// 1. parsed the code
 	// 2. we can steal his parsing of arguments
 	// 3. it puts javascript at our disposal to a limited extent.
-	vm.runInContext(script, vm.createContext(graphProxy));
-	return callSequence;
+	const result=vm.runInContext(script, vm.createContext(graphProxy));
+	return {
+		sequence: callSequence,
+		result
+	};
 }
 

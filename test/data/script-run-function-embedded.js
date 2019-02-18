@@ -10,10 +10,11 @@
  * Note: this example is just meant to demonstrate. It is pretty useless in itself.
  */
 json.read("./test/data/data-pets.json")
-	.map((data)=>{
-		return std.in(data)
-			.object.merge({
-				inserted: "data"
-			});
+	.map(data=>{
+		let merge={inserted: "data"};
+		return {
+			...merge,
+			...data
+		};
 	})
 	.std.out();
