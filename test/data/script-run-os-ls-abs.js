@@ -6,10 +6,11 @@
  */
 
 /**
- * Example of running "ls", filtering, altering the order and writing to stdout
+ * Example of running "ls", filtering, and translating relative paths to absolute paths
  */
 os.ls(".")
 	.string.split("newline")
 	.filter(not.empty())
-	.sort()
+	.map(path.absolute())
+	.sort(path=>path.length)
 	.std.out()

@@ -8,7 +8,7 @@
  *  - Array<*> -> reduce(predicate:function) -> Array<*>
  *  - Array<*> -> reverse(predicate:function) -> Array<*>
  *  - Array<*> -> sort(predicate:function) -> Array<*>
- *  - Array<*> -> uniq() -> Array<*>
+ *  - Array<*> -> unique() -> Array<*>
  * csv:
  *  - read(path:string, opts:(undefined|{delimiter:","}}) -> Array<Array<*>>
  *  - path:string -> read(opts:(undefined|{delimiter:","}}) -> Array<Array<*>>
@@ -49,6 +49,9 @@
  * os:
  *  - stdin:(string|Buffer|undefined) -> <command>(params:string) -> *
  *  - stdin:(string|Buffer|undefined) -> <command>(param1:string, param2:string, ...) -> *
+ * path:
+ *  - string -> absolute:(from:string=".") -> string
+ *  - string -> relative:(from:string=".") -> string
  * std:
  *  - (string|Buffer|Object) -> error() -> (string|Buffer|Object)
  *  - in(data:*) -> *

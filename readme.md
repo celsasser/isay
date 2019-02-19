@@ -57,7 +57,7 @@ Note: it may be helpful to think of a function - `<domain>.<action>(params)` as 
 - reduce: `Array<*> -> reduce(predicate:function) -> Array<*>`
 - reverse: `Array<*> -> reverse(predicate:function) -> Array<*>`
 - sort: `Array<*> -> sort(predicate:function) -> Array<*>`
-- uniq: `Array<*> -> uniq() -> Array<*>`
+- unique: `Array<*> -> uniq() -> Array<*>`
 
 #### csv
 - read: `read(path:string, opts:(undefined|{delimiter:","}}) -> Array<Array<*>>`
@@ -106,6 +106,10 @@ Note: it may be helpful to think of a function - `<domain>.<action>(params)` as 
 #### os:
 - <command>: `stdin:(string|Buffer|undefined) -> <command>(params:string) -> *`
 - <command>: `stdin:(string|Buffer|undefined) -> <command>(param1:string, param2:string, ...) -> *`
+
+#### path:
+- absolute: `string -> absolute:(from:string=".") -> string` 
+- relative: `string -> relative:(from:string=".") -> string` 
 
 #### std:
 - error: `(string|Buffer|Object) -> error() -> (string|Buffer|Object)`

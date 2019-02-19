@@ -128,12 +128,12 @@ class ModuleArray extends ModuleBase {
 	}
 
 	/**
-	 * Returns uniq elements using a deep comparison of elements.
+	 * Returns unique elements using a deep comparison of elements.
 	 * @param {DataBlob} blob
 	 * @returns {Promise<DataBlob>}
 	 * @throws {Error} if <param>blob</param> cannot be treated as an array
 	 */
-	async uniq(blob) {
+	async unique(blob) {
 		const array=this._assertArray(blob);
 		return _.uniqWith(array, _.isEqual);
 	}

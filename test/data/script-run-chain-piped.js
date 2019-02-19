@@ -6,10 +6,10 @@
  */
 
 /**
- * Example of using a chain to handle output from a chain action
+ * Example using a chain as a predicate function.
  */
 json.read("./test/data/data-pets.json")
 	.map(object.get("name"))
 	.sort()
 	.reverse()
-	.std.out();
+	.std.out()

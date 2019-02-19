@@ -27,7 +27,7 @@ exports.run=async function(configuration) {
 		log.verbose("- loading stdin");
 		const input=await _readStdin();
 		log.verbose("- running script");
-		return runScript({input, library, script});
+		return await runScript({input, library, script});
 	} catch(error) {
 		return Promise.reject(new XRayError({
 			error,

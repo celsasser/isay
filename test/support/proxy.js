@@ -133,17 +133,50 @@ exports.log={
 	 */
 	stub: function(exclude=undefined) {
 		const methods=_.xor(this._methods, exclude);
-		methods.forEach(function(name) {
-			if(!exports.log[name]) {
-				exports.log[name]=sinon.stub(log, name);
+		methods.forEach((name)=>{
+			if(!this[name]) {
+				this[name]=sinon.stub(log, name);
 			}
 		});
 	},
 	unstub: function() {
-		this._methods.forEach(function(name) {
-			if(exports.log[name]) {
-				exports.log[name].restore();
-				exports.log[name]=null;
+		this._methods.forEach((name)=>{
+			if(this[name]) {
+				this[name].restore();
+				this[name]=null;
+			}
+		});
+	}
+};
+
+/**
+ * Stub stdout and stderr. stdin is a little exceptional so not integrating here.
+ */
+exports.std={
+	_methods: ["stderr", "stdout"],
+	stderr: null,	// sinon stub when stubbed
+	stdout: null,	// sinon stub when stubbed
+
+	/**
+	 * Stubs stdout and stderr
+	 * @param {Array} exclude
+	 */
+	stub: function(exclude=undefined) {
+		const methods=_.xor(this._methods, exclude);
+		methods.forEach((name)=>{
+			if(!this[name]) {
+				this[name]=sinon.stub(process[name], "write")
+					.callsFake((text, callback)=>{
+						process.nextTick(callback);
+					});
+			}
+		});
+	},
+	unstub: function() {
+		this._methods.forEach((name)=>{
+			if(this[name]) {
+				this[name].restore();
+				this[name]=null;
 			}
 		});
 	}

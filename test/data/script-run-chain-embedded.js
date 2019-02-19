@@ -7,13 +7,13 @@
 
 /**
  * Example of embedding a chain in an input function.
- * Note: this example is just meant to demonstrate. It is pretty useless in itself.
+ * Note: allows one to save state in variables.
  */
 json.read("./test/data/data-pets.json")
 	.map((data)=>{
-		return std.in(data)
+		std.in(data)
 			.object.merge({
 				inserted: "data"
-			});
+			})
 	})
-	.std.out();
+	.std.out()

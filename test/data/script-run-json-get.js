@@ -6,7 +6,7 @@
  */
 
 /**
- * Example of loading and extracting data from a json file and writing it to stdout
+ * Example of loading and extracting data from a json file and writing the result to stdout
  */
 json.read("./test/data/data-pet.json")
 	.object.get("george.type")
