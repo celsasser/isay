@@ -6,6 +6,8 @@
  * @module common/constant
  */
 
+const http=require("http");
+
 /**
  * MIDI constants and defaults
  * @enum {number}
@@ -73,6 +75,24 @@ exports.severity={
 	 * @private
 	 */
 	_ORDER: ["verbose", "debug", "info", "warn", "error", "fatal"]
+};
+
+/**
+ * An extension of the http status codes that we use for internal purposes
+ * @enum {number}
+ */
+exports.status={
+	code: {
+		ABORT: -1
+	},
+	text: (code)=>{
+		switch(code) {
+			case exports.status.code.ABORT: return "Abort";
+			default: {
+				return http.STATUS_CODES[code];
+			}
+		}
+	}
 };
 
 /**

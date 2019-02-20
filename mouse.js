@@ -7,6 +7,7 @@
  * Copyright @2019 by Xraymen Inc.
  */
 
+const constant=require("./src/common/constant");
 const format=require("./src/common/format");
 const log=require("./src/common/log");
 const cli=require("./src/cli");
@@ -20,9 +21,11 @@ command.run(configuration)
 		process.exit(0);
 	})
 	.catch(error=>{
-		log.error(format.errorToString(error, {
-			details: true,
-			stack: true
-		}));
+		if(error.statusCode!==constant.status.code.ABORT) {
+			log.error(format.errorToString(error, {
+				details: true,
+				stack: true
+			}));
+		}
 		process.exit(1);
 	});

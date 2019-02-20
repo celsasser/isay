@@ -7,7 +7,6 @@
  */
 
 const _=require("lodash");
-const http=require("http");
 // note: be careful including relative dependencies in here as it has far reaches
 
 
@@ -47,7 +46,8 @@ class XRayError extends Error {
 					result=leftovers.error.message;
 					delete leftovers.error;
 				} else if(leftovers.statusCode) {
-					result=`${http.STATUS_CODES[leftovers.statusCode]} (${leftovers.statusCode})`;
+					const constant=require("./constant");
+					result=`${constant.status.text(leftovers.statusCode)} (${leftovers.statusCode})`;
 					delete leftovers.statusCode;
 				}
 				return result;
@@ -59,6 +59,10 @@ class XRayError extends Error {
 			}
 			// so that we can trace things to the true origin we steal his stack. There may be times at which we don't want to do this?
 			this.stack=error.stack;
+			// steal goodies that we want to inherit
+			if(statusCode===undefined) {
+				statusCode=error.statusCode;
+			}
 		}
 		XRayError.annotate(this, _.omitBy({
 			details: getMostImportant("details"),

@@ -10,19 +10,21 @@ const fs=require("fs-extra");
 const os=require("os");
 const path=require("path");
 const shortid=require("shortid");
+const constant=require("../../common/constant");
+const {XRayError}=require("../../common/error");
 
 
 /**
  * Launches editor and returns the results
  * @param {string} template - data to prep editor with
- * @return {Promise<void>}
+ * @return {Promise<string>}
  */
 async function getScript({
 	template=""
 }={}) {
 	const filePath=await _createTmpFile(template);
 	await _edit(filePath);
-	return fs.readFileSync(path, {
+	return fs.readFile(filePath, {
 		encoding: "utf8"
 	});
 }
@@ -33,7 +35,7 @@ async function getScript({
  * @return {Promise<string>}
  * @private
  */
-async function _createTmpFile(data) {
+function _createTmpFile(data) {
 	const uri=path.join(os.tmpdir(), shortid.generate()+".js");
 	return fs.writeFile(uri, data, {
 		encoding: "utf8"
@@ -43,25 +45,48 @@ async function _createTmpFile(data) {
 /**
  * Edit file at <param>path</param>
  * @param {string} path
- * @return {Promise<void>}
+ * @return {Promise<string>}
+ * @throws {Error}
  * @private
  */
-async function _edit(path) {
+function _edit(path) {
+	/**
+	 * @param {string} editor
+	 * @returns {Array<string>}
+	 */
+	function _editorToOptions(editor) {
+		if(editor.startsWith("vi")) {
+			return [
+				// move to the end
+				"+normal G",
+				// open in insert mode
+				"+startinsert",
+				// and the file we want to open
+				path
+			];
+		}
+		// todo: insert your favs.
+		return [path];
+	}
+
 	const editor=process.env.EDIT
 		|| process.env.VISUAL
-		|| "vim";
+		|| "vim",
+		options=_editorToOptions(editor);
 	return new Promise((resolve, reject)=>{
 		// vim, nano, emacs all write directly to the tty.  If we are being run from
 		// a terminal (which we should be) then our stdin and stdout should be tty versions
 		// of streams.  We want our child to inherit these guys.
-		const child=spawn(editor, [path], {
+		const child=spawn(editor, options, {
 			stdio: "inherit"
 		});
 		child.on("exit", code=>{
 			if(code===0) {
-				resolve();
+				resolve(path);
 			} else {
-				reject(new Error("aborted editor"));
+				reject(new XRayError({
+					statusCode: constant.status.code.ABORT
+				}));
 			}
 		});
 	});
