@@ -150,7 +150,7 @@ exports.parse=function() {
 				} else if(option.args.count===1 && value.length===0) {
 					throw new Error(`option "${key}" missing required argument`);
 				} else {
-					this.options[option.keys.long]=(value==null)
+					this.options[option.keys.long]=_.isEmpty(value)
 						? true
 						: value;
 				}
@@ -243,7 +243,7 @@ exports.parse=function() {
 	try {
 		const commandLine=new CommandLine();
 		commandLine.parse();
-		if(commandLine.options["help"]) {
+		if("help" in commandLine.options) {
 			reportUsage(commandLine.action);
 			process.exit(1);
 		} else {

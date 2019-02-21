@@ -4,5 +4,5 @@
 		}
 	},
 	"log": {
-		"level": "verbose"
+		"level": "info"
 	}}
