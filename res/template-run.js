@@ -60,5 +60,11 @@
  *  - string -> replace(search:(string|RegExp), replace:string) -> string
  *  - string -> split(method:("newline"|"shell"|"white"))
  *  - string -> split(method:"delimiter", delimiter:string="\s*,\s*")
+ * yaml:
+ *  - data:(string|Buffer) -> parse() -> Object
+ *  - read(path:string) -> Object
+ *  - path:string -> read() -> Object
+ *  - Object -> stringify(options:{compact:true}) -> string
+ *  - json:Object -> write(path:string) -> Object
  */
 

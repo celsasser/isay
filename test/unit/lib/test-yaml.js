@@ -6,17 +6,18 @@
  */
 
 const fs=require("fs-extra");
+const jsyaml=require("js-yaml");
 const assert=require("../../support/assert");
-const {ModuleJson}=require("../../../src/lib/json");
+const {ModuleYaml}=require("../../../src/lib/yaml");
 
-describe("lib.ModuleJson", function() {
+describe("lib.ModuleYaml", function() {
 	function _createInstance({
 		action="action",
 		domain="parse",
 		method="method",
 		params=[]
 	}={}) {
-		return new ModuleJson({
+		return new ModuleYaml({
 			action,
 			domain,
 			method,
@@ -28,7 +29,7 @@ describe("lib.ModuleJson", function() {
 		it("should parse input string data", async function() {
 			const instance=_createInstance(),
 				json={property: "value"},
-				result=await instance.parse(JSON.stringify(json));
+				result=await instance.parse(jsyaml.dump(json));
 			assert.deepEqual(result, json);
 		});
 	});
@@ -44,57 +45,54 @@ describe("lib.ModuleJson", function() {
 		});
 
 		it("should use input data as path if specified", async function() {
-			const path="./test/data/data-pet.json",
+			const path="./test/data/data-pet.yaml",
 				instance=_createInstance();
 			return instance.read(path)
 				.then(data=>{
 					assert.strictEqual(typeof (data), "object");
-					assert.deepEqual(data, fs.readJSONSync(path, "utf8"));
+					assert.deepEqual(data, {
+						"george": {
+							"type": "cat"
+						}
+					});
 				});
 		});
 
 		it("should use input data as path if specified", async function() {
-			const path="./test/data/data-pet.json",
+			const path="./test/data/data-pet.yaml",
 				instance=_createInstance({
 					params: [path]
 				});
 			return instance.read()
 				.then(data=>{
 					assert.strictEqual(typeof (data), "object");
-					assert.deepEqual(data, fs.readJSONSync(path, "utf8"));
+					assert.deepEqual(data, {
+						"george": {
+							"type": "cat"
+						}
+					});
 				});
 		});
 	});
 
 	describe("stringify", function() {
-		it("should encode as 'compact' by default", function() {
+		it("should encode as properly", function() {
 			const instance=_createInstance(),
-				data={a: 1};
+				data={b: 2, a: 1};
 			return instance.stringify(data)
 				.then(result=>{
-					assert.strictEqual(result, '{"a":1}');
+					assert.strictEqual(result, "b: 2\na: 1\n");
 				});
 		});
 
-		it("should encode as 'compact' if explicit", function() {
+		it("should sort if asked to", function() {
 			const instance=_createInstance({
-					params: [{compact: true}]
+					params: [{sort: true}]
 				}),
-				data={a: 1};
+				data={b: 2, a: 1};
 			return instance.stringify(data)
 				.then(result=>{
-					assert.strictEqual(result, '{"a":1}');
-				});
-		});
-
-		it("should encode as 'spacious' if !compact", function() {
-			const instance=_createInstance({
-					params: [{compact: false}]
-				}),
-				data={a: 1};
-			return instance.stringify(data)
-				.then(result=>{
-					assert.strictEqual(result, '{\n\t"a": 1\n}');
+					assert.strictEqual(result, "a: 1\nb: 2\n");
 				});
 		});
 	});
@@ -111,28 +109,28 @@ describe("lib.ModuleJson", function() {
 
 		it("should save to an existing directory", async function() {
 			const data={"george": "cat"},
-				path="./test/data/output/file-save.json",
+				path="./test/data/output/file-save.yaml",
 				instance=_createInstance({
 					params: [path]
 				});
 			return instance.write(data)
 				.then(_data=>{
 					assert.strictEqual(_data, data);
-					assert.deepEqual(fs.readJSONSync(path, "utf8"), data);
+					assert.strictEqual(fs.readFileSync(path, "utf8"), "george: cat\n");
 					fs.removeSync(path);
 				});
 		});
 
 		it("should create a directory that does not exist", async function() {
 			const data={"george": "cat"},
-				path="./test/data/output/new/file-save.json",
+				path="./test/data/output/new/file-save.yaml",
 				instance=_createInstance({
 					params: [path]
 				});
 			return instance.write(data)
 				.then(_data=>{
 					assert.strictEqual(_data, data);
-					assert.deepEqual(fs.readJSONSync(path, "utf8"), data);
+					assert.strictEqual(fs.readFileSync(path, "utf8"), "george: cat\n");
 					fs.removeSync("./test/data/output/new");
 				});
 		});

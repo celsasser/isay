@@ -98,25 +98,6 @@ class ModuleBase {
 	}
 
 	/**
-	 * If the value is not a valid JSON object then we throw an exception
-	 * @param {*} value
-	 * @param {boolean} allowNull - this is a judgement call. We allow null because it is a valid JSON value.
-	 * @throws {Error}
-	 * @protected
-	 */
-	_assertJson(value, {
-		allowNull=true
-	}={}) {
-		if(_.isPlainObject(value)) {
-			// okay
-		} else if(value==null && allowNull) {
-			// okay
-		} else {
-			throw new Error(`expecting JSON object but found ${util.name(value)}`);
-		}
-	}
-
-	/**
 	 * A "predicate" is a function that takes 1 or more arguments and returns a single value. They are
 	 * designed to be used with our API. So that they are fully compatible and in parity we make sure that
 	 * the are asynchronous. If <param>predicate</param> is not found to be async then we make him async

@@ -47,7 +47,7 @@ class ModuleMidi extends ModuleIO {
 	 */
 	async write(data) {
 		const uri=this._getWritePath();
-		this._assertJson(data, {allowNull: false});
+		this._assertType(data, "Object");
 		return fs.ensureDir(path.parse(uri).dir)
 			.then(()=>{
 				midi.writeMidiToFile(data, uri);

@@ -19,7 +19,9 @@ class ModuleObject extends ModuleIO {
 	 * @throws {Error}
 	 */
 	async get(data) {
-		this._assertJson(data);
+		this._assertType(data, "Object", {
+			allowNull: true
+		});
 		return (this.params.length>0)
 			? _.get(data, this.params[0])
 			: data;
@@ -33,7 +35,9 @@ class ModuleObject extends ModuleIO {
 	 */
 	async merge(data) {
 		let merge=this.params[0];
-		this._assertJson(merge);
+		this._assertType(data, "Object", {
+			allowNull: true
+		});
 		return _.merge(data, merge);
 	}
 
@@ -61,7 +65,9 @@ class ModuleObject extends ModuleIO {
 	async toArray(data) {
 		const result=[],
 			predicate=this._assertPredicate(_.get(this.params, 0, object=>object));
-		this._assertJson(data);
+		this._assertType(data, "Object", {
+			allowNull: true
+		});
 		for(let key in data) {
 			result.push(await predicate(data[key], key));
 		}

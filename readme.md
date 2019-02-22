@@ -129,6 +129,13 @@ A _domain_ is a conceptual and physical grouping of one or more _functions_. Wha
 - split: `string -> split(method:("newline"|"shell"|"white"))`
 - split: `string -> split(method:"delimiter", delimiter:string="\s*,\s*")`
 
+#### yaml:
+- parse: `data:(string|Buffer) -> parse() -> Object`
+- read: `read(path:string) -> Object`
+- read: `path:string -> read() -> Object`
+- stringify: `Object -> stringify(options:{compact:true}) -> string`
+- write: `json:Object -> write(path:string) -> Object`
+
 ### A _script_
 
 `run` takes a script. A `script` at the very least is a _chain_. It may contain globally (outside of the _chain_) defined variables and functions but should assume nothing about the environment. These variables and functions may be referenced by the script's _chain_.  
