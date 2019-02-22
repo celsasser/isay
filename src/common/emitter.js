@@ -2,7 +2,7 @@
  * User: curtis
  * Date: 05/27/18
  * Time: 10:10 PM
- * Copyright @2018 by Xraymen Inc.
+ * Copyright @2019 by Xraymen Inc.
  *
  * @module common/emitter
  */

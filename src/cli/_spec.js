@@ -2,14 +2,14 @@
  * User: curtis
  * Date: 05/27/18
  * Time: 1:22 PM
- * Copyright @2018 by Xraymen Inc.
+ * Copyright @2019 by Xraymen Inc.
  */
 
 
 exports.ACTIONS={
 	"run": {
 		args: "[script]",
-		desc: "runs a script",
+		desc: "run a script",
 		/**
 		 * @param {Array<string>} position
 		 * @param {Object<string, string>} options
@@ -29,7 +29,7 @@ exports.OPTIONS=[
 		args: {
 			count: 0
 		},
-		desc: "print general help or help for a specific command",
+		desc: "print general help or help for a specific action",
 		keys: {
 			short: "h",
 			long: "help"
@@ -37,9 +37,10 @@ exports.OPTIONS=[
 	},
 	{
 		args: {
-			count: 1
+			count: 1,
+			name: "level"
 		},
-		desc: "log level",
+		desc: '"verbose", "debug", "info", "warn", "error" or "fatal"',
 		keys: {
 			short: "l",
 			long: "log.level"

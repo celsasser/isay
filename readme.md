@@ -3,7 +3,7 @@
 ## Overview
 `mouse` is a shell command that supports and runs a JavaScript like scripting language. `mouse` offers an alternate means of interacting with your environment within your shell. A sort of shell in a shell, extending it and (hopefully) allowing one to easily accomplish tasks that some may consider cumbersome via the shell.  The language itself takes a _functional_ approach which may appeal to those who are fond of a more functional approach to programming.
 
- In addition to being a simple language, `mouse` also benefits from built-in support for popular file formats such as JSON, YAML, CVS (and midi). Not only does it support loading, parsing and saving but also manipulation. But it's not limited to working with any single file type and is perfectly comfortable with loading, manipulating and saving any portal that my be treated as a file.
+ In addition to being a simple, pared down to basics language, `mouse` also benefits from built-in support for popular file formats such as JSON, YAML, CVS (and midi). Not only does it support loading, parsing and saving but also manipulation. But it's not limited to working with any single file type and is perfectly comfortable with loading, manipulating and saving any portal that my be treated as a file.
 
 ## Running
 `mouse` is the top level command. To make it do anything one must specify a [_action_](#actions).  Each _action_ takes its own set of arguments and options.  
@@ -23,10 +23,10 @@ mouse.js --help <action>
 ## Action `run` 
 ---
 
-`run` is the rubber and your OS is the road. It supports and runs a simple [JavaScript like language](#language) entirely designed with the flow of data in mind. The language itself can be broken down into  _functions_, _domains_ and _chains_.
+`run` is the rubber and your OS is the road. It supports and runs a simple [JavaScript like language](#language) entirely designed with the flow of data in mind. The language itself can be broken down into  _chains_,  _domains_ and _functions_.
 
 ### The chain
-The _chain_ is a list of synchronous _functions_ that are executed sequentially. The language used to define _chains_ (and _scripts_ which will follow) is a both a subset and non-compliant variation of _JavaScript_.  
+The _chain_ is a list of sequentially excecuted, synchronous _functions_. A _functions_ output serves as input for the next _function_ in a _chain_. The last _function_? Nothing is assumed regarding output of last function in a _chain_. If you want its results to be sent to `stdout` then you must send it to `std.out`. An exception is for nested _chains_ - the result of the last _function_ in a nested _chain_ is returned back to the calling _function_. Examples are provided below of nested _chains_.
 
 The syntax of a _chain_ is as follows:
 ```
@@ -54,6 +54,8 @@ Note: it may be helpful to think of a function - `<domain>.<function>(params)` -
 
 <a id="language"></a>
 ### The Language
+The language used to define _chains_ (and _scripts_ which will follow) is a both a subset and not totally compliant variation of _JavaScript_. At its heart are _domains_ and _functions_.
+
 A _domain_ is a conceptual and physical grouping of one or more _functions_. What is the function of a _domain_? It forces a modular breakdown of related functionality that allows and encourages _function_ names to be reused encouraging a smaller, consistent and more terse _function_ lexicon. It also allows for _domain_ omission provided the _domain_ of a previous _function_ is in the same as a subsequent _function_.
 
 

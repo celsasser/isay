@@ -6,7 +6,7 @@
  *
  * This is where the run script is parsed and converted into an array of ModuleDescriptor.
  * Parsing: we cheat. We let the V8 vm do most of the work. We create an object with our
- * mappings for our entire command dictionary.
+ * mappings for our entire (library) dictionary.
  */
 
 const _=require("lodash");

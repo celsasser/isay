@@ -2,7 +2,7 @@
  * User: curtis
  * Date: 10/31/18
  * Time: 1:48 AM
- * Copyright @2018 by Xraymen Inc.
+ * Copyright @2019 by Xraymen Inc.
  *
  * Library of locally defined types
  */

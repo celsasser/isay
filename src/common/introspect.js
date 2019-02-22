@@ -2,7 +2,7 @@
  * User: curtis
  * Date: 3/8/18
  * Time: 9:35 PM
- * Copyright @2018 by Xraymen Inc.
+ * Copyright @2019 by Xraymen Inc.
  *
  * @module common/introspect
  */

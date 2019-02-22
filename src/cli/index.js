@@ -1,8 +1,8 @@
 /**
  * User: curtis
- * Date: 05/27/18
+ * Date: 02/01/2019
  * Time: 1:22 PM
- * Copyright @2018 by Xraymen Inc.
+ * Copyright @2019 by Xraymen Inc.
  *
  * @module horse/cli
  */
@@ -60,11 +60,11 @@ exports.parse=function() {
 		 */
 		validate() {
 			if(!this.action) {
-				throw new Error(`${this.runner}: no command specified`);
+				throw new Error(`${this.runner}: no action specified`);
 			}
 			const action=findAction(this.action);
 			if(!action) {
-				throw new Error(`${this.runner}: unknown command "${this.action}"`);
+				throw new Error(`${this.runner}: unknown action "${this.action}"`);
 			}
 			const allSupportedOptions=OPTIONS.filter(option=>_.isEmpty(option.actions) || _.includes(option.actions, this.action)),
 				allRequiredOptions=_.filter(allSupportedOptions, {required: true}),
@@ -74,7 +74,7 @@ exports.parse=function() {
 				throw new XRayError({
 					action: this.action,
 					message: `${this.runner} ${this.action}: options ${userUnsupportedOptions.map(name=>`--${name}`)
-						.join("|")} not supported by "${this.action}" command`
+						.join("|")} not supported by "${this.action}" action`
 				});
 			}
 			if(userMissingOptions.length>0) {
@@ -113,7 +113,9 @@ exports.parse=function() {
 			const result=Object.assign({
 					options: {}
 				},
-				file.readToJSONSync("./res/defaults.json", {local: true}).command[this.action],
+				file.readToJSONSync("./res/defaults.json", {
+					local: true
+				}).action[this.action],
 				{
 					action: this.action,
 					params: this.positions
@@ -227,11 +229,11 @@ exports.parse=function() {
 				log.info(`   -${option.keys.short}|--${option.keys.long}: ${option.desc}`);
 			});
 		} else {
-			log.info(`Usage: mouse.js ${_formatOptions(OPTIONS)} <command> [<args>]`);
+			log.info(`Usage: mouse.js ${_formatOptions(OPTIONS)} <action> [<args>]`);
 			OPTIONS.forEach(option=>{
 				log.info(`   -${option.keys.short}|--${option.keys.long}: ${option.desc}`);
 			});
-			log.info("Commands:");
+			log.info("Actions:");
 			Object.keys(ACTIONS).sort().forEach(actionName=>{
 				const action=findAction(actionName);
 				log.info(`   ${actionName}: ${action.desc}`);
