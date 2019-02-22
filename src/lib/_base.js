@@ -42,8 +42,11 @@ class ModuleBase {
 	 */
 	async process(data=undefined) {
 		try {
-			log.verbose(()=>`- running ${this.domain}.${this.action}(${util.name(data)})`);
 			let blob=this._preprocessChunk(data);
+			log.verbose(()=>{
+				const {input}=this._getPreviewDetails(blob);
+				return `- executing ${this.domain}.${this.action}(${input})`;
+			});
 			blob=await this[this.method](blob);
 			return (this._output)
 				? this._output.process(blob)
@@ -135,6 +138,35 @@ class ModuleBase {
 			throw new Error("expected valid JSON object but found function");
 		}
 		return data;
+	}
+
+	/**
+	 * Allows modules to return more detailed info, where appropriate, for detailed logging.
+	 * @param {DataBlob} data
+	 * @returns {{input:string}}
+	 * @private
+	 */
+	_getPreviewDetails(data) {
+		let input="";
+		if(data!==undefined) {
+			if(typeof(data)==="string") {
+				// todo: this will be messy if the string happens to be binary data.
+				data=_.chain(data)
+					.deburr()
+					.replace(/\n/g, "\\n")
+					.value();
+				if(data.length<80) {
+					input=`"${data}"`;
+				} else {
+					input=`"${data.substr(0, 38)}[...]${data.substr(data.length-38)}"`;
+				}
+			} else {
+				input=util.name(data);
+			}
+		}
+		return {
+			input
+		};
 	}
 
 	/**
