@@ -87,7 +87,7 @@ function _parseChain({library, script}) {
 	 * @returns {Proxy}
 	 */
 	function _addCall(node, ...args) {
-		if(_.get(args, "0._id")==="urn:graph:proxy") {
+		if(_.get(args, "0._type")==="urn:graph:proxy") {
 			// The call's first argument is a graph proxy so that means the user is creating a "piped" chain
 			// as an an argument. This means that the "piped" chain will take the calling functions output as input.
 			// We build the chain and remove him from the call sequence.
@@ -121,22 +121,23 @@ function _parseChain({library, script}) {
 
 		// todo: last call processing is flawed when the chain we are processing is a "piped" chain
 		// serving as an argument to an existing chain - as we just processed up there ^.
-		const lastCall=_.last(callSequence);
-		if(node.domain===undefined && lastCall===null) {
+		const lastCallDescriptor=_.last(callSequence);
+		if(node.domain===undefined && lastCallDescriptor==null) {
 			throw new Error(`cannot resolve a function domain for action=${node.action}`);
 		}
-		callSequence.push({
+		const newCallDescriptor={
 			action: node.action,
-			class: node.class || lastCall.class,
-			domain: node.domain || lastCall.domain,
+			class: node.class || lastCallDescriptor.class,
+			domain: node.domain || lastCallDescriptor.domain,
 			method: node.method || node.action,
 			params: args
-		});
+		};
+		callSequence.push(newCallDescriptor);
 		// what are we doing here? We want to stash the descriptor so that we may be able to identify
 		// a module (and it's chain) should it be used as an argument. To do so we are creating a new
 		// proxy object so that we may accomplish this.
-		graphProxy._descriptor=_.last(callSequence);
-		graphProxy=new Proxy(graphObject, proxyTop);
+		graphProxy._descriptor=newCallDescriptor;
+		graphProxy=new Proxy(graphObject, proxyTopHandler);
 		return graphProxy;
 	}
 
@@ -144,7 +145,7 @@ function _parseChain({library, script}) {
 	 * Proxies all attempts to dereference properties at the tippy-top. The only reason we need this is for
 	 * our "os" friend. If an action is requested of us and we don't know about it and the last call was on
 	 * domain="os" then we assume that the property is an "os" action. */
-	const proxyTop={
+	const proxyTopHandler={
 		get(target, property) {
 			if(!(property in target)) {
 				if(_.get(_.last(callSequence), "domain")==="os") {
@@ -161,7 +162,7 @@ function _parseChain({library, script}) {
 	 * Proxies all attempts to get properties on "os". We open up the floodgates and assume at this level that all
 	 * is valid. If the command doesn't exist of the commands params are screwy then the caller will be told at runtime.
 	 */
-	const proxyOS={
+	const proxyOSHandler={
 		get(target, property) {
 			if(!(property in target)) {
 				target[property]=_addCall.bind(null, {
@@ -187,10 +188,10 @@ function _parseChain({library, script}) {
 		_.set(result, `${node.domain}.${node.action}`, _addCall.bind(null, node));
 		return result;
 	}, {
-		_id: "urn:graph:proxy",
-		os: new Proxy({}, proxyOS)
+		_type: "urn:graph:proxy",
+		os: new Proxy({}, proxyOSHandler)
 	});
-	graphProxy=new Proxy(graphObject, proxyTop);
+	graphProxy=new Proxy(graphObject, proxyTopHandler);
 
 	// this is the crank that gets everything up above rolling. We use our graph-proxy as the context in
 	// which our scripts is run so that we may intercept all calls. What does this buy us? Everything:
