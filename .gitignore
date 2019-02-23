@@ -20,3 +20,5 @@ node_modules
 # and our own secrets
 **/output.mid
 test/data/output
+tmp
+
