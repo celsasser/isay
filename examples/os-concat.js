@@ -10,6 +10,6 @@
 file.create("./tmp/samples.txt")
 	.os.find("./examples -name \"*.js\"")
 	.string.split("newline")
-	.array.each(file.read()
+	.array.each(path=>file.read()
 		.file.write("./tmp/samples.txt", { append: true })
 	)

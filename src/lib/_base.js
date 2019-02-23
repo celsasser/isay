@@ -6,6 +6,7 @@
  */
 
 const _=require("lodash");
+const {XRayError}=require("../common/error");
 const log=require("../common/log");
 const util=require("../common/util");
 
@@ -55,7 +56,11 @@ class ModuleBase {
 			// look to see whether this was reported by us. If so then it means that
 			// the chain was nested. We just want the top level error.
 			if(/\w+\.\w+ failed/.test(error.message)===false) {
-				error=new Error(`${this.domain}.${this.action} failed - ${error.message}`);
+				// let's make sure we pick up the stack by wrapping the error
+				error=new XRayError({
+					error,
+					message: `${this.domain}.${this.action} failed`
+				});
 			}
 			return Promise.reject(error);
 		}

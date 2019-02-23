@@ -32,6 +32,17 @@ class ModuleArray extends ModuleBase {
 	}
 
 	/**
+	 * Calls right through to <code>each</code>
+	 * @resolves predicate:ArrayPredicate in this.params[0]
+	 * @param {DataBlob} blob
+	 * @returns {Promise<DataBlob>}
+	 * @throws {Error} if <param>blob</param> cannot be treated as an array
+	 */
+	async forEach(blob) {
+		return this.each(blob);
+	}
+
+	/**
 	 * Filters array selecting truthy returns by predicate
 	 * @resolves predicate:ArrayPredicate in this.params[0]
 	 * @param {DataBlob} blob

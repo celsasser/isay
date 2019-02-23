@@ -38,7 +38,7 @@ class ModuleIO extends ModuleBase {
 	 * @protected
 	 */
 	_getReadPath(data) {
-		const path=(data)
+		const path=(data!=null)
 			? data
 			: this.params[0];
 		this._assetPath(path);
@@ -61,7 +61,7 @@ class ModuleIO extends ModuleBase {
 		encoding: "utf8"
 	}) {
 		let result;
-		if(data) {
+		if(data!=null) {
 			result=Object.assign({
 				path: data
 			}, this.params[0] || defaults);

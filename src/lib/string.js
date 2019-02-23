@@ -55,7 +55,14 @@ class ModuleString extends ModuleBase {
 					return data.split(regex);
 				}
 				case "newline": {
-					return data.split(/\s*\n\s*/);
+					const result=data.split(/\s*\n\s*/);
+					if(_.last(result)==="") {
+						// What are we doing here? It's an executive decision that we may back out of. The reason is because function such as
+						// "ls", "find" all return with a trailing newline which when parsed will result in an empty line. And split
+						// includes an empty trailing line. I think it's safe to assume that we never want it.
+						result.pop();
+					}
+					return result;
 				}
 				case "shell": {
 					return string.shell(data);

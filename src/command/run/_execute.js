@@ -9,6 +9,7 @@
  * mappings for our entire (library) dictionary.
  */
 
+const assert=require("assert");
 const _=require("lodash");
 const vm=require("vm");
 const lib_os=require("../../lib/os");
@@ -77,8 +78,7 @@ function _parseChain({library, script}) {
 	 * This array will be populated when the graph is "run"
 	 * @type {Array<ModuleDescriptor>}
 	 */
-	let callSequence=[],
-		graphProxy;
+	let callSequence=[];
 
 	/**
 	 * Creates and adds a ModuleDescriptor to our call-sequence
@@ -112,7 +112,7 @@ function _parseChain({library, script}) {
 				// now we either have found a chain or we have run a chain free function and have what we need.
 				if(sequence.length>0) {
 					const chain=_buildChain(sequence);
-					return chain.process.call(chain, input);
+					return chain.process.apply(chain, input);
 				} else {
 					return result;
 				}
@@ -133,12 +133,27 @@ function _parseChain({library, script}) {
 			params: args
 		};
 		callSequence.push(newCallDescriptor);
-		// what are we doing here? We want to stash the descriptor so that we may be able to identify
-		// a module (and it's chain) should it be used as an argument. To do so we are creating a new
-		// proxy object so that we may accomplish this.
+		// todo: the following does not work as hoped - the the argument placed in params[0] is the last descriptor created.
+		// todo: It's our own fault. How do we support nested chains? How do we know where they begin without getting into parsing?
+		// what are we doing here? We want to stash the descriptor so that we may be able to identify a module
+		// (and it's chain) should it be used as an argument. To do so we are creating a new proxy object so
+		// that we may accomplish this.
+		const graphProxy=_createGraphProxy();
 		graphProxy._descriptor=newCallDescriptor;
-		graphProxy=new Proxy(graphObject, proxyTopHandler);
 		return graphProxy;
+	}
+
+	/**
+	 * Creates a new instance of our graph proxy proxying a new instance of the graph
+	 * @returns {Proxy}
+	 * @private
+	 */
+	function _createGraphProxy() {
+		assert.strictEqual(graphObject.hasOwnProperty("os"), false);
+		return new Proxy(Object.assign(
+			{os: proxyOS},
+			graphObject
+		), proxyTopHandler);
 	}
 
 	/**
@@ -163,21 +178,21 @@ function _parseChain({library, script}) {
 	 * is valid. If the command doesn't exist of the commands params are screwy then the caller will be told at runtime.
 	 */
 	const proxyOSHandler={
-		get(target, property) {
-			if(!(property in target)) {
-				target[property]=_addCall.bind(null, {
-					action: property,
-					class: lib_os.ModuleOs,
-					domain: "os",
-					method: "executionHandler"
-				});
+			get(target, property) {
+				if(!(property in target)) {
+					target[property]=_addCall.bind(null, {
+						action: property,
+						class: lib_os.ModuleOs,
+						domain: "os",
+						method: "executionHandler"
+					});
+				}
+				return target[property];
 			}
-			return target[property];
-		}
-	};
+		},
+		proxyOS=new Proxy({}, proxyOSHandler);
 
 	// And finally we get to the graph that we build from our library.
-	//
 	const graphObject=library.reduce((result, node)=>{
 		// The top level to cover those that are hijacking the last domain.
 		// note: name collisions don't matter here because we resolve these guys to the last explicit domain
@@ -188,17 +203,15 @@ function _parseChain({library, script}) {
 		_.set(result, `${node.domain}.${node.action}`, _addCall.bind(null, node));
 		return result;
 	}, {
-		_type: "urn:graph:proxy",
-		os: new Proxy({}, proxyOSHandler)
+		_type: "urn:graph:proxy"
 	});
-	graphProxy=new Proxy(graphObject, proxyTopHandler);
 
 	// this is the crank that gets everything up above rolling. We use our graph-proxy as the context in
 	// which our scripts is run so that we may intercept all calls. What does this buy us? Everything:
 	// 1. parsed the code
 	// 2. we can steal his parsing of arguments
 	// 3. it puts javascript at our disposal to a limited extent.
-	const result=vm.runInContext(script, vm.createContext(graphProxy));
+	const result=vm.runInContext(script, vm.createContext(_createGraphProxy()));
 	return {
 		sequence: callSequence,
 		result
