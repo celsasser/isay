@@ -1,7 +1,7 @@
 {
 	"description": "A shell in a shell",
 	"name": "mouse",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"dependencies": {
 		"csv-parse": "4.3.1",
 		"csv-stringify": "5.3.0",
@@ -18,6 +18,7 @@
 		"sinon": "7.2.3"
 	},
 	"scripts": {
-		"lint": "eslint --config ./node_modules/pig-quality/server.eslintrc.json src/**/*.js test/**/*.js"
+		"lint": "eslint --config ./node_modules/pig-quality/server.eslintrc.json src/**/*.js test/unit/**/*.js",
+		"test": "mocha --recursive test/unit/**/*.js"
 	}
 }

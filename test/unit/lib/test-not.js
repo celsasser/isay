@@ -96,4 +96,49 @@ describe("lib.ModuleNot", function() {
 				.then(value=>assert.strictEqual(value, true));
 		});
 	});
+
+	describe("startsWith", function() {
+		it("should raise exception if blob is not a string", async function() {
+			const instance=_createInstance({
+				params: ["string"]
+			});
+			return instance.startsWith([])
+				.then(assert.fail)
+				.catch(error=>{
+					assert.strictEqual(error.message, "expecting String but found Array");
+				});
+		});
+
+		it("should return false if found single possibility", async function() {
+			const instance=_createInstance({
+				params: ["one"]
+			});
+			return instance.startsWith("one.two")
+				.then(value=>assert.strictEqual(value, false));
+		});
+
+		it("should return false if found one of many possibilities", async function() {
+			const instance=_createInstance({
+				params: [["one", "two"]]
+			});
+			return instance.startsWith("one.two")
+				.then(value=>assert.strictEqual(value, false));
+		});
+
+		it("should return true if not found single possibility", async function() {
+			const instance=_createInstance({
+				params: ["three"]
+			});
+			return instance.startsWith("one.two")
+				.then(value=>assert.strictEqual(value, true));
+		});
+
+		it("should return true if not found one of many possibilities", async function() {
+			const instance=_createInstance({
+				params: [["three", "four"]]
+			});
+			return instance.startsWith("one.two")
+				.then(value=>assert.strictEqual(value, true));
+		});
+	});
 });

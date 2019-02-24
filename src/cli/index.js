@@ -111,15 +111,15 @@ exports.parse=function() {
 		 */
 		toResponse() {
 			const result=Object.assign({
-					options: {}
-				},
-				file.readToJSONSync("./res/defaults.json", {
-					local: true
-				}).action[this.action],
-				{
-					action: this.action,
-					params: this.positions
-				});
+				options: {}
+			},
+			file.readToJSONSync("./res/defaults.json", {
+				local: true
+			}).action[this.action],
+			{
+				action: this.action,
+				params: this.positions
+			});
 			// setup options. We isolate those that apply to the action being taken. We assume that
 			// global options apply to the environment.
 			OPTIONS.filter(optionCfg=>_.includes(optionCfg.actions, this.action))

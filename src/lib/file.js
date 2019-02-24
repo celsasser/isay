@@ -136,8 +136,8 @@ class ModuleFile extends ModuleIO {
 		// if we don't terminate it with .zip then zip will. We want the final name so that we may
 		// find it when we want to remove it (if we remove it)
 		const archive=this.params[0].endsWith(".zip")
-			? this.params[0]
-			: `${this.params[0]}.zip`,
+				? this.params[0]
+				: `${this.params[0]}.zip`,
 			archiveParsed=path.parse(archive);
 		const {replace}=Object.assign({
 			replace: true

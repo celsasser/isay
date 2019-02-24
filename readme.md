@@ -159,6 +159,7 @@ In `./examples` there are several scripts demonstrating basic functionality as w
 
 The following examples assume that you will be running them from the project's root. To see details about any example follow the link to the associated script.
 
+### Scripts
 _Note: the following scripts were created with a `.js` extension. This is not necessary, but handy when using syntax aware editors._
 
 [json-write-compact.js](./examples/json-write-compact.js)
@@ -204,4 +205,18 @@ _Note: the following scripts were created with a `.js` extension. This is not ne
 [zip-select-files.js](./examples/zip-select-files.js)
 ```
 ./mouse.js run -s ./examples/zip-select-files.js
+```
+
+### Inline
+You may also include your script inline. 
+```
+./mouse.js run "os.ls().string.split('newline').array.sort().std.out()"
+```
+
+### Editor
+Lastly, you may also use your favorite console editor by not including a script or script path.
+
+_Note: `mouse` will look for env.EDITOR or env.VISUAL and launch the associated editor (should be a tty based editor). If it does not find one then it defaults to `vim`_
+```
+./mouse.js run
 ```
