@@ -26,27 +26,35 @@ class ModuleFile extends ModuleIO {
 	 * @throws {Error}
 	 */
 	async copy(data) {
-		let source, target;
+		let source, target, options;
 		if(data) {
 			source=data;
 			target=this.params[0];
+			options=_.get(this.params, 1, {});
 		} else {
 			source=this.params[0];
 			target=this.params[1];
+			options=_.get(this.params, 2, {});
 		}
 		this._assetPath(source);
 		this._assetPath(target);
-		// copy assumes that the target points to the file that you want to copy to. We want to behave
-		// more like the shell: if the source is a file and the target is a directory then we will
-		// append the source name and extension to the target.
-		const targetExists=fs.pathExistsSync(target);
-		if(targetExists) {
-			const sourceStats=fs.lstatSync(source);
-			if(sourceStats.isFile()) {
-				const targetStats=fs.lstatSync(target);
-				if(targetStats.isDirectory()) {
-					const parsed=path.parse(source);
-					target=path.join(target, `${parsed.name}${parsed.ext}`);
+		if(options.rebuild) {
+			// in this case they are asking that we rebuild the hierarchy of the source. We assume
+			// that the target they gave to us is a path. All we need to do is append the target to it.
+			target=path.join(target, source);
+		} else {
+			// copy assumes that the target points to the file that you want to copy to. We want to behave
+			// more like the shell: if the source is a file and the target is a directory then we will
+			// append the source name and extension to the target.
+			const targetExists=fs.pathExistsSync(target);
+			if(targetExists) {
+				const sourceStats=fs.lstatSync(source);
+				if(sourceStats.isFile()) {
+					const targetStats=fs.lstatSync(target);
+					if(targetStats.isDirectory()) {
+						const parsed=path.parse(source);
+						target=path.join(target, `${parsed.name}${parsed.ext}`);
+					}
 				}
 			}
 		}
@@ -65,14 +73,19 @@ class ModuleFile extends ModuleIO {
 	 * @throws {Error}
 	 */
 	async create(data) {
-		const path=this._getReadPath(data);
+		const {path, type}=this._getReadPathAndOptions(data),
+			directory=_.includes(["dir", "directory"], (type||"").toLocaleLowerCase());
 		return fs.pathExists(path)
 			.then(exists=>{
 				return (exists)
 					? fs.remove(path)
 					: Promise.resolve();
 			})
-			.then(fs.outputFile.bind(fs, path, ""))
+			.then(()=>{
+				return (directory)
+					? fs.mkdir(path)
+					: fs.outputFile(path);
+			})
 			.then(Promise.resolve.bind(Promise, data));
 	}
 
@@ -87,6 +100,19 @@ class ModuleFile extends ModuleIO {
 		const path=this._getReadPath(data);
 		return fs.remove(path)
 			.then(Promise.resolve.bind(Promise, data));
+	}
+
+	/**
+	 * A convenience function that wraps copy and delete. Supports all options that copy supports
+	 * @resolves source:string in data|this.params[0]
+	 * @resolves target:string in this.params[0]|this.params[1]
+	 * @param {DataBlob} data
+	 * @return {Promise<void>}
+	 * @throws {Error}
+	 */
+	async move(data) {
+		return this.copy(data)
+			.then(this.delete.bind(this));
 	}
 
 	/**

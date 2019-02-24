@@ -94,12 +94,14 @@ A _domain_ is a conceptual and physical grouping of one or more _functions_. Wha
 - write: `data:Array<Array<*>> -> write(path:string, opts:(undefined|{delimiter:","}}) -> Array<Array<*>>`
 
 #### file
-- copy: `copy(source:string, target:string) -> undefined`
-- copy: `source:string -> copy(target:string) -> string`
-- create: `create(path:string) -> undefined`
-- create: `path:string -> create() -> string`
+- copy: `copy(source:string, target:string, {rebuild:boolean=false}) -> undefined`
+- copy: `source:string -> copy(target:string, {rebuild:boolean=false}) -> string`
+- create: `create(path:string, {type:string="file"}) -> undefined`
+- create: `path:string -> create({type:string="file"}) -> string`
 - delete: `delete(path:string) -> undefined`
 - delete: `path:string -> delete() -> string`
+- move: `move(source:string, target:string, {rebuild:boolean=false}) -> undefined`
+- move: `source:string -> move(target:string, {rebuild:boolean=false}) -> string`
 - read: `read(path:string, opts:(undefined|Object)) -> (string|Buffer)`
 - read: `path:string -> read(opts:(undefined|Object)) -> (string|Buffer)`
 - write: `data:* -> write(path:string, opts:(undefined|{encoding="utf8",append=false})) -> *`
@@ -216,14 +218,29 @@ _Note: the following scripts were created with a `.js` extension. This is not ne
 ./mouse.js run -s ./examples/json-to-yaml-file.js
 ```
 
-[os-concat.js](./examples/os-concat.js)
+[files-concat.js](examples/files-concat.js)
 ```
-./mouse.js run -s ./examples/os-concat.js
+./mouse.js run -s ./examples/files-concat.js
 ```
 
-[zip-select-files.js](./examples/zip-select-files.js)
+[files-copy-flatten.js](examples/files-copy-flatten.js)
 ```
-./mouse.js run -s ./examples/zip-select-files.js
+./mouse.js run -s ./examples/files-copy-flatten.js
+```
+
+[files-copy-rebuild.js](examples/files-copy-rebuild.js)
+```
+./mouse.js run -s ./examples/files-copy-rebuild.js
+```
+
+[files-delete.js](examples/files-delete.js)
+```
+./mouse.js run -s ./examples/files-delete.js
+```
+
+[files-zip-select.js](examples/files-zip-select.js)
+```
+./mouse.js run -s ./examples/files-zip-select.js
 ```
 
 ### Inline

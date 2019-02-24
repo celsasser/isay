@@ -14,12 +14,14 @@
  *  - path:string -> read(opts:(undefined|{delimiter:","}}) -> Array<Array<*>>
  *  - data:Array<Array<*>> -> write(path:string, opts:(undefined|{delimiter:","}}) -> Array<Array<*>>
  * file:
- *  - copy(source:string, target:string) -> undefined
- *  - source:string -> copy(target:string) -> string
- *  - create(path:string) -> undefined
- *  - path:string -> create() -> string
+ *  - copy(source:string, target:string, {rebuild:boolean=false}) -> undefined
+ *  - source:string -> copy(target:string, {rebuild:boolean=false}) -> string
+ *  - create(path:string, {type:string="file"}) -> undefined
+ *  - path:string -> create({type:string="file"}) -> string
  *  - delete(path:string) -> undefined
  *  - path:string -> delete() -> string
+ *  - move(source:string, target:string, {rebuild:boolean=false}) -> undefined
+ *  - source:string -> move(target:string, {rebuild:boolean=false}) -> string
  *  - read(path:string, opts:(undefined|Object)) -> (string|Buffer)
  *  - path:string -> read(opts:(undefined|Object)) -> (string|Buffer)
  *  - data:* -> write(path:string, opts:(undefined|{encoding="utf8",append=false})) -> *
