@@ -5,6 +5,25 @@
 
  In addition to being a simple, pared down to basics language, `mouse` also benefits from built-in support for popular file formats such as JSON, YAML, CVS (and midi). Not only does it support loading, parsing and saving but also manipulation. But it's not limited to working with any single file type and is perfectly comfortable with loading, manipulating and saving any portal that my be treated as a file.
 
+## Getting started
+Pull `mouse` down and stick him somewhere. Being a NodeJS app he will need to live within a folder. This can be any location of your chosing but if you end up liking it you may want to make sure it is in your path.  
+
+Quick start - in a terminal `cd` to someplace you would like for it to live and:
+```
+git clone https://fishguts@bitbucket.org/fishguts/curt-mouse.git mouse
+cd mouse
+npm install
+```
+
+Should you want to make it a more permanent resource in your toolkit, you may chose to put it in your path - `/usr/local/bin` for example. In this case you may want to install it as follows:
+```
+cd /usr/local
+git clone https://fishguts@bitbucket.org/fishguts/curt-mouse.git mouse
+cd mouse
+npm install
+ln -s ${PWD}/mouse.js ../bin/mouse
+```
+
 ## Running
 `mouse` is the top level command. To make it do anything one must specify a [_action_](#actions).  Each _action_ takes its own set of arguments and options.  
 
