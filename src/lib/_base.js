@@ -155,15 +155,21 @@ class ModuleBase {
 		let input="";
 		if(data!==undefined) {
 			if(typeof(data)==="string") {
-				// todo: this will be messy if the string happens to be binary data.
 				data=_.chain(data)
 					.deburr()
+					// there has got to be a way to do this in one fell swoop?
 					.replace(/\n/g, "\\n")
+					.replace(/\r/g, "\\r")
+					.replace(/\t/g, "\\t")
 					.value();
 				if(data.length<80) {
 					input=`"${data}"`;
 				} else {
 					input=`"${data.substr(0, 38)}[...]${data.substr(data.length-38)}"`;
+				}
+				// let's make sure it is all within the printable ascii range. If not then we will simply label it "Binary"
+				if(input.match(/[^\u0020-\u007f]/)) {
+					input="Binary";
 				}
 			} else {
 				input=util.name(data);
