@@ -91,6 +91,7 @@ A _domain_ is a conceptual and physical grouping of one or more _functions_. Wha
 - endsWith: `string -> endsWith(value:(string|Array<string>)) -> boolean`
 - equal: `comparedFrom:* -> equal(comparedTo:*) -> boolean`
 - oneOf: `value:* -> oneOf(values:Array<*>) -> boolean`
+- startsWith: `string -> startsWith(value:(string|Array<string>)) -> boolean`
 
 #### json
 - parse: `data:(string|Buffer) -> parse() -> Object`
@@ -109,6 +110,7 @@ A _domain_ is a conceptual and physical grouping of one or more _functions_. Wha
 - endsWith: `string -> endsWith(value:(string|Array<string>)) -> boolean`
 - equal: `comparedFrom:* -> equal(comparedTo:*) -> boolean`
 - oneOf: `value:* -> oneOf(values:Array<*>) -> boolean`
+- startsWith: `string -> startsWith(value:(string|Array<string>)) -> boolean`
 
 #### object:
 - get: `Object -> get(propertyPath:string) -> *`
@@ -153,3 +155,53 @@ How to input a script? It may be input in one of the following ways:
 3. editor: `mouse.js run`
 
 ## Run Examples
+In `./examples` there are several scripts demonstrating basic functionality as well as some more advanced scripts demonstrating `mouse's` power.
+
+The following examples assume that you will be running them from the project's root. To see details about any example follow the link to the associated script.
+
+_Note: the following scripts were created with a `.js` extension. This is not necessary, but handy when using syntax aware editors._
+
+[json-write-compact.js](./examples/json-write-compact.js)
+```
+./mouse.js run -s ./examples/json-write-compact.js
+```
+
+[json-write-spacious.js](./examples/json-write-spacious.js)
+```
+./mouse.js run -s ./examples/json-write-spacious.js
+```
+
+[json-extract.js](./examples/json-extract.js)
+```
+./mouse.js run -s ./examples/json-extract.js
+```
+
+[json-mutate.js](./examples/json-mutate.js)
+```
+./mouse.js run -s ./examples/json-mutate.js
+```
+
+[json-filter-sort.js](./examples/json-filter-sort.js)
+```
+./mouse.js run -s ./examples/json-filter-sort.js
+```
+
+[json-to-yaml.js](./examples/json-to-yaml.js)
+```
+./mouse.js run -s ./examples/json-to-yaml.js
+```
+
+[json-to-yaml-file.js](./examples/json-to-yaml-file.js)
+```
+./mouse.js run -s ./examples/json-to-yaml-file.js
+```
+
+[os-concat.js](./examples/os-concat.js)
+```
+./mouse.js run -s ./examples/os-concat.js
+```
+
+[zip-select-files.js](./examples/zip-select-files.js)
+```
+./mouse.js run -s ./examples/zip-select-files.js
+```

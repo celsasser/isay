@@ -29,6 +29,7 @@
  *  - string -> endsWith(value:(string|Array<string>)) -> boolean
  *  - comparedFrom:* -> equal(comparedTo:*) -> boolean
  *  - value:* -> oneOf(values:Array<*>) -> boolean
+ *  - string -> startsWith(value:(string|Array<string>)) -> boolean
  * json:
  *  - data:(string|Buffer) -> parse() -> Object
  *  - read(path:string) -> Object
@@ -44,6 +45,7 @@
  *  - string -> endsWith(value:(string|Array<string>)) -> boolean
  *  - comparedFrom:* -> equal(comparedTo:*) -> boolean
  *  - value:* -> oneOf(values:Array<*>) -> boolean
+ *  - string -> startsWith(value:(string|Array<string>)) -> boolean
  * object:
  *  - Object -> get(propertyPath:string) -> *
  *  - Object -> merge(json:Object) -> Object
