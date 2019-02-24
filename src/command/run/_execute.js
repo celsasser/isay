@@ -9,7 +9,6 @@
  * mappings for our entire (library) dictionary.
  */
 
-const assert=require("assert");
 const _=require("lodash");
 const vm=require("vm");
 const lib_os=require("../../lib/os");
@@ -88,10 +87,18 @@ function _parseChain({library, script}) {
 	 */
 	function _addCall(node, ...args) {
 		if(_.get(args, "0._type")==="urn:graph:proxy") {
-			// The call's first argument is a graph proxy so that means the user is creating a "piped" chain
+			// The call's first argument is a graph proxy so that means the user has created an embedded chain
 			// as an an argument. This means that the "piped" chain will take the calling functions output as input.
 			// We build the chain and remove him from the call sequence.
-			const index=callSequence.indexOf(args[0]._descriptor),
+			// todo: 2/23/2019 - this is broken. For the time being all we are doing is taking the last node. It's wrong but
+			// todo: am leaving around thinking that a solution is near at hand.
+			// What is the problem? Ss things are, I haven't figured out a way to tell how long this chain is
+			// - what is it's head node? I tried some solutions but without introducing parsing could not see
+			// a reliable solution. If we take back up the challenge, go back to a commit prior to 2019-02-23T19:34:15
+			// and you may see what we experimented with.
+
+			// For now, we assume it's a single function call.
+			const index=callSequence.length-1,
 				chain=_buildChain(callSequence.slice(index));
 			args[0]=chain.process.bind(chain);
 			callSequence=callSequence.slice(0, index);
@@ -125,35 +132,14 @@ function _parseChain({library, script}) {
 		if(node.domain===undefined && lastCallDescriptor==null) {
 			throw new Error(`cannot resolve a function domain for action=${node.action}`);
 		}
-		const newCallDescriptor={
+		callSequence.push({
 			action: node.action,
 			class: node.class || lastCallDescriptor.class,
 			domain: node.domain || lastCallDescriptor.domain,
 			method: node.method || node.action,
 			params: args
-		};
-		callSequence.push(newCallDescriptor);
-		// todo: the following does not work as hoped - the the argument placed in params[0] is the last descriptor created.
-		// todo: It's our own fault. How do we support nested chains? How do we know where they begin without getting into parsing?
-		// what are we doing here? We want to stash the descriptor so that we may be able to identify a module
-		// (and it's chain) should it be used as an argument. To do so we are creating a new proxy object so
-		// that we may accomplish this.
-		const graphProxy=_createGraphProxy();
-		graphProxy._descriptor=newCallDescriptor;
+		});
 		return graphProxy;
-	}
-
-	/**
-	 * Creates a new instance of our graph proxy proxying a new instance of the graph
-	 * @returns {Proxy}
-	 * @private
-	 */
-	function _createGraphProxy() {
-		assert.strictEqual(graphObject.hasOwnProperty("os"), false);
-		return new Proxy(Object.assign(
-			{os: proxyOS},
-			graphObject
-		), proxyTopHandler);
 	}
 
 	/**
@@ -203,15 +189,17 @@ function _parseChain({library, script}) {
 		_.set(result, `${node.domain}.${node.action}`, _addCall.bind(null, node));
 		return result;
 	}, {
+		os: proxyOS,
 		_type: "urn:graph:proxy"
 	});
+	const graphProxy=new Proxy(graphObject, proxyTopHandler);
 
 	// this is the crank that gets everything up above rolling. We use our graph-proxy as the context in
 	// which our scripts is run so that we may intercept all calls. What does this buy us? Everything:
 	// 1. parsed the code
 	// 2. we can steal his parsing of arguments
 	// 3. it puts javascript at our disposal to a limited extent.
-	const result=vm.runInContext(script, vm.createContext(_createGraphProxy()));
+	const result=vm.runInContext(script, vm.createContext(graphProxy));
 	return {
 		sequence: callSequence,
 		result
