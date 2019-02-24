@@ -88,7 +88,9 @@ A _domain_ is a conceptual and physical grouping of one or more _functions_. Wha
 
 #### is
 - empty: `(string|Array|Buffer) -> empty() -> boolean`
+- endsWith: `string -> endsWith(value:(string|Array<string>)) -> boolean`
 - equal: `comparedFrom:* -> equal(comparedTo:*) -> boolean`
+- oneOf: `value:* -> oneOf(values:Array<*>) -> boolean`
 
 #### json
 - parse: `data:(string|Buffer) -> parse() -> Object`
@@ -104,7 +106,9 @@ A _domain_ is a conceptual and physical grouping of one or more _functions_. Wha
 
 #### not:
 - empty: `(string|Array|Buffer) -> empty()`
+- endsWith: `string -> endsWith(value:(string|Array<string>)) -> boolean`
 - equal: `comparedFrom:* -> equal(comparedTo:*) -> boolean`
+- oneOf: `value:* -> oneOf(values:Array<*>) -> boolean`
 
 #### object:
 - get: `Object -> get(propertyPath:string) -> *`

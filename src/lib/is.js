@@ -6,13 +6,13 @@
  */
 
 const _=require("lodash");
-const {ModuleBase}=require("./_base");
+const {ModuleTest}=require("./_test");
 
 /**
- * support tests
- * @typedef {ModuleBase} ModuleFile
+ * support for testing for positive conditions
+ * @typedef {ModuleTest} ModuleFile
  */
-class ModuleIs extends ModuleBase {
+class ModuleIs extends ModuleTest {
 	/**
 	 * returns true if empty
 	 * @param {DataBlob} blob
@@ -23,12 +23,40 @@ class ModuleIs extends ModuleBase {
 	}
 
 	/**
+	 * returns true if <param>blob</param> ends with value, or one of the values, in this.params[0]
+	 * @param {string} blob
+	 * @returns {Promise<boolean>}
+	 */
+	async endsWith(blob) {
+		return this._endsWith(blob);
+	}
+
+	/**
 	 * returns true if <param>blob</param> is equal to <code>param[0]</code>
 	 * @param {DataBlob} blob
 	 * @returns {Promise<boolean>}
 	 */
 	async equal(blob) {
 		return _.isEqual(blob, this.params[0]);
+	}
+
+	/**
+	 * returns true if <param>blob</param> is included in this.params[0]
+	 * @resolves compareToItems:Array<*> in this.params[0]
+	 * @param {DataBlob} blob
+	 * @returns {Promise<boolean>}
+	 */
+	async oneOf(blob) {
+		return this._oneOf(blob);
+	}
+
+	/**
+	 * returns true if <param>blob</param> starts with value, or one of the values, in this.params[0]
+	 * @param {string} blob
+	 * @returns {boolean}
+	 */
+	async startsWith(blob) {
+		return this._startsWith(blob);
 	}
 }
 

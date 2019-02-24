@@ -26,7 +26,9 @@
  *  - files:Array<string> -> zip(archive:string, opts:(undefined|Object)) -> Array<string>
  * is:
  *  - (string|Array|Buffer) -> empty() -> boolean
+ *  - string -> endsWith(value:(string|Array<string>)) -> boolean
  *  - comparedFrom:* -> equal(comparedTo:*) -> boolean
+ *  - value:* -> oneOf(values:Array<*>) -> boolean
  * json:
  *  - data:(string|Buffer) -> parse() -> Object
  *  - read(path:string) -> Object
@@ -39,7 +41,9 @@
  *  - data:MidiIoSong -> write(path:string) -> MidiIoSong
  * not:
  *  - (string|Array|Buffer) -> empty()
+ *  - string -> endsWith(value:(string|Array<string>)) -> boolean
  *  - comparedFrom:* -> equal(comparedTo:*) -> boolean
+ *  - value:* -> oneOf(values:Array<*>) -> boolean
  * object:
  *  - Object -> get(propertyPath:string) -> *
  *  - Object -> merge(json:Object) -> Object

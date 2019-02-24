@@ -137,7 +137,8 @@ class ModuleFile extends ModuleIO {
 		// find it when we want to remove it (if we remove it)
 		const archive=this.params[0].endsWith(".zip")
 			? this.params[0]
-			: `${this.params[0]}.zip`;
+			: `${this.params[0]}.zip`,
+			archiveParsed=path.parse(archive);
 		const {replace}=Object.assign({
 			replace: true
 		}, this.params[1]);
@@ -145,11 +146,11 @@ class ModuleFile extends ModuleIO {
 			? data
 			: [data];
 		const options=["-q"];
-		const _preprocess=()=>(replace)
-			? fs.remove(archive)
-			: Promise.resolve();
 
-		return _preprocess()
+		return ((replace)
+			? fs.remove(archive)
+			: Promise.resolve())
+			.then(()=>fs.ensureDir(archiveParsed.dir))
 			.then(spawn.command.bind(null, {
 				args: options
 					.concat([archive])
