@@ -24,10 +24,15 @@ describe("lib.ModuleFile", function() {
 		});
 	}
 
+	beforeEach(function() {
+		fs.removeSync("./test/data/output/file");
+		fs.mkdirpSync("./test/data/output/file");
+	});
+
 	describe("copy", function() {
 		it("should copy with source file as input and target as param", async function() {
 			const source="./test/data/data-pets.csv",
-				target="./test/data/output/",
+				target="./test/data/output/file/",
 				instance=_createInstance({
 					params: [target]
 				});
@@ -36,12 +41,11 @@ describe("lib.ModuleFile", function() {
 				targetData=await fs.readFile(`${target}data-pets.csv`, {encoding: "utf8"});
 			assert.strictEqual(result, source);
 			assert.deepEqual(sourceData, targetData);
-			return fs.remove(`${target}data-pets.csv`);
 		});
 
 		it("should copy with source file as param and target as param", async function() {
 			const source="./test/data/data-pets.csv",
-				target="./test/data/output/",
+				target="./test/data/output/file/",
 				instance=_createInstance({
 					params: [source, target]
 				});
@@ -50,12 +54,24 @@ describe("lib.ModuleFile", function() {
 				targetData=await fs.readFile(`${target}data-pets.csv`, {encoding: "utf8"});
 			assert.strictEqual(result, undefined);
 			assert.deepEqual(sourceData, targetData);
-			return fs.remove(`${target}data-pets.csv`);
+		});
+
+		it("should create target directory hierarchy that does not exist", async function() {
+			const source="./test/data/data-pets.csv",
+				target="./test/data/output/file/new/",
+				instance=_createInstance({
+					params: [source, target]
+				});
+			const result=await instance.copy(),
+				sourceData=await fs.readFile(source, {encoding: "utf8"}),
+				targetData=await fs.readFile(`${target}data-pets.csv`, {encoding: "utf8"});
+			assert.strictEqual(result, undefined);
+			assert.deepEqual(sourceData, targetData);
 		});
 
 		it("should copy entire directory to target directory", async function() {
 			const source="./test/support",
-				target="./test/data/output/target",
+				target="./test/data/output/file/target",
 				instance=_createInstance({
 					params: [source, target]
 				});
@@ -69,36 +85,64 @@ describe("lib.ModuleFile", function() {
 				"assert.js",
 				"proxy.js"
 			]);
-			return fs.remove(target);
 		});
 	});
 
 
 	describe("create", function() {
-		it("should successfully create a path specified as input that does not exist", async function() {
-			const path="./test/data/output/create.txt",
+		it("should successfully create a file specified as input that does not exist", async function() {
+			const path="./test/data/output/file/create.txt",
 				instance=_createInstance(),
 				result=await instance.create(path);
 			assert.strictEqual(result, path);
-			assert.strictEqual(fs.pathExistsSync(path), true);
-			return fs.remove(path);
+			assert.strictEqual(fs.lstatSync(path).isFile(), true);
 		});
 
-		it("should successfully create a path specified as a param that does not exist", async function() {
-			const path="./test/data/output/create.txt",
+		it("should successfully create a file specified as a param that does not exist", async function() {
+			const path="./test/data/output/file/create.txt",
 				instance=_createInstance({
 					params: [path]
 				}),
 				result=await instance.create();
 			assert.strictEqual(result, undefined);
-			assert.strictEqual(fs.pathExistsSync(path), true);
-			return fs.remove(path);
+			assert.strictEqual(fs.lstatSync(path).isFile(), true);
+		});
+
+		it("should successfully create directory hierarchy that does not exist for the target file", async function() {
+			const path="./test/data/output/file/new/create.txt",
+				instance=_createInstance({
+					params: [path]
+				}),
+				result=await instance.create();
+			assert.strictEqual(result, undefined);
+			assert.strictEqual(fs.lstatSync(path).isFile(), true);
+		});
+
+		it("should successfully create a directory specified as input that does not exist", async function() {
+			const path="./test/data/output/file/create",
+				instance=_createInstance({
+					params: [{type: "directory"}]
+				}),
+				result=await instance.create(path);
+			assert.strictEqual(result, path);
+			assert.strictEqual(fs.lstatSync(path).isDirectory(), true);
+		});
+
+		it("should recreate a directory that already exists", async function() {
+			const path="./test/data/output/file/ensure",
+				instance=_createInstance({
+					params: [{type: "directory"}]
+				});
+			fs.outputFileSync(`${path}/dummy.txt`, "text");
+			const result=await instance.create(path);
+			assert.strictEqual(result, path);
+			assert.strictEqual(fs.pathExistsSync(`${path}/dummy.txt`), false);
 		});
 	});
 
 	describe("delete", function() {
 		it("should delete a file", async function() {
-			const path="./test/data/output/create.txt",
+			const path="./test/data/output/file/create.txt",
 				instance=_createInstance();
 			await instance.create(path);
 			const result=await instance.delete(path);
@@ -108,10 +152,78 @@ describe("lib.ModuleFile", function() {
 
 		it("should delete a directory", async function() {
 			const instance=_createInstance();
-			await instance.create("./test/data/output/new/create.txt");
-			const result=await instance.delete("./test/data/output/new");
-			assert.strictEqual(result, "./test/data/output/new");
-			assert.strictEqual(fs.pathExistsSync("./test/data/output/new"), false);
+			await instance.create("./test/data/output/file/create.txt");
+			const result=await instance.delete("./test/data/output/file");
+			assert.strictEqual(result, "./test/data/output/file");
+			assert.strictEqual(fs.pathExistsSync("./test/data/output/file"), false);
+		});
+	});
+
+	describe("ensure", function() {
+		it("should create a file that does not exist", async function() {
+			const path="./test/data/output/file/ensure.txt",
+				instance=_createInstance(),
+				result=await instance.ensure(path);
+			assert.strictEqual(result, path);
+			assert.strictEqual(fs.lstatSync(path).isFile(), true);
+		});
+
+		it("should not recreate a file that already exists", async function() {
+			const path="./test/data/output/file/ensure.txt",
+				instance=_createInstance();
+			fs.outputFileSync(path, "text");
+			const result=await instance.ensure(path);
+			assert.strictEqual(result, path);
+			assert.strictEqual(fs.readFileSync(path, {encoding: "utf8"}), "text");
+		});
+
+		it("should create a directory that does not exist", async function() {
+			const path="./test/data/output/file/ensure",
+				instance=_createInstance({
+					params: [{type: "directory"}]
+				}),
+				result=await instance.ensure(path);
+			assert.strictEqual(result, path);
+			assert.strictEqual(fs.lstatSync(path).isDirectory(), true);
+		});
+
+		it("should not recreate a file that already exists", async function() {
+			const path="./test/data/output/file/ensure",
+				instance=_createInstance({
+					params: [{type: "directory"}]
+				});
+			fs.outputFileSync(`${path}/dummy.txt`, "text");
+			const result=await instance.ensure(path);
+			assert.strictEqual(result, path);
+			assert.strictEqual(fs.readFileSync(`${path}/dummy.txt`, {encoding: "utf8"}), "text");
+		});
+
+		it("should throw exception if mismatch on file type", async function() {
+			const path="./test/data/output/file/ensure",
+				instance=_createInstance({
+					params: [{type: "directory"}]
+				});
+			fs.outputFileSync(path, "text");
+			return instance.ensure(path)
+				.then(assert.fail)
+				.catch(error=>{
+					assert.strictEqual(error.message, '"./test/data/output/file/ensure" already exists but is not a directory');
+				});
+		});
+	});
+
+	describe("move", function() {
+		it("should move a file from a source and to a target within the same directory", async function() {
+			const source="./test/data/output/file/data-pets.csv",
+				target="./test/data/output/file/moved.csv",
+				instance=_createInstance({
+					params: [target]
+				});
+			fs.copyFileSync("./test/data/data-pets.csv", source);
+			const result=await instance.move(source);
+			assert.strictEqual(result, source);
+			assert.strictEqual(fs.pathExistsSync(source), false);
+			assert.strictEqual(fs.pathExistsSync(target), true);
 		});
 	});
 
@@ -121,7 +233,7 @@ describe("lib.ModuleFile", function() {
 			return instance.read()
 				.then(assert.fail)
 				.catch(error=>{
-					assert.ok(error.message.startsWith("expecting string"));
+					assert.strictEqual(error.message, "expecting string as file-path but found undefined");
 				});
 		});
 
@@ -159,7 +271,7 @@ describe("lib.ModuleFile", function() {
 		});
 
 		it("should save to an existing directory", async function() {
-			const path="./test/data/output/file-save.txt",
+			const path="./test/data/output/file/file-save.txt",
 				instance=_createInstance({
 					params: [path]
 				});
@@ -167,12 +279,11 @@ describe("lib.ModuleFile", function() {
 				.then(data=>{
 					assert.strictEqual(data, "george");
 					assert.strictEqual(fs.readFileSync(path, "utf8"), "george");
-					return fs.remove(path);
 				});
 		});
 
 		it("should create a directory that does not exist", async function() {
-			const path="./test/data/output/new/file-save.txt",
+			const path="./test/data/output/file/file-save.txt",
 				instance=_createInstance({
 					params: [path]
 				});
@@ -180,12 +291,11 @@ describe("lib.ModuleFile", function() {
 				.then(data=>{
 					assert.strictEqual(data, "george");
 					assert.strictEqual(fs.readFileSync(path, "utf8"), "george");
-					return fs.remove("./test/data/output/new");
 				});
 		});
 
 		it("should append if requested to", async function() {
-			const path="./test/data/output/file-save.txt";
+			const path="./test/data/output/file/file-save.txt";
 
 			async function _write(append) {
 				const instance=_createInstance({
@@ -197,7 +307,6 @@ describe("lib.ModuleFile", function() {
 			await _write(false);
 			await _write(true);
 			assert.strictEqual(fs.readFileSync(path, "utf8"), "georgegeorge");
-			return fs.remove(path);
 		});
 	});
 
@@ -223,7 +332,7 @@ describe("lib.ModuleFile", function() {
 		});
 
 		it("should successfull archive single input file", async function() {
-			const archive="./test/data/output/archive.zip",
+			const archive="./test/data/output/file/archive.zip",
 				instance=_createInstance({
 					params: [archive]
 				});
@@ -231,12 +340,11 @@ describe("lib.ModuleFile", function() {
 				.then(result=>{
 					assert.strictEqual(result, "package.json");
 					assert.strictEqual(fs.existsSync(archive), true);
-					return fs.remove(archive);
 				});
 		});
 
 		it("should successfully archive multiple input files", async function() {
-			const archive="./test/data/output/archive.zip",
+			const archive="./test/data/output/file/archive.zip",
 				files=[
 					"package.json",
 					"test/data/data-pets.csv",
@@ -250,7 +358,6 @@ describe("lib.ModuleFile", function() {
 				.then(result=>{
 					assert.strictEqual(result, files);
 					assert.strictEqual(fs.existsSync(archive), true);
-					return fs.remove(archive);
 				});
 		});
 	});

@@ -38,6 +38,9 @@ class ModuleFile extends ModuleIO {
 		}
 		this._assetPath(source);
 		this._assetPath(target);
+		// Keeping with mouse's rule of creating hierarchy that does not exists, we are going to
+		// ensure that as much of the target that can be known to be directories exists
+		await this._ensureDirectoryHierarchy(target);
 		if(options.rebuild) {
 			// in this case they are asking that we rebuild the hierarchy of the source. We assume
 			// that the target they gave to us is a path. All we need to do is append the target to it.
@@ -65,9 +68,10 @@ class ModuleFile extends ModuleIO {
 	/**
 	 * This guy will force the file to either be:
 	 * - created because it doesn't exist
-	 * - truncated to 0 length and saved
+	 * - or will delete it and recreate it
 	 * It looks for the path as follows:
 	 * @resolves path:string in data|this.params[0]
+	 * @resolves options:Object in this.params[0]|this.params[2]
 	 * @param {string|undefined} data
 	 * @return {Promise<void>}
 	 * @throws {Error}
@@ -84,7 +88,7 @@ class ModuleFile extends ModuleIO {
 			.then(()=>{
 				return (directory)
 					? fs.mkdir(path)
-					: fs.outputFile(path);
+					: fs.outputFile(path, "");
 			})
 			.then(Promise.resolve.bind(Promise, data));
 	}
@@ -103,7 +107,42 @@ class ModuleFile extends ModuleIO {
 	}
 
 	/**
-	 * A convenience function that wraps copy and delete. Supports all options that copy supports
+	 * Ensures that the file or directory pointed to by "path" exists.
+	 * It looks for the path as follows:
+	 * @resolves path:string in data|this.params[0]
+	 * @resolves options:Object in this.params[0]|this.params[2]
+	 * @param {string|undefined} data
+	 * @return {Promise<void>}
+	 * @throws {Error}
+	 */
+	async ensure(data) {
+		const {path, type}=this._getReadPathAndOptions(data),
+			directory=_.includes(["dir", "directory"], (type||"").toLocaleLowerCase());
+		return fs.pathExists(path)
+			.then(exists=>{
+				if(exists) {
+					// here we are making sure that the existing file is of the desired type
+					return fs.lstat(path)
+						.then(stat=>{
+							if(directory) {
+								if(stat.isDirectory()===false) {
+									throw new Error(`"${path}" already exists but is not a directory`);
+								}
+							} else if(stat.isFile()===false) {
+								throw new Error(`"${path}" already exists but is not a file`);
+							}
+						});
+				} else {
+					return (directory)
+						? fs.mkdir(path)
+						: fs.outputFile(path, "");
+				}
+			})
+			.then(Promise.resolve.bind(Promise, data));
+	}
+
+	/**
+	 * A convenience function that combines copy and delete. Supports all options that copy supports
 	 * @resolves source:string in data|this.params[0]
 	 * @resolves target:string in this.params[0]|this.params[1]
 	 * @param {DataBlob} data
@@ -184,6 +223,21 @@ class ModuleFile extends ModuleIO {
 				command: "zip"
 			}))
 			.then(Promise.resolve.bind(Promise, data));
+	}
+
+	/**************** Private Interface ****************/
+	/**
+	 * Ensures that as much of the path that can be determined to be directory hierarchy exists.
+	 * If it doesn't it is created.
+	 * @param {string} path
+	 * @returns {Promise<any>}
+	 * @private
+	 */
+	async _ensureDirectoryHierarchy(path) {
+		const hierarchy=_.get(path.match(/^.+\//), 0);
+		return (hierarchy)
+			? fs.ensureDir(hierarchy)
+			: Promise.resolve();
 	}
 }
 
