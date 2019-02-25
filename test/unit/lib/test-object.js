@@ -57,6 +57,59 @@ describe("lib.ModuleObject", function() {
 				result=await instance.get(data);
 			assert.strictEqual(result, "value");
 		});
+
+		it("should return an object with selected paths if params[0] is an array of strings", async function() {
+			const instance=_createInstance({
+					params: [["a", "b"]]
+				}),
+				data={
+					a: "one",
+					b: "two",
+					c: "three"
+				},
+				result=await instance.get(data);
+			assert.deepEqual(result, {
+				a: "one",
+				b: "two"
+			});
+		});
+
+		it("should deep flatten references to array indexes when params[0] is an array of strings", async function() {
+			const instance=_createInstance({
+					params: [["a", "b.0.c", "b.0.d.1"]]
+				}),
+				data={
+					a: "one",
+					b: [{
+						c: "three",
+						d: [0, 1]
+					}]
+				},
+				result=await instance.get(data);
+			assert.deepEqual(result, {
+				"a": "one",
+				"b": {
+					"c": "three",
+					"d": 1
+				}
+			});
+		});
+
+		it("should map objects properly if param is a 'from', 'to' object", async function() {
+			const instance=_createInstance({
+					params: [["a", {from: "b", to: "x"}]]
+				}),
+				data={
+					a: "one",
+					b: "two",
+					c: "three"
+				},
+				result=await instance.get(data);
+			assert.deepEqual(result, {
+				a: "one",
+				x: "two"
+			});
+		});
 	});
 
 	describe("map", function() {
@@ -79,11 +132,11 @@ describe("lib.ModuleObject", function() {
 		it("should return the returned value of the predicate", async function() {
 			const input={a: 1},
 				instance=_createInstance({
-				params: [object=>{
-					assert.deepEqual(object, input);
-					return "result";
-				}]
-			});
+					params: [object=>{
+						assert.deepEqual(object, input);
+						return "result";
+					}]
+				});
 			return instance.map(input)
 				.then(result=>{
 					assert.strictEqual(result, "result");

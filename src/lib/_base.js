@@ -106,6 +106,23 @@ class ModuleBase {
 	}
 
 	/**
+	 * Asserts that the properties specified are in <param>object</param>
+	 * @param {Object} object
+	 * @param {string|Array<string>} properties
+	 * @throws {Error}
+	 * @protected
+	 */
+	_assertProperties(object, properties) {
+		if(typeof(properties)==="string") {
+			properties=[properties];
+		}
+		const missing=_.difference(properties, Object.keys(object));
+		if(missing.length>0) {
+			throw new Error(`Object missing required keys ${JSON.stringify(missing)}`);
+		}
+	}
+
+	/**
 	 * A "predicate" is a function that takes 1 or more arguments and returns a single value. They are
 	 * designed to be used with our API. So that they are fully compatible and in parity we make sure that
 	 * the are asynchronous. If <param>predicate</param> is not found to be async then we make him async
