@@ -117,6 +117,8 @@ function _parseChain({library, script}) {
 					script: `(${script})(${params})`
 				});
 				// now we either have found a chain or we have run a chain free function and have what we need.
+				// todo: we will want to make sure that the input args are made available to the chain otherwise
+				// his attempts to reference those args will result in "undefined"
 				if(sequence.length>0) {
 					const chain=_buildChain(sequence);
 					return chain.process.apply(chain, input);

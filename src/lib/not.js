@@ -32,7 +32,7 @@ class ModuleNot extends ModuleTest {
 	}
 
 	/**
-	 * returns true if <param>blob</param> is not equal to <code>param[0]</code>
+	 * returns true if <param>blob</param> is not equal to <code>params[0]</code>
 	 * @param {DataBlob} blob
 	 * @returns {Promise<boolean>}
 	 */

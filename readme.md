@@ -136,6 +136,7 @@ A _domain_ is a conceptual and physical grouping of one or more _functions_. Wha
 #### object:
 - get: `Object -> get(propertyPath:string) -> *`
 - merge: `Object -> merge(json:Object) -> Object`
+- map: `Object -> map(predicate:function) -> *`
 - set: `Object -> set(propertyPath:string, value:*) -> Object`
 - read: `path:(string|undefined) -> read(path:(string|undefined))`
 - toArray: `Object -> toString(predicate:function(Object, key:string):Object) -> Array<*>`

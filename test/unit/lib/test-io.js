@@ -35,7 +35,7 @@ describe("lib.ModuleIO", function() {
 			assert.strictEqual(instance._getReadPath("path"), "path");
 		});
 
-		it("should use param[0] as path if specified", function() {
+		it("should use params[0] as path if specified", function() {
 			const instance=_createInstance({
 				params: ["path"]
 			});
@@ -58,7 +58,7 @@ describe("lib.ModuleIO", function() {
 			});
 		});
 
-		it("should use param[0] as path if specified", function() {
+		it("should use params[0] as path if specified", function() {
 			const instance=_createInstance({
 				params: ["path"]
 			});
@@ -76,7 +76,7 @@ describe("lib.ModuleIO", function() {
 				error=>error.message==="expecting string as file-path but found undefined");
 		});
 
-		it("should use param[0] as path", function() {
+		it("should use params[0] as path", function() {
 			const instance=_createInstance({
 				params: ["path"]
 			});
@@ -91,7 +91,7 @@ describe("lib.ModuleIO", function() {
 				error=>error.message==="expecting string as file-path but found undefined");
 		});
 
-		it("should use param[0] as path and default encoding", function() {
+		it("should use params[0] as path and default encoding", function() {
 			const instance=_createInstance({
 				params: ["path"]
 			});
@@ -101,7 +101,7 @@ describe("lib.ModuleIO", function() {
 			});
 		});
 
-		it("should use param[0] as path and param[1] for encoding", function() {
+		it("should use params[0] as path and params[1] for encoding", function() {
 			const instance=_createInstance({
 				params: ["path", {
 					encoding: "utf8"

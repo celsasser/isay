@@ -11,7 +11,7 @@ const util=require("../common/util");
 
 /**
  * Supports operations on piped arrays. The <code>predicate</code> may either be a function or a chain.
- * The <code>predicate</code> is called as follows: param[0](blob[index], index):*
+ * The <code>predicate</code> is called as follows: params[0](blob[index], index):*
  * @typedef {ModuleBase} ModuleArray
  */
 class ModuleArray extends ModuleBase {

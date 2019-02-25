@@ -59,6 +59,38 @@ describe("lib.ModuleObject", function() {
 		});
 	});
 
+	describe("map", function() {
+		it("should throw exception if blob is not an object", async function() {
+			const instance=_createInstance();
+			return instance.map("string")
+				.catch(error=>{
+					assert.strictEqual(error.message, "expecting Object but found String");
+				});
+		});
+
+		it("should throw exception if param is not a predicate", async function() {
+			const instance=_createInstance();
+			return instance.map({})
+				.catch(error=>{
+					assert.strictEqual(error.message, "missing predicate function");
+				});
+		});
+
+		it("should return the returned value of the predicate", async function() {
+			const input={a: 1},
+				instance=_createInstance({
+				params: [object=>{
+					assert.deepEqual(object, input);
+					return "result";
+				}]
+			});
+			return instance.map(input)
+				.then(result=>{
+					assert.strictEqual(result, "result");
+				});
+		});
+	});
+
 	describe("merge", function() {
 		it("should merge json into json", async function() {
 			const jsonSource={property: "value"},

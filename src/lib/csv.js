@@ -17,7 +17,7 @@ const {ModuleIO}=require("./_io");
  */
 class ModuleCsv extends ModuleIO {
 	/**
-	 * Parses input and returns csv. Overrides may exist in param[0] or param[1] depending on
+	 * Parses input and returns csv. Overrides may exist in params[0] or params[1] depending on
 	 * where the input path is specified.
 	 * @param {string} data
 	 * @returns {Promise<CsvDoc>}

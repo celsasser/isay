@@ -50,6 +50,7 @@
  *  - string -> startsWith(value:(string|Array<string>)) -> boolean
  * object:
  *  - Object -> get(propertyPath:string) -> *
+ *  - Object -> map(predicate:function) -> *
  *  - Object -> merge(json:Object) -> Object
  *  - Object -> set(propertyPath:string, value:*) -> Object
  *  - path:(string|undefined) -> read(path:(string|undefined))

@@ -14,42 +14,57 @@ const {ModuleIO}=require("./_io");
 class ModuleObject extends ModuleIO {
 	/**
 	 * Gets value at property path
-	 * @param {Object} data
+	 * @resolves path:(string|Array<str) in this.params[0]
+	 * @param {Object} blob
 	 * @returns {Promise<DataBlob>}
 	 * @throws {Error}
 	 */
-	async get(data) {
-		this._assertType(data, "Object", {
+	async get(blob) {
+		this._assertType(blob, "Object", {
 			allowNull: true
 		});
 		return (this.params.length>0)
-			? _.get(data, this.params[0])
-			: data;
+			? _.get(blob, this.params[0])
+			: blob;
 	}
 
 	/**
-	 * Merges param data in <code>params[0]</code> into <param>data</param>
-	 * @param {Object} data
+	 * Allows one to transform the object in <param>blob</param> into something else
+	 * @resolves predicate:ObjectPredicate in this.params[0]
+	 * @param {DataBlob} blob
+	 * @returns {Promise<DataBlob>}
+	 */
+	async map(blob) {
+		this._assertType(blob, "Object", {
+			allowNull: true
+		});
+		const predicate=this._assertPredicate(this.params[0]);
+		return predicate(blob);
+	}
+
+	/**
+	 * Merges param data in <code>params[0]</code> into <param>blob</param>
+	 * @param {Object} blob
 	 * @returns {Promise<DataBlob>}
 	 * @throws {Error}
 	 */
-	async merge(data) {
+	async merge(blob) {
 		let merge=this.params[0];
-		this._assertType(data, "Object", {
+		this._assertType(blob, "Object", {
 			allowNull: true
 		});
-		return _.merge(data, merge);
+		return _.merge(blob, merge);
 	}
 
 	/**
-	 * Sets the path stored in <code>param[0]</code> on <param>data</param> with <code>param[1]</code>
-	 * @param {Object} data
+	 * Sets the path stored in <code>params[0]</code> on <param>blob</param> with <code>params[1]</code>
+	 * @param {Object} blob
 	 * @returns {Promise<DataBlob>}
 	 */
-	async set(data) {
+	async set(blob) {
 		const path=this.params[0],
 			value=this.params[1];
-		return _.set(data, path, value);
+		return _.set(blob, path, value);
 	}
 
 	/**
@@ -59,17 +74,17 @@ class ModuleObject extends ModuleIO {
 	 * so that they may iterate over them. Our <code>array</code> domain is rich with iteration functionality. Here, we are
 	 * isolating any and all iteration to this one function.
 	 * @resolves predicate:function(object:Object, key:string):Object in this.params[0]
-	 * @param {Object} data
+	 * @param {Object} blob
 	 * @returns {Promise<void>}
 	 */
-	async toArray(data) {
+	async toArray(blob) {
 		const result=[],
 			predicate=this._assertPredicate(_.get(this.params, 0, object=>object));
-		this._assertType(data, "Object", {
+		this._assertType(blob, "Object", {
 			allowNull: true
 		});
-		for(let key in data) {
-			result.push(await predicate(data[key], key));
+		for(let key in blob) {
+			result.push(await predicate(blob[key], key));
 		}
 		return result;
 	}
@@ -78,17 +93,17 @@ class ModuleObject extends ModuleIO {
 	/**
 	 * We always want this to be parsed.
 	 * todo: I liked this when I started, but am not so crazy about the implied behavior
-	 * @param {*} data
+	 * @param {*} blob
 	 * @returns {DataBlob}
 	 * @private
 	 */
-	_preprocessChunk(data) {
-		if(_.isString(data)) {
-			return JSON.parse(data);
-		} else if(Buffer.isBuffer(data)) {
-			return JSON.parse(data.toString("utf8"));
+	_preprocessChunk(blob) {
+		if(_.isString(blob)) {
+			return JSON.parse(blob);
+		} else if(Buffer.isBuffer(blob)) {
+			return JSON.parse(blob.toString("utf8"));
 		}
-		return data;
+		return blob;
 	}
 }
 

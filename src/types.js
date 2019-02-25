@@ -49,6 +49,10 @@
  */
 
 /**
+ * @typedef {function(data:Object):*} ObjectPredicate
+ */
+
+/**
  * @typedef {Array<*>} CsvRow
  */
 
