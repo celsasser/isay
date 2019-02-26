@@ -57,6 +57,38 @@ describe("lib.ModuleObject", function() {
 				result=await instance.get(data);
 			assert.strictEqual(result, "value");
 		});
+	});
+
+	describe("map", function() {
+		it("should throw exception if blob is not an object", async function() {
+			const instance=_createInstance();
+			return instance.map("string")
+				.catch(error=>{
+					assert.strictEqual(error.message, "expecting Object but found String");
+				});
+		});
+
+		it("should throw exception if param is not a predicate or array", async function() {
+			const instance=_createInstance();
+			return instance.map({})
+				.catch(error=>{
+					assert.strictEqual(error.message, "expecting Array or Function but found undefined");
+				});
+		});
+
+		it("should return the returned value of the predicate", async function() {
+			const input={a: 1},
+				instance=_createInstance({
+					params: [object=>{
+						assert.deepEqual(object, input);
+						return "result";
+					}]
+				});
+			return instance.map(input)
+				.then(result=>{
+					assert.strictEqual(result, "result");
+				});
+		});
 
 		it("should return an object with selected paths if params[0] is an array of strings", async function() {
 			const instance=_createInstance({
@@ -67,14 +99,14 @@ describe("lib.ModuleObject", function() {
 					b: "two",
 					c: "three"
 				},
-				result=await instance.get(data);
+				result=await instance.map(data);
 			assert.deepEqual(result, {
 				a: "one",
 				b: "two"
 			});
 		});
 
-		it("should deep flatten references to array indexes when params[0] is an array of strings", async function() {
+		it("should include arrays in the result by default", async function() {
 			const instance=_createInstance({
 					params: [["a", "b.0.c", "b.0.d.1"]]
 				}),
@@ -85,7 +117,33 @@ describe("lib.ModuleObject", function() {
 						d: [0, 1]
 					}]
 				},
-				result=await instance.get(data);
+				result=await instance.map(data);
+			assert.deepEqual(result, {
+				"a": "one",
+				"b": [
+					{
+						"c": "three",
+						"d": [null, 1]
+					}
+				]
+			});
+		});
+
+		it("should deep flatten references to array indexes when params[0] is an array of strings", async function() {
+			const instance=_createInstance({
+					params: [
+						["a", "b.0.c", "b.0.d.1"],
+						{flatten: true}
+					]
+				}),
+				data={
+					a: "one",
+					b: [{
+						c: "three",
+						d: [0, 1]
+					}]
+				},
+				result=await instance.map(data);
 			assert.deepEqual(result, {
 				"a": "one",
 				"b": {
@@ -104,43 +162,11 @@ describe("lib.ModuleObject", function() {
 					b: "two",
 					c: "three"
 				},
-				result=await instance.get(data);
+				result=await instance.map(data);
 			assert.deepEqual(result, {
 				a: "one",
 				x: "two"
 			});
-		});
-	});
-
-	describe("map", function() {
-		it("should throw exception if blob is not an object", async function() {
-			const instance=_createInstance();
-			return instance.map("string")
-				.catch(error=>{
-					assert.strictEqual(error.message, "expecting Object but found String");
-				});
-		});
-
-		it("should throw exception if param is not a predicate", async function() {
-			const instance=_createInstance();
-			return instance.map({})
-				.catch(error=>{
-					assert.strictEqual(error.message, "missing predicate function");
-				});
-		});
-
-		it("should return the returned value of the predicate", async function() {
-			const input={a: 1},
-				instance=_createInstance({
-					params: [object=>{
-						assert.deepEqual(object, input);
-						return "result";
-					}]
-				});
-			return instance.map(input)
-				.then(result=>{
-					assert.strictEqual(result, "result");
-				});
 		});
 	});
 

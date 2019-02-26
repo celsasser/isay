@@ -104,7 +104,7 @@ A _domain_ is a conceptual and physical grouping of one or more _functions_. Wha
 - move: `source:string -> move(target:string, {rebuild:boolean=false}) -> string`
 - read: `read(path:string, opts:(undefined|Object)) -> (string|Buffer)`
 - read: `path:string -> read(opts:(undefined|Object)) -> (string|Buffer)`
-- write: `data:* -> write(path:string, opts:(undefined|{encoding="utf8",append=false})) -> *`
+- write: `data:* -> write(path:string, opts:(undefined|{encoding:string="utf8",append:boolean=false})) -> *`
 - zip: `files:Array<string> -> zip(archive:string, opts:(undefined|Object)) -> Array<string>`
 
 #### is
@@ -134,10 +134,11 @@ A _domain_ is a conceptual and physical grouping of one or more _functions_. Wha
 - startsWith: `string -> startsWith(value:(string|Array<string>)) -> boolean`
 
 #### object:
-- get: `Object -> get(propertyPath:string) -> *`
+- get: `Object -> get(path:string) -> *`
 - merge: `Object -> merge(json:Object) -> Object`
 - map: `Object -> map(predicate:function) -> *`
-- set: `Object -> set(propertyPath:string, value:*) -> Object`
+- map: `Object -> map(paths:Array<string|{from:string,to:string}>, {flatten:boolean=false}) -> Object`
+- set: `Object -> set(path:string, value:*) -> Object`
 - read: `path:(string|undefined) -> read(path:(string|undefined))`
 - toArray: `Object -> toString(predicate:function(Object, key:string):Object) -> Array<*>`
 

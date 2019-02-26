@@ -12,7 +12,7 @@
  * csv:
  *  - read(path:string, opts:(undefined|{delimiter:","}}) -> Array<Array<*>>
  *  - path:string -> read(opts:(undefined|{delimiter:","}}) -> Array<Array<*>>
- *  - data:Array<Array<*>> -> write(path:string, opts:(undefined|{delimiter:","}}) -> Array<Array<*>>
+ *  - data:Array<Array<*>> -> write(path:string, opts:(undefined|{delimiter:string=","}}) -> Array<Array<*>>
  * file:
  *  - copy(source:string, target:string, {rebuild:boolean=false}) -> undefined
  *  - source:string -> copy(target:string, {rebuild:boolean=false}) -> string
@@ -24,7 +24,7 @@
  *  - source:string -> move(target:string, {rebuild:boolean=false}) -> string
  *  - read(path:string, opts:(undefined|Object)) -> (string|Buffer)
  *  - path:string -> read(opts:(undefined|Object)) -> (string|Buffer)
- *  - data:* -> write(path:string, opts:(undefined|{encoding="utf8",append=false})) -> *
+ *  - data:* -> write(path:string, opts:(undefined|{encoding:string="utf8",append:boolean=false})) -> *
  *  - files:Array<string> -> zip(archive:string, opts:(undefined|Object)) -> Array<string>
  * is:
  *  - (string|Array|Buffer) -> empty() -> boolean
@@ -49,10 +49,11 @@
  *  - value:* -> oneOf(values:Array<*>) -> boolean
  *  - string -> startsWith(value:(string|Array<string>)) -> boolean
  * object:
- *  - Object -> get(propertyPath:string) -> *
+ *  - Object -> get(path:string) -> *
  *  - Object -> map(predicate:function) -> *
+ *  - Object -> map(paths:Array<string|{from:string,to:string}>, {flatten:boolean=false}) -> Object
  *  - Object -> merge(json:Object) -> Object
- *  - Object -> set(propertyPath:string, value:*) -> Object
+ *  - Object -> set(path:string, value:*) -> Object
  *  - path:(string|undefined) -> read(path:(string|undefined))
  *  - Object -> toString(predicate:function(Object, key:string):Object) -> Array<*>
  * os:
