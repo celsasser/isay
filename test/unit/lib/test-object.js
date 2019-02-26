@@ -28,13 +28,8 @@ describe("lib.ModuleObject", function() {
 			const instance=_createInstance();
 			instance.get("string")
 				.then(assert.fail)
-				.catch(()=>{
-
-				});
-			instance.get(10)
-				.then(assert.fail)
-				.catch(()=>{
-
+				.catch(error=>{
+					assert.strictEqual(error.message, "expecting one of Array or Object but found String");
 				});
 		});
 
@@ -64,7 +59,7 @@ describe("lib.ModuleObject", function() {
 			const instance=_createInstance();
 			return instance.map("string")
 				.catch(error=>{
-					assert.strictEqual(error.message, "expecting Object but found String");
+					assert.strictEqual(error.message, "expecting one of Array or Object but found String");
 				});
 		});
 

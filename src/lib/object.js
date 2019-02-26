@@ -15,12 +15,13 @@ class ModuleObject extends ModuleIO {
 	/**
 	 * Gets value at property path
 	 * @resolves path:(string|undefined) in this.params[0]
-	 * @param {Object} blob
+	 * @param {DataBlob} blob
 	 * @returns {Promise<DataBlob>}
 	 * @throws {Error}
 	 */
 	async get(blob) {
-		this._assertType(blob, "Object", {
+		// why do we allow arrays? Because a user may describe a path in terms of indexes: _.get("0.name", [{name: "George"}]
+		this._assertType(blob, ["Array", "Object"], {
 			allowNull: true
 		});
 		return (this.params.length>0)
@@ -38,7 +39,7 @@ class ModuleObject extends ModuleIO {
 	 * @returns {Promise<DataBlob>}
 	 */
 	async map(blob) {
-		this._assertType(blob, "Object", {
+		this._assertType(blob, ["Array", "Object"], {
 			allowNull: true
 		});
 		this._assertType(this.params[0], ["Array", "Function"]);
@@ -90,7 +91,7 @@ class ModuleObject extends ModuleIO {
 
 	/**
 	 * Sets the path stored in <code>params[0]</code> on <param>blob</param> with <code>params[1]</code>
-	 * @param {Object} blob
+	 * @param {DataBlob} blob
 	 * @returns {Promise<DataBlob>}
 	 */
 	async set(blob) {

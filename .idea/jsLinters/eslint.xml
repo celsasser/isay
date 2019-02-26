@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="EslintConfiguration">
-    <custom-configuration-file used="true" path="$PROJECT_DIR$/../../../codequality/ecma2018/server.eslintrc.relaxed.json" />
+    <custom-configuration-file used="true" path="$PROJECT_DIR$/node_modules/pig-quality/server.eslintrc.json" />
   </component>
 </project>

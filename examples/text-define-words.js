@@ -12,13 +12,17 @@
 
 file.read("./examples/data/the-raven.txt")
 	.string.split(/\W+/)
-	.array.unique()
 	.array.filter(word=>word.length>9)
 	.array.map(word=>word.toLowerCase())
+	.array.unique()
 	.array.sort()
+	.debug.dump()
 	.array.map(word=>{
-		os.curl(`--get 'https://wordsapiv1.p.rapidapi.com/words/${word}/definitions' -H 'X-RapidAPI-Key: a8d145d4d0msha1bc10cde76a188p1d0581jsn0c57c6bc2072'`)
+		os.curl("--get", `https://www.dictionaryapi.com/api/v3/references/collegiate/json/${word}?key=58001a89-66f9-4249-8d04-8464711ce694`)
 			.json.parse()
-			.object.get(["word", {from: "definitions.0.definition", to: "definition"}])
+			.object.map([
+				{from: "0.meta.id", to: "word"},
+				{from: "0.shortdef.0", to: "definition"}
+			])
 	})
 	.std.out()

@@ -49,13 +49,12 @@
  *  - value:* -> oneOf(values:Array<*>) -> boolean
  *  - string -> startsWith(value:(string|Array<string>)) -> boolean
  * object:
- *  - Object -> get(path:string) -> *
- *  - Object -> map(predicate:function) -> *
- *  - Object -> map(paths:Array<string|{from:string,to:string}>, {flatten:boolean=false}) -> Object
+ *  - (Array|Object) -> get(path:string) -> *
+ *  - (Array|Object) -> map(predicate:function) -> *
+ *  - (Array|Object) -> map(paths:Array<string|{from:string,to:string}>, {flatten:boolean=false}) -> Object
  *  - Object -> merge(json:Object) -> Object
- *  - Object -> set(path:string, value:*) -> Object
- *  - path:(string|undefined) -> read(path:(string|undefined))
- *  - Object -> toString(predicate:function(Object, key:string):Object) -> Array<*>
+ *  - (Array|Object) -> set(path:string, value:*) -> (Array|Object)
+ *  - Object -> toArray(predicate:function(Object, key:string):Object) -> Array<*>
  * os:
  *  - stdin:(string|Buffer|undefined) -> <command>(params:string) -> *
  *  - stdin:(string|Buffer|undefined) -> <command>(param1:string, param2:string, ...) -> *

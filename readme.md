@@ -134,12 +134,11 @@ A _domain_ is a conceptual and physical grouping of one or more _functions_. Wha
 - startsWith: `string -> startsWith(value:(string|Array<string>)) -> boolean`
 
 #### object:
-- get: `Object -> get(path:string) -> *`
-- merge: `Object -> merge(json:Object) -> Object`
-- map: `Object -> map(predicate:function) -> *`
+- get: `(Array|Object) -> get(path:string) -> *`
+- merge: `(Array|Object) -> merge(json:Object) -> Object`
+- map: `(Array|Object) -> map(predicate:function) -> *`
 - map: `Object -> map(paths:Array<string|{from:string,to:string}>, {flatten:boolean=false}) -> Object`
-- set: `Object -> set(path:string, value:*) -> Object`
-- read: `path:(string|undefined) -> read(path:(string|undefined))`
+- set: `(Array|Object) -> set(path:string, value:*) -> (Array|Object)`
 - toArray: `Object -> toString(predicate:function(Object, key:string):Object) -> Array<*>`
 
 #### os:
