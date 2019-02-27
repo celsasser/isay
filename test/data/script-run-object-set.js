@@ -6,7 +6,7 @@
  */
 
 /**
- * Example of setting data in a JSON object and writing to stdout
+ * Testing object.s
  */
 json.read("./test/data/data-pet.json")
 	.object.set("helen", {type: "cat"})

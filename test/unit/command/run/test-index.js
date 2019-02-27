@@ -35,30 +35,7 @@ describe("command.run.index", function() {
 
 		[
 			{
-				script: "test/data/script-run-chain-embedded.js",
-				expected: [
-					{
-						"age": 5,
-						"inserted": "data",
-						"name": "George",
-						"species": "cat"
-					},
-					{
-						"age": 12,
-						"inserted": "data",
-						"name": "Wesley",
-						"species": "dog"
-					},
-					{
-						"age": 0.5,
-						"inserted": "data",
-						"name": "Tiny",
-						"species": "cat"
-					}
-				]
-			},
-			{
-				script: "test/data/script-run-chain-piped.js",
+				script: "test/data/script-run-chain.js",
 				expected: [
 					"Wesley",
 					"Tiny",
@@ -66,7 +43,7 @@ describe("command.run.index", function() {
 				]
 			},
 			{
-				script: "test/data/script-run-function-embedded.js",
+				script: "test/data/script-run-chain-predicate.js",
 				expected: [
 					{
 						"age": 5,
@@ -89,15 +66,45 @@ describe("command.run.index", function() {
 				]
 			},
 			{
-				script: "test/data/script-run-json-get.js",
+				script: "test/data/script-run-closure-test.js",
+				expected: {
+					"age": 4,
+					"name": "George"
+				}
+			},
+			{
+				script: "test/data/script-run-function-predicate.js",
+				expected: [
+					{
+						"age": 5,
+						"inserted": "data",
+						"name": "George",
+						"species": "cat"
+					},
+					{
+						"age": 12,
+						"inserted": "data",
+						"name": "Wesley",
+						"species": "dog"
+					},
+					{
+						"age": 0.5,
+						"inserted": "data",
+						"name": "Tiny",
+						"species": "cat"
+					}
+				]
+			},
+			{
+				script: "test/data/script-run-object-get.js",
 				expected: "cat"
 			},
 			{
 				script: "test/data/script-run-json-stringify.js",
-				expected: '{"george":{"type":"cat"}}'
+				expected: "{\"george\":{\"type\":\"cat\"}}"
 			},
 			{
-				script: "test/data/script-run-json-set.js",
+				script: "test/data/script-run-object-set.js",
 				expected: {
 					"george": {
 						"type": "cat"

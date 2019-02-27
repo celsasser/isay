@@ -6,10 +6,9 @@
  */
 
 /**
- * Example of running "ls", filtering, altering the order and writing to stdout
+ * Testing os with "ls". Throwing in sort for fun.
  */
 os.ls(".")
 	.string.split("newline")
-	.filter(not.empty())
 	.sort()
 	.std.out()

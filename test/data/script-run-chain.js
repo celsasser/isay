@@ -6,7 +6,7 @@
  */
 
 /**
- * Example using a chain as a predicate function.
+ * Test of our basic chain functionality
  */
 json.read("./test/data/data-pets.json")
 	.map(object.get("name"))

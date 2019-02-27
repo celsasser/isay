@@ -6,6 +6,6 @@
  */
 
 /**
- * Example of an invalid script
+ * Testing unknown action within a known domain
  */
 json.invalid("./test/data/data-pet.json")

@@ -6,7 +6,7 @@
  */
 
 /**
- * Example of reading and parsing JSON from a file and converting it to a compact string
+ * Testing json.stringify
  */
 json.read("./test/data/data-pet.json")
 	.json.stringify({compact: true})

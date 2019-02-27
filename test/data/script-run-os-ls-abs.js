@@ -6,7 +6,7 @@
  */
 
 /**
- * Example of running "ls", filtering, and translating relative paths to absolute paths
+ * Another os test with ls with a little more functionality
  */
 os.ls(".")
 	.string.split("newline")
