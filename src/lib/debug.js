@@ -25,14 +25,16 @@ class ModuleDebug extends ModuleIO {
 	}
 
 	/**
-	 * Dumps the state of <param>blob</blob>
+	 * Dumps the state of <param>blob</blob> as well as <code>this.params</code>
 	 * @param {DataBlob} blob
 	 * @return {Promise<DataBlob>}
 	 */
 	async dump(blob) {
-		const text=(typeof(blob)==="string")
-			? blob
-			: JSON.stringify(blob, null, "\t");
+		const data={
+				input: blob,
+				params: this.params
+			},
+			text=JSON.stringify(data, null, "\t");
 		return new Promise(resolve=>{
 			process.stdout.write(`${text}\n`, ()=>{
 				resolve(blob);

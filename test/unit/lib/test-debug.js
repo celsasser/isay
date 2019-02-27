@@ -7,7 +7,6 @@
 
 const assert=require("../../support/assert");
 const proxy=require("../../support/proxy");
-const constant=require("../../../src/common/constant");
 const {ModuleDebug}=require("../../../src/lib/debug");
 
 describe("lib.ModuleDebug", function() {
@@ -29,26 +28,18 @@ describe("lib.ModuleDebug", function() {
 		proxy.unstub();
 	});
 
-	describe("abort", function() {
-		it("should throw an exception", async function() {
-			const instance=_createInstance();
-			instance.abort()
-				.catch(error=>{
-					assert.strictEqual(error.statusCode, constant.status.code.ABORT);
-				});
-		});
-	});
-
 	describe("dump", function() {
 		it("should write blob to stdout and return input blob", async function() {
-			const instance=_createInstance();
+			const instance=_createInstance({
+				params: ["param"]
+			});
 			proxy.stub(process.stdout, "write", (text, callback)=>{
-				assert.strictEqual(text, "text\n");
+				assert.strictEqual(text, '{\n\t"input": "input",\n\t"params": [\n\t\t"param"\n\t]\n}\n');
 				callback();
 			});
-			return instance.dump("text")
+			return instance.dump("input")
 				.then(result=>{
-					assert.strictEqual(result, "text");
+					assert.strictEqual(result, "input");
 				});
 		});
 	});
