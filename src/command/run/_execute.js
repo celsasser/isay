@@ -141,26 +141,9 @@ function _parseChain({library, script}) {
 			method: node.method || node.action,
 			params: args
 		});
-		return graphProxy;
+		return runContext;
 	}
 
-	/**
-	 * Proxies all attempts to dereference properties at the tippy-top. The only reason we need this is for
-	 * our "os" friend. If an action is requested of us and we don't know about it and the last call was on
-	 * domain="os" then we assume that the property is an "os" action. */
-	const proxyTopHandler={
-		get(target, property) {
-			if(!(property in target)) {
-				if(_.get(_.last(callSequence), "domain")==="os") {
-					target[property]=_addCall.bind(null, {
-						action: property,
-						method: "executionHandler"
-					});
-				}
-			}
-			return target[property];
-		}
-	};
 	/**
 	 * Proxies all attempts to get properties on "os". We open up the floodgates and assume at this level that all
 	 * is valid. If the command doesn't exist of the commands params are screwy then the caller will be told at runtime.
@@ -180,13 +163,11 @@ function _parseChain({library, script}) {
 		},
 		proxyOS=new Proxy({}, proxyOSHandler);
 
-	// And finally we get to the graph that we build from our library.
-	const graphObject=library.reduce((result, node)=>{
-		// The top level to cover those that are hijacking the last domain.
-		// note: name collisions don't matter here because we resolve these guys to the last explicit domain
-		if(result.hasOwnProperty(node.action)===false) {
-			result[node.action]=_addCall.bind(null, node);
-		}
+	/**
+	 * And here we build everything that we want in the run context. Which is support for our own lexicon.
+	 * Note that all <code>os.</code> dereferences are handled by proxyOSHandler.
+	 */
+	const runContext=library.reduce((result, node)=>{
 		// and all domain.action combinations
 		_.set(result, `${node.domain}.${node.action}`, _addCall.bind(null, node));
 		return result;
@@ -194,14 +175,13 @@ function _parseChain({library, script}) {
 		os: proxyOS,
 		_type: "urn:graph:proxy"
 	});
-	const graphProxy=new Proxy(graphObject, proxyTopHandler);
 
 	// this is the crank that gets everything up above rolling. We use our graph-proxy as the context in
 	// which our scripts is run so that we may intercept all calls. What does this buy us? Everything:
 	// 1. parsed the code
 	// 2. we can steal his parsing of arguments
 	// 3. it puts javascript at our disposal to a limited extent.
-	const result=vm.runInContext(script, vm.createContext(graphProxy));
+	const result=vm.runInContext(script, vm.createContext(runContext));
 	return {
 		sequence: callSequence,
 		result

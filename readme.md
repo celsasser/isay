@@ -50,8 +50,8 @@ The _chain_ is a list of sequentially excecuted, synchronous _functions_. A _fun
 The syntax of a _chain_ is as follows:
 ```
 <domain>.<function>(params)
-	.[domain].<function>(params)
-	.[domain].<function>(params)
+	.<domain>.<function>(params)
+	.<domain>.<function>(params)
 	...
 ```
 
@@ -63,9 +63,9 @@ Follows is an example:
 os.ls(".")
    .string.split("newline")
    .array.filter(item=>item.length>0)
-   .map(item=>`./${item}`)
-   .sort()
-   .reverse()
+   .array.map(item=>`./${item}`)
+   .array.sort()
+   .array.reverse()
    .std.out();
 ```
 
@@ -75,7 +75,7 @@ Note: it may be helpful to think of a function - `<domain>.<function>(params)` -
 ### The Language
 The language used to define _chains_ (and _scripts_ which will follow) is a both a subset and not totally compliant variation of _JavaScript_. At its heart are _domains_ and _functions_.
 
-A _domain_ is a conceptual and physical grouping of one or more _functions_. What is the function of a _domain_? It forces a modular breakdown of related functionality that allows and encourages _function_ names to be reused encouraging a smaller, consistent and more terse _function_ lexicon. It also allows for _domain_ omission provided the _domain_ of a previous _function_ is in the same as a subsequent _function_.
+A _domain_ is a conceptual and physical grouping of one or more _functions_. What is the function of a _domain_? It forces a modular breakdown of related functionality that allows and encourages _function_ names to be reused encouraging a smaller, consistent and more terse _function_ lexicon. 
 
 
 #### array

@@ -9,7 +9,7 @@
  * Testing embedded chains
  */
 json.read("./test/data/data-pets.json")
-	.map(object.merge({
+	.array.map(object.merge({
 		inserted: "data"
 		})
 	)

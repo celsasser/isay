@@ -9,7 +9,7 @@
  * Test of our basic chain functionality
  */
 json.read("./test/data/data-pets.json")
-	.map(object.get("name"))
-	.sort()
-	.reverse()
+	.array.map(object.get("name"))
+	.array.sort()
+	.array.reverse()
 	.std.out()

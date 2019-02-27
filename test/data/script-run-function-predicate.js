@@ -9,7 +9,7 @@
  * Test a non chain predicate function
  */
 json.read("./test/data/data-pets.json")
-	.map(data=>{
+	array.map(data=>{
 		let merge={inserted: "data"};
 		return {
 			...merge,

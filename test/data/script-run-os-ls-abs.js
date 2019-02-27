@@ -10,7 +10,7 @@
  */
 os.ls(".")
 	.string.split("newline")
-	.filter(not.empty())
-	.map(path.absolute())
-	.sort(path=>path.length)
+	.array.filter(not.empty())
+	.array.map(path.absolute())
+	.array.sort(path=>path.length)
 	.std.out()
