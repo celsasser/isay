@@ -10,6 +10,7 @@
  */
 
 const _=require("lodash");
+const assert=require("assert");
 const vm=require("vm");
 const lib_os=require("../../lib/os");
 
@@ -23,11 +24,12 @@ const lib_os=require("../../lib/os");
  * @returns {Promise<DataBlob>}
  * @throws {Error}
  */
-exports.runScript=async function({input=undefined, library, script}) {
-	const {sequence}=_parseChain({library, script}),
+async function runScript({input=undefined, library, script}) {
+	const transpiled=_transpileScript({library, script}),
+		{sequence}=_parseChain({library, transpiled}),
 		chain=_buildChain(sequence);
 	return chain.process(input);
-};
+}
 
 /**
  * Translates parsed script into a sequence of modules
@@ -67,12 +69,12 @@ function _buildChain(descriptors) {
  * Which in our world is a sequence of ModuleDescriptor. See <code>_parseChain</code> to see how that works.
  * And then uses vm.runInContext to steal the sequence
  * @param {Array<LibraryNode>} library
- * @param {string} script
+ * @param {string} transpiled
  * @returns {{result:*, sequence:Array<ModuleDescriptor>}}
  * @throws {Error}
  * @private
  */
-function _parseChain({library, script}) {
+function _parseChain({library, transpiled}) {
 	/**
 	 * This array will be populated when the graph is "run"
 	 * @type {Array<ModuleDescriptor>}
@@ -86,26 +88,24 @@ function _parseChain({library, script}) {
 	 * @returns {Proxy}
 	 */
 	function _addCall(node, ...args) {
+		// see <code>_transpileScript</code> for more information about declarationIndex.
+		assert.ok(_.isNumber(args[0]));
+		const declarationIndex=args[0];
+		args=args.slice(1);
 		if(_.get(args, "0._type")==="urn:graph:proxy") {
-			// The call's first argument is a graph proxy so that means the user has created an embedded chain
-			// as an an argument. This means that the "piped" chain will take the calling functions output as input.
-			// We build the chain and remove him from the call sequence.
-			// todo: 2/23/2019 - this is broken. For the time being all we are doing is taking the last node. It's wrong but
-			// todo: am leaving around thinking that a solution is near at hand.
-			// What is the problem? Ss things are, I haven't figured out a way to tell how long this chain is
-			// - what is it's head node? I tried some solutions but without introducing parsing could not see
-			// a reliable solution. If we take back up the challenge, go back to a commit prior to 2019-02-23T19:34:15
-			// and you may see what we experimented with.
-
-			// For now, we assume it's a single function call.
-			const index=callSequence.length-1,
-				chain=_buildChain(callSequence.slice(index));
-			args[0]=chain.process.bind(chain);
-			callSequence=callSequence.slice(0, index);
+			// The call's first argument is a graph proxy so that means the user is using a chain as an argument
+			// - a predicate. This chain will take the calling functions output as input.
+			// Here we build the predicate chain and remove him from the call sequence.
+			// How do we know how much to pull of the stack? By the declarationIndex. Everything that remains on
+			// the call-stack that is greater this function declaration must be links in the nested chain.
+			const predicateHeadIndex=_.findIndex(callSequence, descriptor=>descriptor._declarationIndex>declarationIndex),
+				predicateChain=_buildChain(callSequence.slice(predicateHeadIndex));
+			args[0]=predicateChain.process.bind(predicateChain);
+			callSequence=callSequence.slice(0, predicateHeadIndex);
 		} else if(_.isFunction(args[0])) {
-			// the call's first argument is a function (predicate). Our only concern here is whether it includes a chain (which is
-			// not real javascript). We parse him as we did the top level chain and then inspect the results and act accordingly:
-			// First, capture the function script so that we may run it later
+			// the call's first argument is a function (predicate). Our only concern here is whether it includes a chain which
+			// will not execute properly without our help. Hence, we get involved. We parse him as we did the top level chain
+			// and then inspect the results and do chain processing if we find one.
 			const script=args[0].toString();
 			// intercept the call so that we may steal and describe the function with params, parse and run it ourselves
 			args[0]=function(...input) {
@@ -114,11 +114,9 @@ function _parseChain({library, script}) {
 					.join(",");
 				const {sequence, result}=_parseChain({
 					library,
-					script: `(${script})(${params})`
+					transpiled: `(${script})(${params})`
 				});
 				// now we either have found a chain or we have run a chain free function and have what we need.
-				// todo: we will want to make sure that the input args are made available to the chain otherwise
-				// his attempts to reference those args will result in "undefined"
 				if(sequence.length>0) {
 					const chain=_buildChain(sequence);
 					return chain.process.apply(chain, input);
@@ -127,17 +125,11 @@ function _parseChain({library, script}) {
 				}
 			};
 		}
-
-		// todo: last call processing is flawed when the chain we are processing is a "piped" chain
-		// serving as an argument to an existing chain - as we just processed up there ^.
-		const lastCallDescriptor=_.last(callSequence);
-		if(node.domain===undefined && lastCallDescriptor==null) {
-			throw new Error(`cannot resolve a function domain for action=${node.action}`);
-		}
 		callSequence.push({
+			_declarationIndex: declarationIndex,
 			action: node.action,
-			class: node.class || lastCallDescriptor.class,
-			domain: node.domain || lastCallDescriptor.domain,
+			class: node.class,
+			domain: node.domain,
 			method: node.method || node.action,
 			params: args
 		});
@@ -180,11 +172,45 @@ function _parseChain({library, script}) {
 	// which our scripts is run so that we may intercept all calls. What does this buy us? Everything:
 	// 1. parsed the code
 	// 2. we can steal his parsing of arguments
-	// 3. it puts javascript at our disposal to a limited extent.
-	const result=vm.runInContext(script, vm.createContext(runContext));
+	// 3. it puts javascript at our (script's) disposal.
+	const result=vm.runInContext(transpiled, vm.createContext(runContext));
 	return {
 		sequence: callSequence,
 		result
 	};
 }
+
+/**
+ * Modifies the script so that we may execute it properly. See comments inline for info on what and why
+ * we are doing what we are doing
+ * @param {Array<LibraryNode>} library
+ * @param {string} script
+ * @returns {string}
+ * @private
+ */
+function _transpileScript({library, script}) {
+	// first we are going to insert argument[0] indexes into each <domain>.<function> call so that we may be able
+	// to properly manage the stack when processing nested chains
+	const regexList=library.reduce((text, node)=>{
+			return `${text}|${node.domain}\\.${node.action}`;
+		}, ""),
+		regexText=`(\\W|^)((os.\\w+${regexList})\\s*\\()`,
+		regex=new RegExp(regexText, "g");
+	for(let index=0; true; index++) {
+		let match=regex.exec(script);
+		if(!match) {
+			break;
+		} else {
+			script=`${script.substr(0, regex.lastIndex)}${index},${script.substr(regex.lastIndex)}`;
+		}
+	}
+	return script;
+}
+
+module.exports={
+	runScript,
+	_buildChain,
+	_parseChain,
+	_transpileScript
+};
 

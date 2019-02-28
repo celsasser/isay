@@ -1,5 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="run: os-ls" type="NodeJSConfigurationType" folderName="run" application-parameters="run -l verbose -s ./test/data/script-run-os-ls.js" path-to-js-file="mouse.js" working-dir="$PROJECT_DIR$">
-    <method v="2" />
-  </configuration>
-</component>

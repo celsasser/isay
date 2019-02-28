@@ -10,4 +10,4 @@
 os.find("./examples")
 	.string.split("newline")
 	.array.filter(is.endsWith([".js", ".json"]))
-	.array.each(file.copy("./tmp", {rebuild:true}))
+	.array.each(file.copy("./tmp", {rebuild: true}))

@@ -1,0 +1,5 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="run: script-chain-predicate" type="NodeJSConfigurationType" folderName="run" application-parameters="run -s ./test/scripts/script-run-chain-predicate.js" path-to-js-file="mouse.js" working-dir="$PROJECT_DIR$">
+    <method v="2" />
+  </configuration>
+</component>

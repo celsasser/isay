@@ -20,10 +20,10 @@ describe("command.run.index", function() {
 	});
 
 	describe("run", function() {
-		it("should throw error when processing 'test/data/script-run-unknown-action.js'", async function() {
+		it("should throw error when processing 'test/scripts/script-run-unknown-action.js'", async function() {
 			const configuration={
 				options: {
-					script: "test/data/script-run-unknown-action.js"
+					script: "test/scripts/script-run-unknown-action.js"
 				}
 			};
 			return run(configuration)
@@ -35,7 +35,7 @@ describe("command.run.index", function() {
 
 		[
 			{
-				script: "test/data/script-run-chain.js",
+				script: "test/scripts/script-run-chain.js",
 				expected: [
 					"Wesley",
 					"Tiny",
@@ -43,7 +43,7 @@ describe("command.run.index", function() {
 				]
 			},
 			{
-				script: "test/data/script-run-chain-predicate.js",
+				script: "test/scripts/script-run-chain-embedded.js",
 				expected: [
 					{
 						"age": 5,
@@ -66,14 +66,40 @@ describe("command.run.index", function() {
 				]
 			},
 			{
-				script: "test/data/script-run-closure-test.js",
+				script: "test/scripts/script-run-chain-predicate.js",
+				expected: [
+					{
+						"age": 5,
+						"link1": "link1",
+						"link2": "link2",
+						"name": "George",
+						"species": "cat"
+					},
+					{
+						"age": 12,
+						"link1": "link1",
+						"link2": "link2",
+						"name": "Wesley",
+						"species": "dog"
+					},
+					{
+						"age": 0.5,
+						"link1": "link1",
+						"link2": "link2",
+						"name": "Tiny",
+						"species": "cat"
+					}
+				]
+			},
+			{
+				script: "test/scripts/script-run-closure-test.js",
 				expected: {
 					"age": 4,
 					"name": "George"
 				}
 			},
 			{
-				script: "test/data/script-run-function-predicate.js",
+				script: "test/scripts/script-run-function-predicate.js",
 				expected: [
 					{
 						"age": 5,
@@ -96,15 +122,15 @@ describe("command.run.index", function() {
 				]
 			},
 			{
-				script: "test/data/script-run-object-get.js",
+				script: "test/scripts/script-run-object-get.js",
 				expected: "cat"
 			},
 			{
-				script: "test/data/script-run-json-stringify.js",
+				script: "test/scripts/script-run-json-stringify.js",
 				expected: "{\"george\":{\"type\":\"cat\"}}"
 			},
 			{
-				script: "test/data/script-run-object-set.js",
+				script: "test/scripts/script-run-object-set.js",
 				expected: {
 					"george": {
 						"type": "cat"
@@ -131,10 +157,10 @@ describe("command.run.index", function() {
 			});
 		});
 
-		it("should successfully process 'test/data/script-run-os-ls.js'", function() {
+		it("should successfully process 'test/scripts/script-run-os-ls.js'", function() {
 			const configuration={
 				options: {
-					script: "test/data/script-run-os-ls.js"
+					script: "test/scripts/script-run-os-ls.js"
 				}
 			};
 			return run(configuration)
@@ -150,7 +176,7 @@ describe("command.run.index", function() {
 					];
 					assert.deepEqual(_.intersection(result, expected).sort(), expected);
 				})
-				.catch(error=>assert.fail(`processing 'test/data/script-run-os-ls.js' failed - ${error}`));
+				.catch(error=>assert.fail(`processing 'test/scripts/script-run-os-ls.js' failed - ${error}`));
 		});
 	});
 });
