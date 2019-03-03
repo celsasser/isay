@@ -33,7 +33,7 @@ class ModuleObject extends ModuleIO {
 	 * Allows one to transform the object in <param>blob</param> via:
 	 * - predicate function
 	 * - or array of directions on what to take or how to map from and to properties
-	 * @resolves (predicate:ObjectPredicate|(Array<string|{from:string,to:string}>)) in this.params[0]
+	 * @resolves (predicate:ActionPredicate|(Array<string|{from:string,to:string}>)) in this.params[0]
 	 * @resolves options:{flatten:false} in this.params[1]
 	 * @param {DataBlob} blob
 	 * @returns {Promise<DataBlob>}

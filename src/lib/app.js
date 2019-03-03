@@ -6,7 +6,6 @@
  */
 
 const constant=require("../common/constant");
-const {XRayError}=require("../common/error");
 const {ModuleIO}=require("./_io");
 
 /**
@@ -19,7 +18,7 @@ class ModuleApp extends ModuleIO {
 	 * @throws {Error}
 	 */
 	async abort() {
-		throw new XRayError({
+		throw this._createExpectedError({
 			code: constant.error.code.ABORT
 		});
 	}

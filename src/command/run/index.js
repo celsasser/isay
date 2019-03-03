@@ -9,7 +9,6 @@ const _=require("lodash");
 const fs=require("fs-extra");
 const editor=require("./_editor");
 const {runScript}=require("./_execute");
-const {XRayError}=require("../../common/error");
 const {toLocalPath}=require("../../common/file");
 const log=require("../../common/log");
 const {loadLibrary}=require("../../lib");
@@ -17,23 +16,17 @@ const {loadLibrary}=require("../../lib");
 /**
  * @param {CliParsed} configuration
  * @returns {Promise<DataBlob>}
+ * @throws {Error}
  */
 exports.run=async function(configuration) {
-	try {
-		log.verbose("- loading library");
-		const library=loadLibrary();
-		log.verbose("- loading script");
-		const script=await _loadScript(configuration);
-		log.verbose("- loading stdin");
-		const input=await _readStdin();
-		log.verbose("- running script");
-		return await runScript({input, library, script});
-	} catch(error) {
-		return Promise.reject(new XRayError({
-			error,
-			message: "run failed"
-		}));
-	}
+	log.verbose("- loading library");
+	const library=loadLibrary();
+	log.verbose("- loading script");
+	const script=await _loadScript(configuration);
+	log.verbose("- loading stdin");
+	const input=await _readStdin();
+	log.verbose("- running script");
+	return await runScript({input, library, script});
 };
 
 /**

@@ -64,31 +64,13 @@ class XRayError extends Error {
 				code=error.code;
 			}
 		}
-		XRayError.annotate(this, _.omitBy({
+		_.merge(this, _.omitBy({
+			code,
 			details: getMostImportant("details"),
 			error,
 			instance,
-			code,
 			...properties
 		}, _.isUndefined));
-	}
-
-	/**
-	 * Optionally merges data and then looks for data that we know how to annotate.
-	 * Note: the reason I made it static is because I am having issues with webpack and seeing the dependency. It's
-	 * possible to annotate any error so fair enough.
-	 * @param {Error} error
-	 * @param {Object} merge
-	 */
-	static annotate(error, merge) {
-		_.merge(error, merge);
-		if(error.hasOwnProperty("instance")
-			&& _.isObject(error.instance)
-			&& !error.instance.hasOwnProperty("type")) {
-			error.instance=Object.assign({
-				type: error.instance.constructor.name
-			}, error.instance);
-		}
 	}
 }
 

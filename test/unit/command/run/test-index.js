@@ -19,21 +19,12 @@ describe("command.run.index", function() {
 		proxy.std.unstub();
 	});
 
-	describe("run", function() {
-		it("should throw error when processing 'test/scripts/script-run-unknown-action.js'", async function() {
-			const configuration={
-				options: {
-					script: "test/scripts/script-run-unknown-action.js"
-				}
-			};
-			return run(configuration)
-				.catch(error=>{
-					assert.strictEqual(error.message, "run failed");
-					assert.strictEqual(error.details, "json.invalid is not a function");
-				});
-		});
-
+	describe.only("run", function() {
 		[
+			{
+				script: "test/scripts/script-run-catch-one.js",
+				expected: "blob+error"
+			},
 			{
 				script: "test/scripts/script-run-chain.js",
 				expected: [
@@ -139,21 +130,44 @@ describe("command.run.index", function() {
 						"type": "cat"
 					}
 				}
+			},
+			{
+				script: "test/scripts/script-run-throw-error.js",
+				errorText: "as error"
+			},
+			{
+				script: "test/scripts/script-run-throw-predicate.js",
+				errorText: "as predicate"
+			},
+			{
+				script: "test/scripts/script-run-throw-string.js",
+				errorText: "as string"
+			},
+			{
+				script: "test/scripts/script-run-unknown-action.js",
+				errorText: "json.invalid is not a function"
 			}
-		].forEach(({expected, script})=>{
+		].forEach(({errorText, expected, script})=>{
 			it(`should successfully process '${script}'`, function() {
 				const configuration={
 					options: {script}
 				};
 				return run(configuration)
 					.then(result=>{
+						assert.strictEqual(errorText, undefined);
 						if(expected.constructor.name==="String") {
 							assert.strictEqual(result, expected);
 						} else {
 							assert.deepEqual(result, expected);
 						}
 					})
-					.catch(error=>assert.fail(`processing '${script}' failed - ${error}`));
+					.catch(error=>{
+						if(errorText) {
+							assert.strictEqual(error.message, errorText);
+						} else {
+							assert.fail(`processing '${script}' failed - ${error}`);
+						}
+					});
 			});
 		});
 

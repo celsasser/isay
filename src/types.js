@@ -45,11 +45,15 @@
  */
 
 /**
- * @typedef {function(data:*, index:Number):*} ArrayPredicate
+ * @typedef {function(data:DataBlob):*} ActionPredicate
  */
 
 /**
- * @typedef {function(data:Object):*} ObjectPredicate
+ * @typedef {function(data:DataBlob, error:Error):*} CatchPredicate
+ */
+
+/**
+ * @typedef {function(data:*, index:Number):*} ArrayPredicate
  */
 
 /**

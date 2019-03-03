@@ -41,9 +41,10 @@ function _buildChain(descriptors) {
 	 * Builds chain of modules. Works it's way forward
 	 * @param {number} index
 	 * @param {ModuleBase} next
+	 * @param {ModuleBase} trap - "catch" handler
 	 * @returns {ModuleBase}
 	 */
-	function _build(index, next=undefined) {
+	function _build(index, next=undefined, trap=undefined) {
 		if(index<0) {
 			return next;
 		} else {
@@ -53,9 +54,17 @@ function _buildChain(descriptors) {
 				domain: descriptor.domain,
 				method: descriptor.method,
 				output: next,
-				params: descriptor.params
+				params: descriptor.params,
+				trap
 			});
-			return _build(index-1, instance);
+			if(descriptor.action==="catch") {
+				// This instance is a catch handler. We never want to flow into him. If an error is thrown then
+				// we want to flow around him. But from here on he will be installed as the catch handler.
+				// At least until another one is installed.
+				return _build(index-1, next, instance);
+			} else {
+				return _build(index-1, instance, trap);
+			}
 		}
 	}
 

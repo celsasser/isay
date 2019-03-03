@@ -21,19 +21,22 @@ class ModuleBase {
 	 * @param {boolean} objectMode
 	 * @param {ModuleBase} output
 	 * @param {Array<*>} params
+	 * @param {ModuleBase} trap - it's catch but we are using "trap" to get around reserved keyword problems
 	 */
 	constructor({
 		action,
 		domain,
 		method,
 		output=undefined,
-		params=[]
+		params=[],
+		trap=undefined
 	}) {
 		this.action=action;
 		this.domain=domain;
 		this.method=method;
 		this.params=params;
 		this._output=output;
+		this._trap=trap;
 	}
 
 	/**
@@ -53,16 +56,17 @@ class ModuleBase {
 				? this._output.process(blob)
 				: Promise.resolve(blob);
 		} catch(error) {
-			// look to see whether this was reported by us. If so then it means that
-			// the chain was nested. We just want the top level error.
-			if(/\w+\.\w+ failed/.test(error.message)===false) {
-				// let's make sure we pick up the stack by wrapping the error
-				error=new XRayError({
-					error,
-					message: `${this.domain}.${this.action} failed`
-				});
+			if(this._trap) {
+				// we have a "catch" error handler so we let him handle it.
+				return this._trap.process(data, error);
+			} else {
+				// look to see whether this was reported by us. If so then it means that
+				// the chain was nested. We just want the top level error.
+				if(!(error.instance instanceof ModuleBase)) {
+					error=this._createUnexpectedError({error});
+				}
+				return Promise.reject(error);
 			}
-			return Promise.reject(error);
 		}
 	}
 
@@ -145,6 +149,46 @@ class ModuleBase {
 			throw new Error(`expecting predicate but found ${util.name(predicate)}`);
 		}
 	}
+
+	/**
+	 * Creates a special error that we will know and not modify as it percolates up through nested chains.
+	 * @param {Number|undefined} code
+	 * @param {Error} error
+	 * @param {string} message
+	 * @protected
+	 */
+	_createExpectedError({
+		code=undefined,
+		error=undefined,
+		message=undefined
+	}) {
+		return new XRayError({
+			action: this.action,
+			code,
+			domain: this.domain,
+			error,
+			instance: this,
+			message
+		});
+	}
+
+	/**
+	 * Creates a special error that we will know and not modify as it percolates up through nested chains.
+	 * @param {Error} error
+	 * @private
+	 */
+	_createUnexpectedError(error) {
+		return new XRayError({
+			action: this.action,
+			domain: this.domain,
+			error,
+			instance: this,
+			message: `${this.domain}.${this.action} failed`
+		});
+
+	}
+
+
 	/**
 	 * He will make an attempt to ensure that the object is parsed JSON.
 	 * @param {*} data

@@ -22,6 +22,8 @@ command.run(configuration)
 	})
 	.catch(error=>{
 		if(error.code!==constant.error.code.ABORT) {
+			// todo: we should think about what is written to error here. By default we don't want the
+			//  stack.  But it is handy for debugging. Probably want it to only log stack on debug.verbose
 			log.error(format.errorToString(error, {
 				details: true,
 				stack: true
