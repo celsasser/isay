@@ -19,11 +19,30 @@ describe("command.run.index", function() {
 		proxy.std.unstub();
 	});
 
-	describe.only("run", function() {
+	describe("run", function() {
+		it.skip("debug script", async function() {
+			const configuration={
+				options: {
+					script: "test/scripts/script-run-catch-two.js"
+				}
+			};
+			return run(configuration)
+				.then(result=>{
+					console.log(result);
+				})
+				.catch(error=>{
+					console.error(error.message);
+				});
+		});
+
 		[
 			{
 				script: "test/scripts/script-run-catch-one.js",
-				expected: "blob+error"
+				expected: "error=throw"
+			},
+			{
+				script: "test/scripts/script-run-catch-two.js",
+				expected: "error=throw+1"
 			},
 			{
 				script: "test/scripts/script-run-chain.js",
@@ -153,19 +172,21 @@ describe("command.run.index", function() {
 					options: {script}
 				};
 				return run(configuration)
-					.then(result=>{
-						assert.strictEqual(errorText, undefined);
-						if(expected.constructor.name==="String") {
-							assert.strictEqual(result, expected);
-						} else {
-							assert.deepEqual(result, expected);
-						}
-					})
 					.catch(error=>{
-						if(errorText) {
-							assert.strictEqual(error.message, errorText);
+						if(errorText!==undefined) {
+							assert.strictEqual(error.message, errorText, script);
 						} else {
 							assert.fail(`processing '${script}' failed - ${error}`);
+						}
+					})
+					.then(result=>{
+						if(errorText===undefined) {
+							assert.strictEqual(errorText, undefined);
+							if(expected.constructor.name==="String") {
+								assert.strictEqual(result, expected);
+							} else {
+								assert.deepEqual(result, expected);
+							}
 						}
 					});
 			});

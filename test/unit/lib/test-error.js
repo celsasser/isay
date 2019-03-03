@@ -34,13 +34,12 @@ describe("lib.ModuleError", function() {
 
 		it("should return the result of the predicate", function() {
 			const instance=_createInstance({
-				params: [(blob, error)=>{
-					assert.strictEqual(blob, "blob");
+				params: [error=>{
 					assert.strictEqual(error, "error");
 					return "result";
 				}]
 			});
-			return instance.catch("blob", "error")
+			return instance.catch("error")
 				.then(result=>{
 					assert.strictEqual(result, "result");
 				});

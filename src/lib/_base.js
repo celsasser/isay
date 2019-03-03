@@ -42,23 +42,24 @@ class ModuleBase {
 	/**
 	 * Processes data for this module and passes results down the pipeline
 	 * @param {DataBlob} data
+	 * @param {Array<*>} args - a few of our action predicates offering extra params such as array.map
 	 * @returns {Promise<DataBlob>}
 	 */
-	async process(data=undefined) {
+	async process(data=undefined, ...args) {
 		try {
 			let blob=this._preprocessChunk(data);
 			log.verbose(()=>{
 				const {input}=this._getPreviewDetails(blob);
 				return `- executing ${this.domain}.${this.action}(${input})`;
 			});
-			blob=await this[this.method](blob);
+			blob=await this[this.method](blob, ...args);
 			return (this._output)
 				? this._output.process(blob)
 				: Promise.resolve(blob);
 		} catch(error) {
 			if(this._trap) {
 				// we have a "catch" error handler so we let him handle it.
-				return this._trap.process(data, error);
+				return this._trap.process(error);
 			} else {
 				// look to see whether this was reported by us. If so then it means that
 				// the chain was nested. We just want the top level error.

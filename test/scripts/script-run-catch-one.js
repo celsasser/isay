@@ -10,7 +10,7 @@
  */
 
 std.in("blob")
-	.error.throw("error")
-	.error.catch((blob, error)=>{
-		return `${blob}+${error.message}`;
+	.error.throw("throw")
+	.error.catch(error=>{
+		return `error=${error.message}`;
 	})

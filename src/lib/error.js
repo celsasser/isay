@@ -8,8 +8,7 @@
 const {ModuleBase}=require("./_base");
 
 /**
- * Supports operations on piped arrays. The <code>predicate</code> may either be a function or a chain.
- * The <code>predicate</code> is called as follows: params[0](blob[index], index):*
+ * Supports error creation and handling.
  * @typedef {ModuleBase} ModuleError
  */
 class ModuleError extends ModuleBase {
@@ -18,13 +17,12 @@ class ModuleError extends ModuleBase {
 	 * - they throw an error in which case it goes to the next handler or we exit
 	 * - whatever the return becomes input for whatever follows this action
 	 * @resolves predicate:CatchPredicate in this.params[0]
-	 * @param {DataBlob} blob
 	 * @param {Error} error
 	 * @returns {Promise<*>}
 	 */
-	async catch(blob, error) {
+	async catch(error) {
 		const predicate=this._assertPredicate(this.params[0]);
-		return predicate(blob, error);
+		return predicate(error);
 	}
 
 	/**

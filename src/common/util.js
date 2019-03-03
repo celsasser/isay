@@ -332,7 +332,9 @@ exports.objectToData=function(object, {
 				if(!_.isFunction(value)) {
 					if(_.isError(value)) {
 						// we nestle errors in errors so let's make sure we process this guys properties minus the stack
-						result[key]=inspect(_.omit(value, "stack"), _depth+1);
+						result[key]=inspect(Object.assign({
+								message: value.message
+						}, _.omit(value, "stack")), _depth+1);
 					} else if(isSimple(value)) {
 						result[key]=value;
 					} else if(circular.has(value)) {

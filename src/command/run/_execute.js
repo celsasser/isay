@@ -13,6 +13,7 @@ const _=require("lodash");
 const assert=require("assert");
 const vm=require("vm");
 const lib_os=require("../../lib/os");
+const util=require("../../common/util");
 
 
 /**************** Public Interface  ****************/
@@ -71,6 +72,24 @@ function _buildChain(descriptors) {
 	return _build(descriptors.length-1);
 }
 
+/**
+ * Encodes a runtime param into a simple object. Most of our runtime objects will already be such objects. But there are exceptions.
+ * @param {*} param
+ * @returns {Object}
+ * @private
+ */
+function _paramToPOJO(param) {
+	if(param instanceof Error) {
+		// these are errors that are being passed to predicates. How much info do they need? For example: stack, instance, embedded error?
+		// We are making the API. We are going to keep it to bare essentials:
+		return util.scrubObject({
+			code: param.code,
+			details: param.details,
+			message: param.message
+		});
+	}
+	return param;
+}
 
 /**
  * Builds a "library graph". It graphs the various routes that a single function call may make into our library.
@@ -119,7 +138,7 @@ function _parseChain({library, transpiled}) {
 			// intercept the call so that we may steal and describe the function with params, parse and run it ourselves
 			args[0]=function(...input) {
 				const params=input
-					.map(JSON.stringify)
+					.map(param=>JSON.stringify(_paramToPOJO(param)))
 					.join(",");
 				const {sequence, result}=_parseChain({
 					library,
@@ -219,6 +238,7 @@ function _transpileScript({library, script}) {
 module.exports={
 	runScript,
 	_buildChain,
+	_paramToPOJO,
 	_parseChain,
 	_transpileScript
 };
