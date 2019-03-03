@@ -19,21 +19,21 @@ class XRayError extends Error {
 	 * General purpose pig error that hold all of our secrets.  He is designed to stash information
 	 * related to the error so that we capture and report relevant info.  You may specify a number
 	 * of predefined params and include additional ones.  You must supply something that constitutes
-	 * a "message".  This can come from "message", "error", "statusCode" or "instance"...though instance
+	 * a "message".  This can come from "message", "error", "code" or "instance"...though instance
 	 * probably does not make for a very good message.
+	 * @param {number} code - code to associate with error. See <link>./constant.js</link> for enums
 	 * @param {string} details - details in addition to the principle error or message
 	 * @param {Error} error - error that will be promoted to "message" or "details" if they are not specified.
 	 * @param {Object|string} instance - instance of object in which the error occurred
 	 * @param {string} message
-	 * @param {number} statusCode - http code to associate with error. Will will pick up the text.
 	 * @param {Object} properties - additional properties that you want captured and logged.
 	 */
 	constructor({
+		code=undefined,
 		details=undefined,
 		error=undefined,
 		instance=undefined,
 		message=undefined,
-		statusCode=undefined,
 		...properties
 	}) {
 		const leftovers=Object.assign({}, arguments[0]),
@@ -45,10 +45,10 @@ class XRayError extends Error {
 				} else if(leftovers.error) {
 					result=leftovers.error.message;
 					delete leftovers.error;
-				} else if(leftovers.statusCode) {
+				} else if(leftovers.code) {
 					const constant=require("./constant");
-					result=`${constant.status.text(leftovers.statusCode)} (${leftovers.statusCode})`;
-					delete leftovers.statusCode;
+					result=`${constant.error.text(leftovers.code)} (${leftovers.code})`;
+					delete leftovers.code;
 				}
 				return result;
 			};
@@ -60,15 +60,15 @@ class XRayError extends Error {
 			// so that we can trace things to the true origin we steal his stack. There may be times at which we don't want to do this?
 			this.stack=error.stack;
 			// steal goodies that we want to inherit
-			if(statusCode===undefined) {
-				statusCode=error.statusCode;
+			if(code===undefined) {
+				code=error.code;
 			}
 		}
 		XRayError.annotate(this, _.omitBy({
 			details: getMostImportant("details"),
 			error,
 			instance,
-			statusCode,
+			code,
 			...properties
 		}, _.isUndefined));
 	}

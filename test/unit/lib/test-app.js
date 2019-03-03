@@ -34,7 +34,7 @@ describe("lib.ModuleApp", function() {
 			const instance=_createInstance();
 			instance.abort()
 				.catch(error=>{
-					assert.strictEqual(error.statusCode, constant.status.code.ABORT);
+					assert.strictEqual(error.code, constant.error.code.ABORT);
 				});
 		});
 	});

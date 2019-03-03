@@ -21,7 +21,7 @@ command.run(configuration)
 		process.exit(0);
 	})
 	.catch(error=>{
-		if(error.statusCode!==constant.status.code.ABORT) {
+		if(error.code!==constant.error.code.ABORT) {
 			log.error(format.errorToString(error, {
 				details: true,
 				stack: true

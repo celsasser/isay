@@ -1,7 +1,7 @@
 /**
  * User: curtis
  * Date: 2019-02-26
- * Time: 22:12 
+ * Time: 22:12
  * Copyright @2019 by Xraymen Inc.
  */
 
@@ -20,7 +20,7 @@ class ModuleApp extends ModuleIO {
 	 */
 	async abort() {
 		throw new XRayError({
-			statusCode: constant.status.code.ABORT
+			code: constant.error.code.ABORT
 		});
 	}
 

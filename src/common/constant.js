@@ -6,46 +6,22 @@
  * @module common/constant
  */
 
-const http=require("http");
-
 /**
- * MIDI constants and defaults
+ * An extension of the http error codes that we use for internal purposes
  * @enum {number}
  */
-exports.midi={
-	default: {
-		CHANNEL: 0,
-		VELOCITY: 80
+exports.error={
+	code: {
+		ABORT: -1
+	},
+	text: (code)=>{
+		switch(code) {
+			case exports.error.code.ABORT: return "Abort";
+			default: {
+				return String(code);
+			}
+		}
 	}
-};
-
-/**
- * All notification types that may be dispatched
- * @enum {string}
- */
-exports.notification={
-	/***************************************
-	 * "callback" processing notifications
-	 ***************************************/
-	CALLBACK_BAR: "callback-bar",
-	CALLBACK_CLUSTER: "callback-cluster",
-	CALLBACK_TICK: "callback-tick",
-
-	/***************************************
-	 * general edit notifications
-	 ***************************************/
-	CHORD_ADDED: "chord-added",
-	CHORD_DELETED: "chord-deleted",
-	NOTE_ADDED: "note-added",
-	NOTE_DELETED: "note-deleted",
-	SEQUENCE_ADDED: "sequence-added",
-	SEQUENCE_DELETED: "sequence-deleted",
-	STORAGE_ADDED: "storage-added",
-	STORAGE_REMOVED: "storage-removed",
-	TEMPO_ADDED: "tempo-added",
-	TEMPO_DELETED: "tempo-deleted",
-	TRACK_ADDED: "track-added",
-	TRACK_DELETED: "track-deleted"
 };
 
 /**
@@ -75,24 +51,6 @@ exports.severity={
 	 * @private
 	 */
 	_ORDER: ["verbose", "debug", "info", "warn", "error", "fatal"]
-};
-
-/**
- * An extension of the http status codes that we use for internal purposes
- * @enum {number}
- */
-exports.status={
-	code: {
-		ABORT: -1
-	},
-	text: (code)=>{
-		switch(code) {
-			case exports.status.code.ABORT: return "Abort";
-			default: {
-				return http.STATUS_CODES[code];
-			}
-		}
-	}
 };
 
 /**

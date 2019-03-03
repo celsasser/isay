@@ -20,7 +20,7 @@ class ModuleDebug extends ModuleIO {
 	 */
 	async abort() {
 		throw new XRayError({
-			statusCode: constant.status.code.ABORT
+			code: constant.error.code.ABORT
 		});
 	}
 
