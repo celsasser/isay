@@ -64,14 +64,32 @@ describe("lib.ModuleLoop", function() {
 				});
 		});
 
-		it("should use params[1] as endIndex if params.length==2", function() {
+		it("should raise an exception if params[1] is not an object", function() {
 			let index=0;
 			const predicate=sinon.spy((blob, _index)=>{
 				assert.strictEqual(blob, "blob");
 				assert.strictEqual(_index, index++);
 			});
 			const instance=_createInstance({
-				params: [predicate, 10]
+				params: [predicate]
+			});
+			return instance.range("blob")
+				.then(assert.notCalled)
+				.catch(error=>{
+					assert.strictEqual(error.message, "expecting Object but found undefined");
+				});
+		});
+
+		it("should iterate if there is the bare minimum of a 'to' in the params object", function() {
+			let index=0;
+			const predicate=sinon.spy((blob, _index)=>{
+				assert.strictEqual(blob, "blob");
+				assert.strictEqual(_index, index++);
+			});
+			const instance=_createInstance({
+				params: [predicate, {
+					to: 10
+				}]
 			});
 			return instance.range("blob")
 				.then(result=>{
@@ -79,14 +97,17 @@ describe("lib.ModuleLoop", function() {
 				});
 		});
 
-		it("should use params[1] as startIndex and params[2] as endIndex if params.length>2", function() {
+		it("should use 'from' if included", function() {
 			let index=1;
 			const predicate=sinon.spy((blob, _index)=>{
 				assert.strictEqual(blob, "blob");
 				assert.strictEqual(_index, index++);
 			});
 			const instance=_createInstance({
-				params: [predicate, 1, 10]
+				params: [predicate, {
+					from: 1,
+					to: 10
+				}]
 			});
 			return instance.range("blob")
 				.then(result=>{
@@ -94,7 +115,7 @@ describe("lib.ModuleLoop", function() {
 				});
 		});
 
-		it("should include alternate increment if params.length>3", function() {
+		it("should use increment if included", function() {
 			let index=3;
 			const predicate=sinon.spy((blob, _index)=>{
 				assert.strictEqual(blob, "blob");
@@ -102,11 +123,83 @@ describe("lib.ModuleLoop", function() {
 				index+=2;
 			});
 			const instance=_createInstance({
-				params: [predicate, 3, 11, 2]
+				params: [predicate, {
+					from: 3,
+					to: 11,
+					increment: 2
+				}]
 			});
 			return instance.range("blob")
 				.then(result=>{
 					assert.strictEqual(predicate.callCount, 4);
+				});
+		});
+
+		it("should properly apply 'smart' when there is no input", function() {
+			let index=0;
+			const predicate=sinon.spy(blob=>{
+				assert.strictEqual(blob, index++);
+			});
+			const instance=_createInstance({
+				params: [predicate, {
+					to: 10
+				}]
+			});
+			return instance.range()
+				.then(result=>{
+					assert.strictEqual(predicate.callCount, 10);
+				});
+		});
+
+		it("should properly apply 'smart' when there is input", function() {
+			let index=0;
+			const predicate=sinon.spy((blob, _index)=>{
+				assert.strictEqual(blob, "blob");
+				assert.strictEqual(_index, index++);
+			});
+			const instance=_createInstance({
+				params: [predicate, {
+					to: 10
+				}]
+			});
+			return instance.range("blob")
+				.then(result=>{
+					assert.strictEqual(predicate.callCount, 10);
+				});
+		});
+
+		it("should force use of input with input=true", function() {
+			let index=0;
+			const predicate=sinon.spy((blob, _index)=>{
+				assert.strictEqual(blob, "blob");
+				assert.strictEqual(_index, index++);
+			});
+			const instance=_createInstance({
+				params: [predicate, {
+					input: true,
+					to: 10
+				}]
+			});
+			return instance.range("blob")
+				.then(result=>{
+					assert.strictEqual(predicate.callCount, 10);
+				});
+		});
+
+		it("should force no use of input with input='index'", function() {
+			let index=0;
+			const predicate=sinon.spy(blob=>{
+				assert.strictEqual(blob, index++);
+			});
+			const instance=_createInstance({
+				params: [predicate, {
+					input: "index",
+					to: 10
+				}]
+			});
+			return instance.range("blob")
+				.then(result=>{
+					assert.strictEqual(predicate.callCount, 10);
 				});
 		});
 	});
