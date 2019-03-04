@@ -6,11 +6,10 @@
  */
 
 /**
- * Test catch of thrown with a catch immediately following
+ * Test catch of thrown with an catch immediately following
  */
 
 std.in("blob")
 	.error.throw("throw")
-	.error.catch(error=>{
-		return `error=${error.message}`;
-	})
+	.std.in("unexpected")
+	.error.catch("result")

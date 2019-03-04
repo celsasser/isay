@@ -27,6 +27,7 @@ describe("lib.ModulePath", function() {
 		it("should throw exception if input data is not a string", async function() {
 			const instance=_createInstance();
 			return instance.absolute(null)
+				.then(assert.notCalled)
 				.catch(error=>{
 					assert.strictEqual(error.message, "expecting String but found null");
 				});
@@ -55,6 +56,7 @@ describe("lib.ModulePath", function() {
 		it("should throw exception if input data is not a string", async function() {
 			const instance=_createInstance();
 			return instance.relative(null)
+				.then(assert.notCalled)
 				.catch(error=>{
 					assert.strictEqual(error.message, "expecting String but found null");
 				});

@@ -37,7 +37,7 @@ describe("lib.ModuleJson", function() {
 		it("should throw exception if path cannot be found", async function() {
 			const instance=_createInstance();
 			return instance.read()
-				.then(assert.fail)
+				.then(assert.notCalled)
 				.catch(error=>{
 					assert.ok(error.message.startsWith("expecting string"));
 				});
@@ -103,7 +103,7 @@ describe("lib.ModuleJson", function() {
 		it("should throw exception if path cannot be found", async function() {
 			const instance=_createInstance();
 			return instance.write()
-				.then(assert.fail)
+				.then(assert.notCalled)
 				.catch(error=>{
 					assert.ok(error.message.startsWith("expecting string"));
 				});

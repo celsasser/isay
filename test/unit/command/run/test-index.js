@@ -23,7 +23,7 @@ describe("command.run.index", function() {
 		it.skip("debug script", async function() {
 			const configuration={
 				options: {
-					script: "test/scripts/script-run-catch-two.js"
+					script: "test/scripts/script-run-catch-five.js"
 				}
 			};
 			return run(configuration)
@@ -42,7 +42,19 @@ describe("command.run.index", function() {
 			},
 			{
 				script: "test/scripts/script-run-catch-two.js",
-				expected: "error=throw+1"
+				expected: "error=throw1"
+			},
+			{
+				script: "test/scripts/script-run-catch-three.js",
+				expected: "blob"
+			},
+			{
+				script: "test/scripts/script-run-catch-four.js",
+				expected: "result"
+			},
+			{
+				script: "test/scripts/script-run-catch-five.js",
+				expected: [2, 3]
 			},
 			{
 				script: "test/scripts/script-run-chain.js",

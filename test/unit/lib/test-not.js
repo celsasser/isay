@@ -29,7 +29,7 @@ describe("lib.ModuleNot", function() {
 				params: ["string"]
 			});
 			return instance.endsWith([])
-				.then(assert.fail)
+				.then(assert.notCalled)
 				.catch(error=>{
 					assert.strictEqual(error.message, "expecting String but found Array");
 				});
@@ -74,7 +74,7 @@ describe("lib.ModuleNot", function() {
 				params: ["string"]
 			});
 			return instance.oneOf("data")
-				.then(assert.fail)
+				.then(assert.notCalled)
 				.catch(error=>{
 					assert.strictEqual(error.message, "expecting Array but found String");
 				});
@@ -103,7 +103,7 @@ describe("lib.ModuleNot", function() {
 				params: ["string"]
 			});
 			return instance.startsWith([])
-				.then(assert.fail)
+				.then(assert.notCalled)
 				.catch(error=>{
 					assert.strictEqual(error.message, "expecting String but found Array");
 				});

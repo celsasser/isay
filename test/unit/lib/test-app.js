@@ -33,6 +33,7 @@ describe("lib.ModuleApp", function() {
 		it("should throw an exception", async function() {
 			const instance=_createInstance();
 			instance.abort()
+				.then(assert.notCalled)
 				.catch(error=>{
 					assert.strictEqual(error.code, constant.error.code.ABORT);
 				});

@@ -46,8 +46,9 @@ class ModuleBase {
 	 * @returns {Promise<DataBlob>}
 	 */
 	async process(data=undefined, ...args) {
+		let blob;
 		try {
-			let blob=this._preprocessChunk(data);
+			blob=this._preprocessChunk(data);
 			log.verbose(()=>{
 				const {input}=this._getPreviewDetails(blob);
 				return `- executing ${this.domain}.${this.action}(${input})`;
@@ -59,7 +60,7 @@ class ModuleBase {
 		} catch(error) {
 			if(this._trap) {
 				// we have a "catch" error handler so we let him handle it.
-				return this._trap.process(error);
+				return this._trap.process(error, blob, ...args);
 			} else {
 				// look to see whether this was reported by us. If so then it means that
 				// the chain was nested. We just want the top level error.

@@ -37,7 +37,7 @@ describe("lib.ModuleString", function() {
 						params: [search, replace]
 					});
 				return instance.replace(input)
-					.then(assert.fail)
+					.then(assert.notCalled)
 					.catch(error=>{
 						assert.ok(error.message.startsWith("expecting"));
 					});

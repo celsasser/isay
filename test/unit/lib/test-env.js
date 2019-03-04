@@ -27,6 +27,7 @@ describe("lib.ModuleEnv", function() {
 		it("should throw exception if variable name not found", async function() {
 			const instance=_createInstance();
 			return instance.delete()
+				.then(assert.notCalled)
 				.catch(error=>{
 					assert.strictEqual(error.message, "expecting String but found undefined");
 				});
@@ -50,7 +51,7 @@ describe("lib.ModuleEnv", function() {
 		it("should get the whole enchilada", async function() {
 			const instance=_createInstance();
 			return instance.get()
-				.catch(result=>{
+				.then(result=>{
 					assert.deepEqual(result, process.env);
 				});
 		});
@@ -60,16 +61,18 @@ describe("lib.ModuleEnv", function() {
 		it("should throw exception if variable name not found", async function() {
 			const instance=_createInstance();
 			return instance.set("value")
+				.then(assert.notCalled)
 				.catch(error=>{
 					assert.strictEqual(error.message, "expecting String but found undefined");
 				});
 		});
 
-		it("should throw exception if value cannot be not found", async function() {
+		it("should throw exception if name is not a string", async function() {
 			const instance=_createInstance({
-				params: ["name"]
+				params: [1]
 			});
 			return instance.set()
+				.then(assert.notCalled)
 				.catch(error=>{
 					assert.strictEqual(error.message, "expecting String but found Number");
 				});

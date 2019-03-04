@@ -27,7 +27,7 @@ describe("lib.ModuleObject", function() {
 		it("should throw exception if data is not JSON", async function() {
 			const instance=_createInstance();
 			instance.get("string")
-				.then(assert.fail)
+				.then(assert.notCalled)
 				.catch(error=>{
 					assert.strictEqual(error.message, "expecting one of Array or Object but found String");
 				});
@@ -58,6 +58,7 @@ describe("lib.ModuleObject", function() {
 		it("should throw exception if blob is not an object", async function() {
 			const instance=_createInstance();
 			return instance.map("string")
+				.then(assert.notCalled)
 				.catch(error=>{
 					assert.strictEqual(error.message, "expecting one of Array or Object but found String");
 				});
@@ -66,6 +67,7 @@ describe("lib.ModuleObject", function() {
 		it("should throw exception if param is not a predicate or array", async function() {
 			const instance=_createInstance();
 			return instance.map({})
+				.then(assert.notCalled)
 				.catch(error=>{
 					assert.strictEqual(error.message, "expecting Array or Function but found undefined");
 				});

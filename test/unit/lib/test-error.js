@@ -24,15 +24,25 @@ describe("lib.ModuleError", function() {
 	}
 
 	describe("catch", function() {
-		it("should raise exception if params[0] is not a predicate", async function() {
+		it("should return input if params[0] is not defined", async function() {
 			const instance=_createInstance();
-			return instance.catch()
-				.catch(error=>{
-					assert.strictEqual(error.message, "missing predicate function");
+			return instance.catch("error", "input")
+				.then(result=>{
+					assert.strictEqual(result, "input");
 				});
 		});
 
-		it("should return the result of the predicate", function() {
+		it("should return params[0] if set and not a predicate", function() {
+			const instance=_createInstance({
+				params: ["result"]
+			});
+			return instance.catch("error")
+				.then(result=>{
+					assert.strictEqual(result, "result");
+				});
+		});
+
+		it("should return the result of a predicate", function() {
 			const instance=_createInstance({
 				params: [error=>{
 					assert.strictEqual(error, "error");
@@ -50,6 +60,7 @@ describe("lib.ModuleError", function() {
 		it("should raise exception if params[0] is not a valid type", async function() {
 			const instance=_createInstance();
 			return instance.throw()
+				.then(assert.notCalled)
 				.catch(error=>{
 					assert.strictEqual(error.message, "expecting Error or Function or String but found undefined");
 				});
@@ -63,6 +74,7 @@ describe("lib.ModuleError", function() {
 				}]
 			});
 			return instance.throw("blob")
+				.then(assert.notCalled)
 				.catch(error=>{
 					assert.strictEqual(error.message, "failed");
 				});
@@ -73,6 +85,7 @@ describe("lib.ModuleError", function() {
 				params: [new Error("failed")]
 			});
 			return instance.throw("blob")
+				.then(assert.notCalled)
 				.catch(error=>{
 					assert.strictEqual(error.message, "failed");
 				});
@@ -83,6 +96,7 @@ describe("lib.ModuleError", function() {
 				params: ["failed"]
 			});
 			return instance.throw("blob")
+				.then(assert.notCalled)
 				.catch(error=>{
 					assert.strictEqual(error.message, "failed");
 				});

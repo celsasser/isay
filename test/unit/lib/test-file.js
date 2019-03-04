@@ -205,7 +205,7 @@ describe("lib.ModuleFile", function() {
 				});
 			fs.outputFileSync(path, "text");
 			return instance.ensure(path)
-				.then(assert.fail)
+				.then(assert.notCalled)
 				.catch(error=>{
 					assert.strictEqual(error.message, '"./test/data/output/file/ensure" already exists but is not a directory');
 				});
@@ -231,7 +231,7 @@ describe("lib.ModuleFile", function() {
 		it("should throw exception if path cannot be found", async function() {
 			const instance=_createInstance();
 			return instance.read()
-				.then(assert.fail)
+				.then(assert.notCalled)
 				.catch(error=>{
 					assert.strictEqual(error.message, "expecting string as file-path but found undefined");
 				});
@@ -264,7 +264,7 @@ describe("lib.ModuleFile", function() {
 		it("should throw exception if path cannot be found", async function() {
 			const instance=_createInstance();
 			return instance.write()
-				.then(assert.fail)
+				.then(assert.notCalled)
 				.catch(error=>{
 					assert.ok(error.message.startsWith("expecting string"));
 				});
@@ -316,7 +316,7 @@ describe("lib.ModuleFile", function() {
 				params: ["archive"]
 			});
 			return instance.zip()
-				.then(assert.fail)
+				.then(assert.notCalled)
 				.catch(error=>{
 					assert.strictEqual(error.message, "expecting String or Array but found undefined");
 				});
@@ -325,7 +325,7 @@ describe("lib.ModuleFile", function() {
 		it("should throw exception if archive is not known type", async function() {
 			const instance=_createInstance();
 			return instance.zip("files")
-				.then(assert.fail)
+				.then(assert.notCalled)
 				.catch(error=>{
 					assert.strictEqual(error.message, "expecting String but found undefined");
 				});

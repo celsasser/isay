@@ -17,12 +17,20 @@ class ModuleError extends ModuleBase {
 	 * - they throw an error in which case it goes to the next handler or we exit
 	 * - whatever the return becomes input for whatever follows this action
 	 * @resolves predicate:CatchPredicate in this.params[0]
+	 * @resolves result:(*) in this.params[0]
 	 * @param {Error} error
+	 * @param {DataBlob} blob
 	 * @returns {Promise<*>}
 	 */
-	async catch(error) {
-		const predicate=this._assertPredicate(this.params[0]);
-		return predicate(error);
+	async catch(error, blob) {
+		if(this.params.length===0) {
+			return blob;
+		} else if(typeof(this.params[0])==="function") {
+			const predicate=this._assertPredicate(this.params[0], blob);
+			return predicate(error);
+		} else {
+			return this.params[0];
+		}
 	}
 
 	/**

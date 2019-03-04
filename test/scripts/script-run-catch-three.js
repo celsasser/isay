@@ -6,11 +6,10 @@
  */
 
 /**
- * Test catch of thrown with a catch immediately following
+ * Test catch without a param which acts as both a handler as well as a throughput filter
  */
 
 std.in("blob")
 	.error.throw("throw")
-	.error.catch(error=>{
-		return `error=${error.message}`;
-	})
+	.std.in("skipped")
+	.error.catch()
