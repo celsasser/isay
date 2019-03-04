@@ -25,8 +25,8 @@ class ModuleString extends ModuleBase {
 			let search=this.params[0],
 				replace=this.params[1];
 			this._assertType(data, "String");
-			this._assertType(search, ["RegExp", "String"], {allowNull: false}),
-				this._assertType(replace, ["String"], {allowNull: false});
+			this._assertType(search, ["RegExp", "String"], {allowNull: false});
+			this._assertType(replace, ["String"], {allowNull: false});
 			if(search.constructor.name!=="RegExp") {
 				search=new RegExp(search, "g");
 			}

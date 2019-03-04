@@ -5,7 +5,6 @@
  * Copyright @2019 by Xraymen Inc.
  */
 
-const _=require("lodash");
 const assert=require("../../../support/assert");
 const execute=require("../../../../src/command/run/_execute");
 const {XRayError}=require("../../../../src/common/error");

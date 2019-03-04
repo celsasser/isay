@@ -157,6 +157,7 @@ class ModuleBase {
 	 * @param {Number|undefined} code
 	 * @param {Error} error
 	 * @param {string} message
+	 * @returns {XRayError}
 	 * @protected
 	 */
 	_createExpectedError({
@@ -177,6 +178,7 @@ class ModuleBase {
 	/**
 	 * Creates a special error that we will know and not modify as it percolates up through nested chains.
 	 * @param {Error} error
+	 * @returns {XRayError}
 	 * @private
 	 */
 	_createUnexpectedError(error) {
@@ -187,7 +189,6 @@ class ModuleBase {
 			instance: this,
 			message: `${this.domain}.${this.action} failed`
 		});
-
 	}
 
 

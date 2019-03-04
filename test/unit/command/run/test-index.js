@@ -10,6 +10,7 @@ const proxy=require("../../../support/proxy");
 const assert=require("../../../support/assert");
 const {run}=require("../../../../src/command/run");
 
+/* eslint-disable no-console */
 describe("command.run.index", function() {
 	beforeEach(function() {
 		proxy.std.stub();
