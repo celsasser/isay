@@ -13,77 +13,121 @@ const {ModuleBase}=require("./_base");
  */
 class ModuleMath extends ModuleBase {
 	/**
-	 * Adds whatever is in this.params[0], provided it is a number, to the incoming value
-	 * @param {Number} value
+	 * Adds whatever is in this.params[0], provided it is a number, to the incoming <param>input</param>
+	 * @param {Number|Array<Number>} input
 	 * @returns {Promise<Number>}
 	 */
-	async add(value) {
-		this._assertType(value, "Number");
-		this._assertType(this.params[0], "Number");
-		return value+this.params[0];
+	async add(input) {
+		return this._applyBinary(input, (a, b)=>a+b);
 	}
 
 	/**
-	 * Applies ceiling to the incoming value
-	 * @param {Number} value
-	 * @returns {Promise<Number>}
+	 * Applies ceiling to the incoming <param>input</param>
+	 * @param {Number|Array<Number>} input
+	 * @returns {Promise<(Number|Array<Number>)}
 	 */
-	async ceiling(value) {
-		this._assertType(value, "Number");
-		return Math.ceil(value);
+	async ceiling(input) {
+		return this._applyUnary(input, Math.ceil);
 	}
 
 	/**
-	 * Divides incoming value from whatever is in this.params[0] provided it is a number
-	 * @param {Number} value
+	 * Divides incoming <param>input</param> from whatever is in this.params[0] provided it is a number
+	 * @param {Number|Array<Number>} input
 	 * @returns {Promise<Number>}
 	 */
-	async divide(value) {
-		this._assertType(value, "Number");
-		this._assertType(this.params[0], "Number");
-		return value/this.params[0];
+	async divide(input) {
+		return this._applyBinary(input, (a, b)=>a/b);
 	}
 
 	/**
-	 * Applies floor to the incoming value
-	 * @param {Number} value
-	 * @returns {Promise<Number>}
+	 * Applies floor to the incoming <param>input</param>
+	 * @param {Number|Array<Number>} input
+	 * @returns {Promise<(Number|Array<Number>)}
 	 */
-	async floor(value) {
-		this._assertType(value, "Number");
-		return Math.floor(value);
+	async floor(input) {
+		return this._applyUnary(input, Math.floor);
 	}
 
 	/**
-	 * Multiplies incoming value from whatever is in this.params[0] provided it is a number
-	 * @param {Number} value
+	 * Returns the largest number in the <param>input</param> sequence
+	 * @param {Array<Number>} input
 	 * @returns {Promise<Number>}
 	 */
-	async multiply(value) {
-		this._assertType(value, "Number");
-		this._assertType(this.params[0], "Number");
-		return value*this.params[0];
+	async max(input) {
+		this._assertType(input, "Array");
+		return Math.max.apply(null, input);
 	}
 
 	/**
-	 * Rounds the incoming value
-	 * @param {Number} value
+	 * Returns the smallest number in the <param>input</param> sequence
+	 * @param {Array<Number>} input
 	 * @returns {Promise<Number>}
 	 */
-	async round(value) {
-		this._assertType(value, "Number");
-		return Math.round(value);
+	async min(input) {
+		this._assertType(input, "Array");
+		return Math.min.apply(null, input);
 	}
 
 	/**
-	 * Subtracts whatever is in this.params[0], provided it is a number, from the incoming value
-	 * @param {Number} value
+	 * Multiplies incoming <param>input</param> from whatever is in this.params[0] provided it is a number
+	 * @param {Number|Array<Number>} input
 	 * @returns {Promise<Number>}
 	 */
-	async subtract(value) {
-		this._assertType(value, "Number");
-		this._assertType(this.params[0], "Number");
-		return value-this.params[0];
+	async multiply(input) {
+		return this._applyBinary(input, (a, b)=>a*b);
+	}
+
+	/**
+	 * Rounds the incoming <param>input</param>
+	 * @param {Number|Array<Number>} input
+	 * @returns {Promise<(Number|Array<Number>)}
+	 */
+	async round(input) {
+		return this._applyUnary(input, Math.round);
+	}
+
+	/**
+	 * Subtracts whatever is in this.params[0], provided it is a number, from the incoming <param>input</param>
+	 * @param {Number|Array<Number>} input
+	 * @returns {Promise<Number>}
+	 */
+	async subtract(input) {
+		return this._applyBinary(input, (a, b)=>a-b);
+	}
+
+	/********************* Private Interface *********************/
+	/**
+	 * Applies operation to either the <param>input</param> and params[0] or to the sequence of <param>input</param>
+	 * @param {Number|Array<Number>} input
+	 * @param {function(a:Number):Number} operation
+	 * @return {Number}
+	 * @throws {Error}
+	 * @private
+	 */
+	_applyUnary(input, operation) {
+		this._assertType(input, ["Array", "Number"]);
+		return (input.constructor.name==="Number")
+			? operation(input)
+			: input.map(operation);
+	}
+
+	/**
+	 * Applies operator either the <param>input</param> and params[0] or to the sequence of <param>input</param>
+	 * @param {Number|Array<Number>} input
+	 * @param {function(a:Number,b:Number):Number} operator
+	 * @return {Number}
+	 * @throws {Error}
+	 * @private
+	 */
+	_applyBinary(input, operator) {
+		this._assertType(input, ["Array", "Number"]);
+		if(input.constructor.name==="Number") {
+			this._assertType(this.params[0], "Number");
+			return operator(input, this.params[0]);
+		} else {
+			return input.slice(1)
+				.reduce(operator, input[0]);
+		}
 	}
 }
 

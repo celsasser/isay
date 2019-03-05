@@ -26,10 +26,10 @@ describe("lib.ModuleObject", function() {
 	describe("get", function() {
 		it("should throw exception if data is not JSON", async function() {
 			const instance=_createInstance();
-			instance.get("string")
+			return instance.get("string")
 				.then(assert.notCalled)
 				.catch(error=>{
-					assert.strictEqual(error.message, "expecting one of Array or Object but found String");
+					assert.strictEqual(error.message, "expecting Array or Object but found String");
 				});
 		});
 
@@ -60,7 +60,7 @@ describe("lib.ModuleObject", function() {
 			return instance.map("string")
 				.then(assert.notCalled)
 				.catch(error=>{
-					assert.strictEqual(error.message, "expecting one of Array or Object but found String");
+					assert.strictEqual(error.message, "expecting Array or Object but found String");
 				});
 		});
 

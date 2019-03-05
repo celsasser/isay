@@ -62,7 +62,7 @@ describe("lib.ModuleError", function() {
 			return instance.throw()
 				.then(assert.notCalled)
 				.catch(error=>{
-					assert.strictEqual(error.message, "expecting Error or Function or String but found undefined");
+					assert.strictEqual(error.message, "expecting Error, Function or String but found undefined");
 				});
 		});
 

@@ -88,7 +88,9 @@ class ModuleBase {
 	}={}) {
 		function _formatAllowed() {
 			return _.isArray(allowed)
-				? allowed.join(" or ")
+				? allowed.slice(0, allowed.length-1)
+					.join(", ")
+					+` or ${allowed[allowed.length-1]}`
 				: allowed;
 		}
 		if(value==null) {
@@ -101,7 +103,7 @@ class ModuleBase {
 				: typeof(value);
 			if(_.isArray(allowed)) {
 				if(_.includes(allowed, type)===false) {
-					throw new Error(`expecting one of ${_formatAllowed()} but found ${util.name(value)}`);
+					throw new Error(`expecting ${_formatAllowed()} but found ${util.name(value)}`);
 				}
 			} else {
 				if(type!==allowed) {
