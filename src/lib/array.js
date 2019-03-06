@@ -97,6 +97,47 @@ class ModuleArray extends ModuleBase {
 	}
 
 	/**
+	 * Creates a sequence, within the specified range, of numbers and at a specified interval.
+	 * Note: This is our solution to finite looping. See notes in <link>./loop.js</link> for an explanation for
+	 * we are supporting iteration via arrays vs. a looping construct.
+	 *
+	 * If there are parameters then we assume the sequence is defined by them. If not then
+	 * the configuration should be in <param>blob</param>
+	 * @resolves endIndex:Number in (this.params[0]|blob)
+	 * @resolves fromIndex:Number in this.params[0]
+	 * @resolves endIndex:Number in this.params[1]
+	 * @resolves increment:Number in this.params[2]
+	 * @param {DataBlob} blob
+	 * @returns {Promise<Array<Number>>}
+	 */
+	async range(blob) {
+		let endIndex,
+			increment=1,
+			startIndex=0,
+			result=[];
+		// If there are parameters then we assume the sequence is defined by them otherwise it should be in <param>blob</param>
+		const params=(this.params.length===0)
+			? _.isArray(blob) ? blob : [blob]
+			: this.params;
+		this._assertType(params[0], "Number");
+		if(params.length===1) {
+			endIndex=params[0];
+		} else {
+			this._assertType(params[1], "Number");
+			startIndex=params[0];
+			endIndex=params[1];
+			if(params.length>=3) {
+				this._assertType(params[2], "Number");
+				increment=params[2];
+			}
+		}
+		for(startIndex; startIndex<endIndex; startIndex+=increment) {
+			result.push(startIndex);
+		}
+		return result;
+	}
+
+	/**
 	 * Reduces array down to the little or big guy you make him.
 	 * @resolves predicate:function(result:*, data:*, index:Number):* in this.params[0]
 	 * @resolves startingValue: in this.params[1] - defaults to []

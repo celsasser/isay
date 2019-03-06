@@ -5,14 +5,21 @@
  * Copyright @2019 by Xraymen Inc.
  */
 
-const _=require("lodash");
 const {ModuleIO}=require("./_io");
 
 /**
- * Allows one to loop. One must think about what looping means for mouse. We are a very basic scripting language and want
- * to remain a very basic scripting language. I see two valuable and useful means of looping:
- * 1. forever - to give users the ability to repeatedly do something such as probe, test, etc.
- * 2. x number of times - it's a nice way to introduce indexed operations and a finite means of probing, testing, etc.
+ * Allows one to loop. But one must think about what looping means for mouse. We are a very basic scripting language
+ * and want to remain a very basic scripting language. I see two valuable and useful means of looping:
+ *  1. forever - to give users the ability to repeatedly do something such as probe, test, etc.
+ *  2. n iterations - lets call it "times"
+ * The first - forever - does not pose any problems. The input to forever becomes the input to its predicate and that is that.
+ * But the second - times - gets muddy. What should the input its predicate be? I presume the iteration index
+ * would be the preference most of the time. But what about when there is input to times? There isn't a single approach
+ * that makes sense. And I don't want to start make assumptions or having different behaviors. So, instead of making "times"
+ * an action we are going to create array.range allowing for the consistent and single input model we want to maintain.
+ *
+ * Note: see history before 3/5/2019 if you are curious about an implementation for "times" (called range) that I am rejecting.
+ *
  * @typedef {ModuleIO} ModuleLoop
  */
 class ModuleLoop extends ModuleIO {
@@ -36,40 +43,6 @@ class ModuleLoop extends ModuleIO {
 			};
 			_run();
 		});
-	}
-
-	/**
-	 * Loops a finite number of times. There is some flexibility in creating the sequence it iterates over
-	 * @resolves predicate:ArrayPredicate in this.params[0]
-	 * @resolves {from:Number=0,increment:Number=1,input:String="smart",to:Number}:Object in this.params[1]
-	 * @param {DataBlob} blob
-	 * @returns {Promise<void>}
-	 */
-	async range(blob) {
-		let predicate=this._assertPredicate(this.params[0]);
-		this._assertType(this.params[1], "Object");
-		let startIndex=_.get(this.params[1], "from", 0),
-			endIndex=this.params[1].to,
-			increment=_.get(this.params[1], "increment", 1),
-			inputMode=_.get(this.params[1], "input", "smart");
-		this._assertType(endIndex, "Number");
-		this._assertType(startIndex, "Number");
-		this._assertType(increment, "Number");
-		this._assertType(inputMode, ["Boolean", "String"]);
-		// here we are trying to figure out whether they want <param>blob</param> as input. 99% of the time they probably
-		// do not and "smart" (our default) should do the trick which is to say if there is input then use it otherwise
-		// the pole position input will be an index.
-		if(inputMode==="smart") {
-			if(blob!==undefined) {
-				predicate=predicate.bind(null, blob);
-			}
-		} else if(inputMode!=="index") {
-			predicate=predicate.bind(null, blob);
-		}
-		for(startIndex; startIndex<endIndex; startIndex+=increment) {
-			await predicate(startIndex);
-		}
-		return blob;
 	}
 }
 

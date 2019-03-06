@@ -145,6 +145,63 @@ describe("lib.ModuleArray", function() {
 		});
 	});
 
+	describe("range", function() {
+		it("should raise exception if there is no configuration info", function() {
+			const instance=_createInstance({});
+			return instance.range()
+				.then(assert.notCalled)
+				.catch(error=>{
+					assert.strictEqual(error.message, "expecting Number but found undefined");
+				});
+		});
+
+		it("should use input as endIndex if params.length==0", function() {
+			const instance=_createInstance();
+			return instance.range(5)
+				.then(result=>{
+					assert.deepEqual(result, [0, 1, 2, 3, 4]);
+				});
+		});
+
+		it("should use params[0] as endIndex if params.length==1", function() {
+			const instance=_createInstance({
+				params: [5]
+			});
+			return instance.range()
+				.then(result=>{
+					assert.deepEqual(result, [0, 1, 2, 3, 4]);
+				});
+		});
+
+		it("should use input[0] as startIndex and input[1] as endIndex if specified as an array", function() {
+			const instance=_createInstance();
+			return instance.range([1, 5])
+				.then(result=>{
+					assert.deepEqual(result, [1, 2, 3, 4]);
+				});
+		});
+
+		it("should use params[0] as startIndex and params[1] as endIndex if params.length===2", function() {
+			const instance=_createInstance({
+				params: [1, 5]
+			});
+			return instance.range("blob")
+				.then(result=>{
+					assert.deepEqual(result, [1, 2, 3, 4]);
+				});
+		});
+
+		it("should include alternate increment if params.length>3", function() {
+			const instance=_createInstance({
+				params: [1, 6, 2]
+			});
+			return instance.range("blob")
+				.then(result=>{
+					assert.deepEqual(result, [1, 3, 5]);
+				});
+		});
+	});
+
 	describe("reduce", function() {
 		it("should reduce and return result", async function() {
 			const instance=_createInstance({
