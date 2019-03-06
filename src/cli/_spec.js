@@ -49,6 +49,17 @@ exports.OPTIONS=[
 	{
 		actions: ["run"],
 		args: {
+			count: 0
+		},
+		desc: "full logging of input and params",
+		keys: {
+			short: "d",
+			long: "debug"
+		}
+	},
+	{
+		actions: ["run"],
+		args: {
 			count: 1,
 			name: "script"
 		},

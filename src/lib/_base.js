@@ -6,6 +6,7 @@
  */
 
 const _=require("lodash");
+const {getApplicationConfiguration}=require("../command/configuration");
 const {XRayError}=require("../common/error");
 const log=require("../common/log");
 const util=require("../common/util");
@@ -47,12 +48,19 @@ class ModuleBase {
 	 */
 	async process(data=undefined, ...args) {
 		let blob;
+		const configuration=getApplicationConfiguration();
 		try {
 			blob=this._preprocessChunk(data);
-			log.verbose(()=>{
-				const {input}=this._getPreviewDetails(blob);
-				return `- executing ${this.domain}.${this.action}(${input})`;
-			});
+			if(configuration.options.debug) {
+				const {input, params}=this._formatDebugActionDetails(blob),
+					paramsText=params.map((text, index)=>`\n   params[${index}]=${text}`, "").join("");
+				log.info(`- executing ${this.domain}.${this.action}(${input})${paramsText}`);
+			} else {
+				log.verbose(()=>{
+					const {input}=this._formatVerboseActionDetails(blob);
+					return `- executing ${this.domain}.${this.action}(${input})`;
+				});
+			}
 			blob=await this[this.method](blob, ...args);
 			return (this._output)
 				? this._output.process(blob)
@@ -212,37 +220,71 @@ class ModuleBase {
 	}
 
 	/**
-	 * Allows modules to return more detailed info, where appropriate, for detailed logging.
-	 * @param {DataBlob} data
-	 * @returns {{input:string}}
+	 * Formats data for verbose or debug presentation. It is assumed that <param>data</param> was received as input or param data.
+	 * @param {*} data
+	 * @param {Number} max
+	 * @returns {string}
 	 * @private
 	 */
-	_getPreviewDetails(data) {
-		let input="";
+	static _formatVariableData(data, max=Number.MAX_SAFE_INTEGER) {
+		let formatted="";
 		if(data!==undefined) {
-			if(typeof(data)==="string") {
-				data=_.chain(data)
+			if(typeof(data)==="function") {
+				formatted="Function";
+			} else {
+				// Most of the data we are going to encounter in mouse is not going to be binary. So, optimistically, we are going
+				// to convert it to text and see what we make of it.
+				let text=(typeof(data)==="object")
+					? JSON.stringify(data)
+					: String(data);
+				text=_.chain(text)
 					.deburr()
 					// there has got to be a way to do this in one fell swoop?
 					.replace(/\n/g, "\\n")
 					.replace(/\r/g, "\\r")
 					.replace(/\t/g, "\\t")
 					.value();
-				if(data.length<80) {
-					input=`"${data}"`;
+				if(text.length<max) {
+					formatted=`${text}`;
 				} else {
-					input=`"${data.substr(0, 38)}[...]${data.substr(data.length-38)}"`;
+					const split=Math.floor(max/2)-2;
+					formatted=`${text.substr(0, split)}[...]${text.substr(text.length-split)}`;
 				}
 				// let's make sure it is all within the printable ascii range. If not then we will simply label it "Binary"
-				if(input.match(/[^\u0020-\u007f]/)) {
-					input="Binary";
+				if(formatted.match(/[^\u0020-\u007f]/)) {
+					formatted="Binary";
+				} else if(typeof(data)==="string") {
+					formatted=`"${formatted}"`;
 				}
-			} else {
-				input=util.name(data);
 			}
 		}
+		return formatted;
+	}
+	/**
+	 * Debug information. More detail than verbose and includes params.
+	 * @param {DataBlob} data
+	 * @returns {{input:string, params:Array<string>}}
+	 * @private
+	 */
+	_formatDebugActionDetails(data) {
+		// This max is a somewhat arbitrary number. We want to log as much as reasonable.
+		// But the input could be enormous and at some point is just interference.
+		const max=256;
 		return {
-			input
+			input: ModuleBase._formatVariableData(data, max),
+			params: this.params.map(param=>ModuleBase._formatVariableData(param, max))
+		};
+	}
+
+	/**
+	 * Allows modules to return more detailed info, where appropriate, for detailed logging.
+	 * @param {DataBlob} data
+	 * @returns {{input:string}}
+	 * @private
+	 */
+	_formatVerboseActionDetails(data) {
+		return {
+			input: ModuleBase._formatVariableData(data, 80)
 		};
 	}
 
