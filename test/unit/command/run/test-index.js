@@ -24,7 +24,7 @@ describe("command.run.index", function() {
 		it.skip("debug script", async function() {
 			const configuration={
 				options: {
-					script: "test/scripts/script-run-catch-five.js"
+					script: "test/scripts/script-catch-five.js"
 				}
 			};
 			return run(configuration)
@@ -38,27 +38,27 @@ describe("command.run.index", function() {
 
 		[
 			{
-				script: "test/scripts/script-run-catch-one.js",
+				script: "test/scripts/script-catch-one.js",
 				expected: "error=throw"
 			},
 			{
-				script: "test/scripts/script-run-catch-two.js",
+				script: "test/scripts/script-catch-two.js",
 				expected: "error=throw1"
 			},
 			{
-				script: "test/scripts/script-run-catch-three.js",
+				script: "test/scripts/script-catch-three.js",
 				expected: "blob"
 			},
 			{
-				script: "test/scripts/script-run-catch-four.js",
+				script: "test/scripts/script-catch-four.js",
 				expected: "result"
 			},
 			{
-				script: "test/scripts/script-run-catch-five.js",
+				script: "test/scripts/script-catch-five.js",
 				expected: [2, 3]
 			},
 			{
-				script: "test/scripts/script-run-chain.js",
+				script: "test/scripts/script-chain.js",
 				expected: [
 					"Wesley",
 					"Tiny",
@@ -66,7 +66,7 @@ describe("command.run.index", function() {
 				]
 			},
 			{
-				script: "test/scripts/script-run-chain-embedded.js",
+				script: "test/scripts/script-chain-embedded.js",
 				expected: [
 					{
 						"age": 5,
@@ -89,7 +89,7 @@ describe("command.run.index", function() {
 				]
 			},
 			{
-				script: "test/scripts/script-run-chain-predicate.js",
+				script: "test/scripts/script-chain-predicate.js",
 				expected: [
 					{
 						"age": 5,
@@ -115,14 +115,14 @@ describe("command.run.index", function() {
 				]
 			},
 			{
-				script: "test/scripts/script-run-closure-test.js",
+				script: "test/scripts/script-closure-test.js",
 				expected: {
 					"age": 4,
 					"name": "George"
 				}
 			},
 			{
-				script: "test/scripts/script-run-function-predicate.js",
+				script: "test/scripts/script-function-predicate.js",
 				expected: [
 					{
 						"age": 5,
@@ -145,15 +145,15 @@ describe("command.run.index", function() {
 				]
 			},
 			{
-				script: "test/scripts/script-run-object-get.js",
+				script: "test/scripts/script-object-get.js",
 				expected: "cat"
 			},
 			{
-				script: "test/scripts/script-run-json-stringify.js",
+				script: "test/scripts/script-json-stringify.js",
 				expected: "{\"george\":{\"type\":\"cat\"}}"
 			},
 			{
-				script: "test/scripts/script-run-object-set.js",
+				script: "test/scripts/script-object-set.js",
 				expected: {
 					"george": {
 						"type": "cat"
@@ -164,19 +164,19 @@ describe("command.run.index", function() {
 				}
 			},
 			{
-				script: "test/scripts/script-run-throw-error.js",
+				script: "test/scripts/script-throw-error.js",
 				errorText: "as error"
 			},
 			{
-				script: "test/scripts/script-run-throw-predicate.js",
+				script: "test/scripts/script-throw-predicate.js",
 				errorText: "as predicate"
 			},
 			{
-				script: "test/scripts/script-run-throw-string.js",
+				script: "test/scripts/script-throw-string.js",
 				errorText: "as string"
 			},
 			{
-				script: "test/scripts/script-run-unknown-action.js",
+				script: "test/scripts/script-unknown-action.js",
 				errorText: "json.invalid is not a function"
 			}
 		].forEach(({errorText, expected, script})=>{
@@ -205,10 +205,10 @@ describe("command.run.index", function() {
 			});
 		});
 
-		it("should successfully process 'test/scripts/script-run-os-ls.js'", function() {
+		it("should successfully process 'test/scripts/script-os-ls.js'", function() {
 			const configuration={
 				options: {
-					script: "test/scripts/script-run-os-ls.js"
+					script: "test/scripts/script-os-ls.js"
 				}
 			};
 			return run(configuration)
@@ -224,7 +224,7 @@ describe("command.run.index", function() {
 					];
 					assert.deepEqual(_.intersection(result, expected).sort(), expected);
 				})
-				.catch(error=>assert.fail(`processing 'test/scripts/script-run-os-ls.js' failed - ${error}`));
+				.catch(error=>assert.fail(`processing 'test/scripts/script-os-ls.js' failed - ${error}`));
 		});
 	});
 });
