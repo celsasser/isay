@@ -8,6 +8,7 @@
  */
 
 const _=require("lodash");
+const util=require("util");
 const constant=require("./constant");
 const format=require("./format");
 
@@ -73,13 +74,13 @@ exports.configure=function({applicationName, logLevel}) {
 exports.console=function(text, {
 	meta=undefined,
 	stack=false,
-	stream=process.stderr
+	stream=process.stdout
 }={}) {
 	text=format.messageToString(text, {stack});
 	if(meta) {
 		text=`${text}\n${JSON.stringify(text, null, "\t")}`;
 	}
-	return stream.write(`${text}\n`);
+	return util.promisify(stream.write.bind(stream))(`${text}\n`);
 };
 
 /**

@@ -21,7 +21,7 @@ const util=require("./util");
  */
 function errorToString(error, {
 	details=true,
-	instance=true,
+	instance=false,
 	stack=false
 }={}) {
 	let text="",
@@ -30,7 +30,7 @@ function errorToString(error, {
 		text=`${text}${error}`;
 	} else {
 		if(instance && error.hasOwnProperty("instance")) {
-			text=`${text}${error.instance.type}${delimiter} ${error.message}`;
+			text=`${text}${util.name(error.instance)}${delimiter} ${error.message}`;
 			delimiter=".";
 		} else {
 			text=`${text}${error.message}`;

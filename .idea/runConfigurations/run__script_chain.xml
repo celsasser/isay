@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="run: script-chain" type="NodeJSConfigurationType" folderName="run" application-parameters="run -s ./test/scripts/script-chain.js" path-to-js-file="mouse.js" working-dir="$PROJECT_DIR$">
+  <configuration default="false" name="run: script-chain" type="NodeJSConfigurationType" folderName="run" application-parameters="run -d -s ./test/scripts/script-chain.js" path-to-js-file="mouse.js" working-dir="$PROJECT_DIR$">
     <method v="2" />
   </configuration>
 </component>

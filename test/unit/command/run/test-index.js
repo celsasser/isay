@@ -145,6 +145,10 @@ describe("command.run.index", function() {
 				]
 			},
 			{
+				script: "test/scripts/script-math-binary.js",
+				expected: 25
+			},
+			{
 				script: "test/scripts/script-object-get.js",
 				expected: "cat"
 			},

@@ -53,13 +53,14 @@ class ModuleBase {
 			blob=this._preprocessChunk(data);
 			if(configuration.options.debug) {
 				const {input, params}=this._formatDebugActionDetails(blob),
+					inputText=(data!==undefined)
+						? `\n   input=${input}`
+						: "",
 					paramsText=params.map((text, index)=>`\n   params[${index}]=${text}`, "").join("");
-				log.info(`- executing ${this.domain}.${this.action}(${input})${paramsText}`);
-			} else {
-				log.verbose(()=>{
-					const {input}=this._formatVerboseActionDetails(blob);
-					return `- executing ${this.domain}.${this.action}(${input})`;
-				});
+				await log.console(`- executing ${this.domain}.${this.action}()${inputText}${paramsText}`);
+			} else if(log.level.isLog("verbose")) {
+				const {input}=this._formatVerboseActionDetails(blob);
+				await log.console(`- executing ${this.domain}.${this.action}(${input})`);
 			}
 			blob=await this[this.method](blob, ...args);
 			return (this._output)
@@ -73,7 +74,7 @@ class ModuleBase {
 				// look to see whether this was reported by us. If so then it means that
 				// the chain was nested. We just want the top level error.
 				if(!(error.instance instanceof ModuleBase)) {
-					error=this._createUnexpectedError({error});
+					error=this._createUnexpectedError(error);
 				}
 				return Promise.reject(error);
 			}

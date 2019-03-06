@@ -201,6 +201,7 @@ function _parseChain({library, transpiled}) {
 	// 1. parsed the code
 	// 2. we can steal his parsing of arguments
 	// 3. it puts javascript at our (script's) disposal.
+	// todo: stack is pretty weird here. If it can be cleaned up then catch and revise the error
 	const result=vm.runInContext(transpiled, vm.createContext(runContext));
 	return {
 		sequence: callSequence,

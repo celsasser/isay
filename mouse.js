@@ -30,13 +30,15 @@ command.run(configuration)
 		process.exit(0);
 	})
 	.catch(error=>{
-		if(error.code!==constant.error.code.ABORT) {
-			// todo: we should think about what is written to error here. By default we don't want the
-			//  stack.  But it is handy for debugging. Probably want it to only log stack on debug.verbose
+		if(error.code===constant.error.code.ABORT) {
+			process.exit(1);
+		} else {
+			// I don't get it. We are using async completion synchronization when logging to the console (in ModuleBase)
+			// nonetheless this error message can still get interleaved in stdout's output.
 			log.error(format.errorToString(error, {
 				details: true,
-				stack: true
+				stack: configuration.options.debug
 			}));
+			process.exit((error.code!==undefined) ? error.code : 1);
 		}
-		process.exit(1);
 	});

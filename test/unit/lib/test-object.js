@@ -55,21 +55,25 @@ describe("lib.ModuleObject", function() {
 	});
 
 	describe("map", function() {
-		it("should throw exception if blob is not an object", async function() {
-			const instance=_createInstance();
+		it("should throw exception if params[0] is not an array or function", async function() {
+			const instance=_createInstance({
+				params: ["string"]
+			});
+			return instance.map()
+				.then(assert.notCalled)
+				.catch(error=>{
+					assert.strictEqual(error.message, "expecting Array or Function but found String");
+				});
+		});
+
+		it("should throw exception if blob is not an object or array and params[0] is not a predicate", async function() {
+			const instance=_createInstance({
+				params: [[]]
+			});
 			return instance.map("string")
 				.then(assert.notCalled)
 				.catch(error=>{
 					assert.strictEqual(error.message, "expecting Array or Object but found String");
-				});
-		});
-
-		it("should throw exception if param is not a predicate or array", async function() {
-			const instance=_createInstance();
-			return instance.map({})
-				.then(assert.notCalled)
-				.catch(error=>{
-					assert.strictEqual(error.message, "expecting Array or Function but found undefined");
 				});
 		});
 

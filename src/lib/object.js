@@ -31,22 +31,22 @@ class ModuleObject extends ModuleIO {
 
 	/**
 	 * Allows one to transform the object in <param>blob</param> via:
-	 * - predicate function
-	 * - or array of directions on what to take or how to map from and to properties
-	 * @resolves (predicate:ActionPredicate|(Array<string|{from:string,to:string}>)) in this.params[0]
+	 * - predicate function: blob may be of any type
+	 * - or array of directions indicating what to take or how to map properties: blob must be object or array
+	 * @resolves (predicate:ActionPredicate|(Array<string>|{from:string,to:string}>)) in this.params[0]
 	 * @resolves options:{flatten:false} in this.params[1]
 	 * @param {DataBlob} blob
 	 * @returns {Promise<DataBlob>}
 	 */
 	async map(blob) {
-		this._assertType(blob, ["Array", "Object"], {
-			allowNull: true
-		});
 		this._assertType(this.params[0], ["Array", "Function"]);
 		if(typeof(this.params[0])==="function") {
 			const predicate=this._assertPredicate(this.params[0]);
 			return predicate(blob);
 		} else {
+			this._assertType(blob, ["Array", "Object"], {
+				allowNull: true
+			});
 			const flatten=_.get(this.params[1], "flatten", false);
 			// The following is standard but also supports some non-standard "pick" functionality.
 			// It includes support for remapping paths. And it also allows one to flatten arrays.
