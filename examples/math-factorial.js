@@ -6,6 +6,6 @@ array.range(2, 10)
 	.array.map(value=>{
 		array.range(1, value)
 			.math.multiply()
-			.object.map(result=>`${value}!=${result}`)
+			.object.map(result=>`${value} != ${result}`)
 			.std.out()
 	})

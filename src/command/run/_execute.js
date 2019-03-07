@@ -13,6 +13,7 @@ const _=require("lodash");
 const assert=require("assert");
 const vm=require("vm");
 const lib_os=require("../../lib/os");
+const log=require("../../common/log");
 const util=require("../../common/util");
 
 
@@ -78,7 +79,7 @@ function _buildChain(descriptors) {
  * @returns {Object}
  * @private
  */
-function _paramToPOJO(param) {
+function _functionParamToPOJO(param) {
 	if(param instanceof Error) {
 		// these are errors that are being passed to predicates. How much info do they need? For example: stack, instance, embedded error?
 		// We are making the API. We are going to keep it to bare essentials:
@@ -92,17 +93,52 @@ function _paramToPOJO(param) {
 }
 
 /**
+ * Plucks function's param names from <param>script</param>. It should only be used for functions.
+ * Explanation: we are parsing function's params because we need to manage scope across nested functions.
+ *    Why don't we steal them from Scope? 'Cause we don't have access to a function's scope object.
+ * Note: There are javascript variations of declaring a function's params that we don't parse. Could we?
+ *    Yes, but we are not javascript. We are a controlled subset. Stay in the lines...
+ * @param {string} script
+ * @returns {Array<string>}
+ * @private
+ */
+function _getFunctionParamNames(script) {
+	let paramSubstring;
+	// we are only going to support the arrow operator
+	if((paramSubstring=_.get(script.match(/^\s*function\s*\(\s*(.*?)\s*\)/), 1))===undefined) {
+		if((paramSubstring=_.get(script.match(/^\s*\(\s*(.*?)\s*\)\s*=>/), 1))===undefined) {
+			paramSubstring=_.get(script.match(/^(.*?)=>/), 1);
+		}
+	}
+
+	if(paramSubstring!==undefined) {
+		return paramSubstring.split(/\s*,\s*/)
+			.filter(param=>param.length>0);
+	} else {
+		log.error(`_getFunctionParamNames: failed to find script params - script="${script}"`);
+		// let's assume it's our error for now. We use params for creating scopes. As long as
+		// the function isn't nested more than one level deep all will be fine.
+		return [];
+	}
+}
+
+/**
  * Builds a "library graph". It graphs the various routes that a single function call may make into our library.
  * And at each one of of the terminal nodes lies functionality that will allow us to track function call sequence.
  * Which in our world is a sequence of ModuleDescriptor. See <code>_parseChain</code> to see how that works.
  * And then uses vm.runInContext to steal the sequence
+ * @param {Object} context - additional properties that should be present in the runtime context.
  * @param {Array<LibraryNode>} library
  * @param {string} transpiled
  * @returns {{result:*, sequence:Array<ModuleDescriptor>}}
  * @throws {Error}
  * @private
  */
-function _parseChain({library, transpiled}) {
+function _parseChain({
+	context={},
+	library,
+	transpiled
+}) {
 	/**
 	 * This array will be populated when the graph is "run"
 	 * @type {Array<ModuleDescriptor>}
@@ -132,17 +168,28 @@ function _parseChain({library, transpiled}) {
 			callSequence=callSequence.slice(0, predicateHeadIndex);
 		} else if(_.isFunction(args[0])) {
 			// the call's first argument is a function (predicate). Our only concern here is whether it includes a chain which
-			// will not execute properly without our help. Hence, we get involved. We parse him as we did the top level chain
-			// and then inspect the results and do chain processing if we find one.
+			// will not execute properly without our help. So, we parse him as we did the top level chain and then inspect the
+			// results and do chain processing if we find one.
 			const script=args[0].toString();
 			// intercept the call so that we may steal and describe the function with params, parse and run it ourselves
 			args[0]=function(...input) {
-				const params=input
-					.map(param=>JSON.stringify(_paramToPOJO(param)))
-					.join(",");
+				const paramNames=_getFunctionParamNames(script),
+					{paramValues, scopeContext}=input
+						.reduce((result, param, index)=>{
+							const paramPOJO=_functionParamToPOJO(param);
+							result.paramValues.push(JSON.stringify(paramPOJO));
+							if(paramNames.length>index) {
+								result.scopeContext[paramNames[index]]=paramPOJO;
+							}
+							return result;
+						}, {
+							paramValues: [],
+							scopeContext: {}
+						});
 				const {sequence, result}=_parseChain({
+					context: Object.assign({}, context, scopeContext),
 					library,
-					transpiled: `(${script})(${params})`
+					transpiled: `(${script})(${paramValues.join(",")})`
 				});
 				// now we either have found a chain or we have run a chain free function and have what we need.
 				if(sequence.length>0) {
@@ -193,7 +240,8 @@ function _parseChain({library, transpiled}) {
 		return result;
 	}, {
 		os: proxyOS,
-		_type: "urn:graph:proxy"
+		_type: "urn:graph:proxy",
+		...context
 	});
 
 	// this is the crank that gets everything up above rolling. We use our graph-proxy as the context in
@@ -239,7 +287,8 @@ function _transpileScript({library, script}) {
 module.exports={
 	runScript,
 	_buildChain,
-	_paramToPOJO,
+	_functionParamToPOJO,
+	_getFunctionParamNames,
 	_parseChain,
 	_transpileScript
 };

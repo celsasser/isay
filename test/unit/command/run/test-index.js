@@ -24,7 +24,7 @@ describe("command.run.index", function() {
 		it.skip("debug script", async function() {
 			const configuration={
 				options: {
-					script: "test/scripts/script-catch-five.js"
+					script: "test/scripts/script-embedded-predicate-deep.js"
 				}
 			};
 			return run(configuration)
@@ -32,7 +32,12 @@ describe("command.run.index", function() {
 					console.log(result);
 				})
 				.catch(error=>{
-					console.error(error.message);
+					const {errorToString}=require("../../../../src/common/format");
+					assert.fail(errorToString(error, {
+						details: true,
+						instance: true,
+						stack: true
+					}));
 				});
 		});
 
@@ -66,60 +71,83 @@ describe("command.run.index", function() {
 				]
 			},
 			{
-				script: "test/scripts/script-chain-embedded.js",
-				expected: [
-					{
-						"age": 5,
-						"inserted": "data",
-						"name": "George",
-						"species": "cat"
-					},
-					{
-						"age": 12,
-						"inserted": "data",
-						"name": "Wesley",
-						"species": "dog"
-					},
-					{
-						"age": 0.5,
-						"inserted": "data",
-						"name": "Tiny",
-						"species": "cat"
-					}
-				]
-			},
-			{
-				script: "test/scripts/script-chain-predicate.js",
-				expected: [
-					{
-						"age": 5,
-						"link1": "link1",
-						"link2": "link2",
-						"name": "George",
-						"species": "cat"
-					},
-					{
-						"age": 12,
-						"link1": "link1",
-						"link2": "link2",
-						"name": "Wesley",
-						"species": "dog"
-					},
-					{
-						"age": 0.5,
-						"link1": "link1",
-						"link2": "link2",
-						"name": "Tiny",
-						"species": "cat"
-					}
-				]
-			},
-			{
 				script: "test/scripts/script-closure-test.js",
 				expected: {
 					"age": 4,
 					"name": "George"
 				}
+			},
+			{
+				script: "test/scripts/script-embedded-chain.js",
+				expected: [
+					{
+						"age": 5,
+						"link1": "link1",
+						"link2": "link2",
+						"name": "George",
+						"species": "cat"
+					},
+					{
+						"age": 12,
+						"link1": "link1",
+						"link2": "link2",
+						"name": "Wesley",
+						"species": "dog"
+					},
+					{
+						"age": 0.5,
+						"link1": "link1",
+						"link2": "link2",
+						"name": "Tiny",
+						"species": "cat"
+					}
+				]
+			},
+			{
+				script: "test/scripts/script-embedded-predicate.js",
+				expected: [
+					{
+						"age": 5,
+						"inserted": "data",
+						"name": "George",
+						"species": "cat"
+					},
+					{
+						"age": 12,
+						"inserted": "data",
+						"name": "Wesley",
+						"species": "dog"
+					},
+					{
+						"age": 0.5,
+						"inserted": "data",
+						"name": "Tiny",
+						"species": "cat"
+					}
+				]
+			},
+			{
+				script: "test/scripts/script-embedded-predicate-deep.js",
+				expected: [
+					{
+						"age": 5,
+						"inserted": "data",
+						"name": "George",
+						"species": "cat"
+					},
+					{
+						"age": 12,
+						"inserted": "data",
+						"name": "Wesley",
+						"species": "dog"
+					},
+					{
+						"age": 0.5,
+						"inserted": "data",
+						"name": "Tiny",
+						"species": "cat"
+					}
+				]
 			},
 			{
 				script: "test/scripts/script-function-predicate.js",
