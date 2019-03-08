@@ -260,6 +260,7 @@ function _parseChain({
 /**
  * Modifies the script so that we may execute it properly. See comments inline for info on what and why
  * we are doing what we are doing
+ * todo: for the most part this will be okay, but we can be fooled into marking up string constants.
  * @param {Array<LibraryNode>} library
  * @param {string} script
  * @returns {string}

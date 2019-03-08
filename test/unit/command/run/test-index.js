@@ -129,24 +129,10 @@ describe("command.run.index", function() {
 			{
 				script: "test/scripts/script-embedded-predicate-deep.js",
 				expected: [
-					{
-						"age": 5,
-						"inserted": "data",
-						"name": "George",
-						"species": "cat"
-					},
-					{
-						"age": 12,
-						"inserted": "data",
-						"name": "Wesley",
-						"species": "dog"
-					},
-					{
-						"age": 0.5,
-						"inserted": "data",
-						"name": "Tiny",
-						"species": "cat"
-					}
+					"range(1)=[0]",
+					"range(2)=[0,1]",
+					"range(3)=[0,1,2]",
+					"range(4)=[0,1,2,3]"
 				]
 			},
 			{
@@ -174,7 +160,12 @@ describe("command.run.index", function() {
 			},
 			{
 				script: "test/scripts/script-math-binary.js",
-				expected: 25
+				expected: [
+					"1! = 1",
+					"2! = 2",
+					"3! = 6",
+					"4! = 24"
+				]
 			},
 			{
 				script: "test/scripts/script-object-get.js",
