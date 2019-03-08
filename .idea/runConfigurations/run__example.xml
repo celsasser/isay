@@ -1,5 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="run: example" type="NodeJSConfigurationType" folderName="run" application-parameters="run -d -s ./examples/math-factorial.js" path-to-js-file="mouse.js" working-dir="$PROJECT_DIR$">
-    <method v="2" />
-  </configuration>
-</component>

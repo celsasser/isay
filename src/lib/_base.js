@@ -48,21 +48,43 @@ class ModuleBase {
 	 */
 	async process(data=undefined, ...args) {
 		let blob;
+
+		/**
+		 * Logs the action with input and params info
+		 * @return {Promise}
+		 */
+		const _logDebug=()=>{
+			const {input, params}=this._formatDebugActionDetails(blob),
+				inputText=(data!==undefined)
+					? `\n   input = ${input}`
+					: "",
+				paramsText=params.map((text, index)=>`\n   params[${index}] = ${text}`, "").join("");
+			return log.console(`- executing ${this.domain}.${this.action}()${inputText}${paramsText}`);
+		};
+
+		/**
+		 * Logs the action with at most a single line of input
+		 * @return {Promise}
+		 */
+		const _logVerbose=()=>{
+			const prefix=`- executing ${this.domain}.${this.action}`,
+				// here we are preventing the write from exceeding a single line if in a TTY
+				maxLength=(process.stdin.isTTY)
+					? process.stdout.columns-prefix.length-3
+					: 80,
+				{input}=this._formatVerboseActionDetails(blob, maxLength);
+			return log.console(`${prefix}(${input})`);
+		};
+
 		const configuration=getApplicationConfiguration();
 		try {
 			blob=this._preprocessChunk(data);
 			if(configuration.options.debug) {
-				const {input, params}=this._formatDebugActionDetails(blob),
-					inputText=(data!==undefined)
-						? `\n   input=${input}`
-						: "",
-					paramsText=params.map((text, index)=>`\n   params[${index}]=${text}`, "").join("");
-				await log.console(`- executing ${this.domain}.${this.action}()${inputText}${paramsText}`);
+				await _logDebug();
 			} else if(log.level.isLog("verbose")) {
-				const {input}=this._formatVerboseActionDetails(blob);
-				await log.console(`- executing ${this.domain}.${this.action}(${input})`);
+				await _logVerbose();
 			}
-			blob=await this[this.method](blob, ...args);
+			blob= await this[this.method](blob, ...args);
 			return (this._output)
 				? this._output.process(blob)
 				: Promise.resolve(blob);
@@ -248,7 +270,7 @@ class ModuleBase {
 				if(text.length<max) {
 					formatted=`${text}`;
 				} else {
-					const split=Math.floor(max/2)-2;
+					const split=Math.floor(max/2)-(typeof(data)==="string" ? 3 : 2);
 					formatted=`${text.substr(0, split)}[...]${text.substr(text.length-split)}`;
 				}
 				// let's make sure it is all within the printable ascii range. If not then we will simply label it "Binary"
@@ -264,13 +286,13 @@ class ModuleBase {
 	/**
 	 * Debug information. More detail than verbose and includes params.
 	 * @param {DataBlob} data
+	 * @param {Number} max - max length
 	 * @returns {{input:string, params:Array<string>}}
 	 * @private
 	 */
-	_formatDebugActionDetails(data) {
-		// This max is a somewhat arbitrary number. We want to log as much as reasonable.
+	_formatDebugActionDetails(data, max=256) {
+		// Our default max is a somewhat arbitrary number. We want to log as much as reasonable.
 		// But the input could be enormous and at some point is just interference.
-		const max=256;
 		return {
 			input: ModuleBase._formatVariableData(data, max),
 			params: this.params.map(param=>ModuleBase._formatVariableData(param, max))
@@ -280,12 +302,13 @@ class ModuleBase {
 	/**
 	 * Allows modules to return more detailed info, where appropriate, for detailed logging.
 	 * @param {DataBlob} data
+	 * @param {Number} max - max length
 	 * @returns {{input:string}}
 	 * @private
 	 */
-	_formatVerboseActionDetails(data) {
+	_formatVerboseActionDetails(data, max=80) {
 		return {
-			input: ModuleBase._formatVariableData(data, 80)
+			input: ModuleBase._formatVariableData(data, max)
 		};
 	}
 

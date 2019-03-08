@@ -1,0 +1,5 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="run: script - test " type="NodeJSConfigurationType" application-parameters="run -l verbose -s ./test/scripts//script-catch-five.js" path-to-js-file="mouse.js" working-dir="$PROJECT_DIR$">
+    <method v="2" />
+  </configuration>
+</component>
