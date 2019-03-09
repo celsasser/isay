@@ -27,6 +27,7 @@ describe("lib.ModuleMath", function() {
 		["add", "binary"],
 		["ceiling", "unary"],
 		["divide", "binary"],
+		["divmod", "binary"],
 		["floor", "unary"],
 		["multiply", "binary"],
 		["round", "unary"],
@@ -86,16 +87,19 @@ describe("lib.ModuleMath", function() {
 	[
 		["add", 50, 150],
 		["divide", 50, 2],
+		["divmod", 50, [2, 0]],
+		["divmod", 51, [1, 49]],
+		["divmod", 100, [1, 0]],
 		["multiply", 50, 5000],
 		["subtract", 50, 50]
 	].forEach(([action, operand, expected])=>{
-		it(`${action} should properly ${action} ${operand} and get ${expected}`, async function() {
+		it(`${action} should properly ${action} 100 to or by ${operand} and get ${expected}`, async function() {
 			const instance=_createInstance({
 				params: [operand]
 			});
 			return instance[action](100)
 				.then(result=>{
-					assert.strictEqual(result, expected);
+					assert.deepEqual(result, expected);
 				});
 		});
 	});
@@ -106,11 +110,29 @@ describe("lib.ModuleMath", function() {
 		["multiply", [2, 3, 4], 24],
 		["subtract", [10, 5, 1], 4]
 	].forEach(([action, input, expected])=>{
-		it(`${action} should properly ${action} ${JSON.stringify(input)} and get ${expected}`, async function() {
+		it(`${action} should properly ${action} ${JSON.stringify(input)} and reduce to ${expected}`, async function() {
 			const instance=_createInstance();
 			return instance[action](input)
 				.then(result=>{
 					assert.strictEqual(result, expected);
+				});
+		});
+	});
+
+	[
+		["add", [1, 2, 3], [11, 12, 13]],
+		["divide", [5, 10, 20], [0.5, 1, 2]],
+		["divmod", [5, 10, 15], [[0, 5], [1, 0], [1, 5]]],
+		["multiply", [2, 3, 4], [20, 30, 40]],
+		["subtract", [10, 11, 12], [0, 1, 2]]
+	].forEach(([action, input, expected])=>{
+		it(`${action} should properly ${action} ${JSON.stringify(input)} to or by 10 and get ${expected}`, async function() {
+			const instance=_createInstance({
+				params: [10]
+			});
+			return instance[action](input)
+				.then(result=>{
+					assert.deepEqual(result, expected);
 				});
 		});
 	});
