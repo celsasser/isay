@@ -25,7 +25,7 @@ ln -s ${PWD}/mouse.js ../bin/mouse
 ```
 
 ## Running
-`mouse` is the top level command. To make it do anything one must specify a [_action_](#actions).  Each _action_ takes its own set of arguments and options.  
+`mouse` is the top level command. To make it do anything one must specify a [_action_](#actions).  Each _action_ takes its own set of arguments and options. To start the only action it takes is `run`.
 
 To get more information about `mouse.js` - at command prompt:
 
@@ -45,7 +45,7 @@ mouse.js --help <action>
 `run` is the rubber and your OS is the road. It supports and runs a simple [JavaScript like language](#language) entirely designed with the flow of data in mind. The language itself can be broken down into  _chains_,  _domains_ and _functions_.
 
 ### The chain
-The _chain_ is a list of sequentially excecuted, synchronous _functions_. A _functions_ output serves as input for the next _function_ in a _chain_. The last _function_? Nothing is assumed regarding output of last function in a _chain_. If you want its results to be sent to `stdout` then you must send it to `std.out`. An exception is for nested _chains_ - the result of the last _function_ in a nested _chain_ is returned back to the calling _function_. Examples are provided below of nested _chains_.
+A _chain_ is a list of sequentially excecuted, synchronous _functions_. A _function's_ output serves as input for the next _function_ in a _chain_.  The the value of a _chain_ is the value returned by the last _function_ in a _chain_. What about the topmost _chain_? Nothing is assumed regarding its result. If you want its results to be sent to `stdout` or `stderr` then you must send it via `std`. Examples are provided below of nested _chains_.
 
 The syntax of a _chain_ is as follows:
 ```
@@ -75,7 +75,7 @@ Note: it may be helpful to think of a function - `<domain>.<function>(params)` -
 ### The Language
 The language used to define _chains_ (and _scripts_ which will follow) is a both a subset and not totally compliant variation of _JavaScript_. At its heart are _domains_ and _functions_.
 
-A _domain_ is a conceptual and physical grouping of one or more _functions_. What is the function of a _domain_? It forces a modular breakdown of related functionality that allows and encourages _function_ names to be reused encouraging a smaller, consistent and more terse _function_ lexicon. 
+A _domain_ is a conceptual and physical grouping of one or more _functions_. What is the function of a _domain_? It forces a modular breakdown of related functionality that allows for short (but non-abbreviated) _function_ names that may be reused encouraging a smaller, consistent and more terse _function_ lexicon. 
 
 
 #### array
@@ -168,7 +168,9 @@ A _domain_ is a conceptual and physical grouping of one or more _functions_. Wha
 
 ### A _script_
 
-`run` takes a script. A `script` at the very least is a _chain_. It may contain globally (outside of the _chain_) defined variables and functions but should assume nothing about the environment. These variables and functions may be referenced by the script's _chain_.  
+`run` takes a script. A `script` should include one, and no more than one, top level _chain_. It may include ornamentation such as documentation. But does not support more than that. 
+
+An important note regarding state and variables. The language does support predicate functions and will properly manage the scope of the parameters declared to store their arguments. **But it has no support for properly scoping variable declarations.**  
 
 How to input a script? It may be input in one of the following ways:
 

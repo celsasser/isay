@@ -121,23 +121,6 @@ class ModuleObject extends ModuleIO {
 		}
 		return result;
 	}
-
-	/**************** Private Interface ****************/
-	/**
-	 * We always want this to be parsed.
-	 * todo: I liked this when I started, but am not so crazy about the implied behavior
-	 * @param {*} blob
-	 * @returns {DataBlob}
-	 * @private
-	 */
-	_preprocessChunk(blob) {
-		if(_.isString(blob)) {
-			return JSON.parse(blob);
-		} else if(Buffer.isBuffer(blob)) {
-			return JSON.parse(blob.toString("utf8"));
-		}
-		return blob;
-	}
 }
 
 module.exports={

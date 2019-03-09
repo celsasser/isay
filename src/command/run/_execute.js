@@ -74,22 +74,22 @@ function _buildChain(descriptors) {
 }
 
 /**
- * Encodes a runtime param into a simple object. Most of our runtime objects will already be such objects. But there are exceptions.
- * @param {*} param
+ * Encodes a runtime argument into a simple object. Most of our runtime objects will already be such objects. But there are exceptions.
+ * @param {*} argument
  * @returns {Object}
  * @private
  */
-function _functionParamToPOJO(param) {
-	if(param instanceof Error) {
+function _functionArgumentToPojo(argument) {
+	if(argument instanceof Error) {
 		// these are errors that are being passed to predicates. How much info do they need? For example: stack, instance, embedded error?
 		// We are making the API. We are going to keep it to bare essentials:
 		return util.scrubObject({
-			code: param.code,
-			details: param.details,
-			message: param.message
+			code: argument.code,
+			details: argument.details,
+			message: argument.message
 		});
 	}
-	return param;
+	return argument;
 }
 
 /**
@@ -102,20 +102,20 @@ function _functionParamToPOJO(param) {
  * @returns {Array<string>}
  * @private
  */
-function _getFunctionParamNames(script) {
-	let paramSubstring;
+function _getFunctionParameters(script) {
+	let params;
 	// we are only going to support the arrow operator
-	if((paramSubstring=_.get(script.match(/^\s*function\s*\(\s*(.*?)\s*\)/), 1))===undefined) {
-		if((paramSubstring=_.get(script.match(/^\s*\(\s*(.*?)\s*\)\s*=>/), 1))===undefined) {
-			paramSubstring=_.get(script.match(/^(.*?)=>/), 1);
+	if((params=_.get(script.match(/^\s*function\s*\(\s*(.*?)\s*\)/), 1))===undefined) {
+		if((params=_.get(script.match(/^\s*\(\s*(.*?)\s*\)\s*=>/), 1))===undefined) {
+			params=_.get(script.match(/^(.*?)=>/), 1);
 		}
 	}
 
-	if(paramSubstring!==undefined) {
-		return paramSubstring.split(/\s*,\s*/)
+	if(params!==undefined) {
+		return params.split(/\s*,\s*/)
 			.filter(param=>param.length>0);
 	} else {
-		log.error(`_getFunctionParamNames: failed to find script params - script="${script}"`);
+		log.error(`_getFunctionParameters: failed to find script params - script="${script}"`);
 		// let's assume it's our error for now. We use params for creating scopes. As long as
 		// the function isn't nested more than one level deep all will be fine.
 		return [];
@@ -173,23 +173,23 @@ function _parseChain({
 			const script=args[0].toString();
 			// intercept the call so that we may steal and describe the function with params, parse and run it ourselves
 			args[0]=function(...input) {
-				const paramNames=_getFunctionParamNames(script),
-					{paramValues, scopeContext}=input
-						.reduce((result, param, index)=>{
-							const paramPOJO=_functionParamToPOJO(param);
-							result.paramValues.push(JSON.stringify(paramPOJO));
-							if(paramNames.length>index) {
-								result.scopeContext[paramNames[index]]=paramPOJO;
+				const parameters=_getFunctionParameters(script),
+					{functionArguments, scopeContext}=input
+						.reduce((result, argument, index)=>{
+							const argumentPojo=_functionArgumentToPojo(argument);
+							result.functionArguments.push(JSON.stringify(argumentPojo));
+							if(parameters.length>index) {
+								result.scopeContext[parameters[index]]=argumentPojo;
 							}
 							return result;
 						}, {
-							paramValues: [],
+							functionArguments: [],
 							scopeContext: {}
 						});
 				const {sequence, result}=_parseChain({
 					context: Object.assign({}, context, scopeContext),
 					library,
-					transpiled: `(${script})(${paramValues.join(",")})`
+					transpiled: `(${script})(${functionArguments.join(",")})`
 				});
 				// now we either have found a chain or we have run a chain free function and have what we need.
 				if(sequence.length>0) {
@@ -288,8 +288,8 @@ function _transpileScript({library, script}) {
 module.exports={
 	runScript,
 	_buildChain,
-	_functionParamToPOJO,
-	_getFunctionParamNames,
+	_functionArgumentToPojo,
+	_getFunctionParameters,
 	_parseChain,
 	_transpileScript
 };
