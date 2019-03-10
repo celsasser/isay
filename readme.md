@@ -79,14 +79,18 @@ A _domain_ is a conceptual and physical grouping of one or more _functions_. Wha
 
 
 #### array
-- each: `Array<*> -> each(predicate:function) -> Array<*>`
+- each|forEach: `Array<*> -> each(predicate:function) -> Array<*>`
 - filter: `Array<*> -> filter(predicate:function) -> Array<*>`
-- find: `Array<*> -> find(predicate:function) -> Array<*>`
+- find: `Array<*> -> find(predicate:function) -> (*|null)`
 - map: `Array<*> -> map(predicate:function) -> Array<*>`
+- range: `range(to:number) -> Array<number>`
+- range: `range(from:number, to:number, inc:number=1) -> Array<number>`
+- range: `to:number => range() -> Array<number>`
+- range: `[from:number, to:number, inc:number=1] => range() -> Array<number>`
 - reduce: `Array<*> -> reduce(predicate:function) -> Array<*>`
 - reverse: `Array<*> -> reverse(predicate:function) -> Array<*>`
 - sort: `Array<*> -> sort(predicate:function) -> Array<*>`
-- unique: `Array<*> -> uniq() -> Array<*>`
+- unique: `Array<*> -> unique() -> Array<*>`
 
 #### csv
 - read: `read(path:string, opts:(undefined|{delimiter:","}}) -> Array<Array<*>>`
@@ -95,11 +99,13 @@ A _domain_ is a conceptual and physical grouping of one or more _functions_. Wha
 
 #### file
 - copy: `copy(source:string, target:string, {rebuild:boolean=false}) -> undefined`
-- copy: `source:string -> copy(target:string, {rebuild:boolean=false}) -> string`
+- copy: `source:string -> copy(target:string, {rebuild:boolean=false}) -> source:string`
 - create: `create(path:string, {type:string="file"}) -> undefined`
 - create: `path:string -> create({type:string="file"}) -> string`
 - delete: `delete(path:string) -> undefined`
 - delete: `path:string -> delete() -> string`
+- ensure: `ensure(path:string, {type:string="file"}) -> undefined`
+- ensure: `path:string -> ensure({type:string="file"}) -> string`
 - move: `move(source:string, target:string, {rebuild:boolean=false}) -> undefined`
 - move: `source:string -> move(target:string, {rebuild:boolean=false}) -> string`
 - read: `read(path:string, opts:(undefined|Object)) -> (string|Buffer)`
@@ -135,9 +141,10 @@ A _domain_ is a conceptual and physical grouping of one or more _functions_. Wha
 
 #### object:
 - get: `(Array|Object) -> get(path:string) -> *`
-- merge: `(Array|Object) -> merge(json:Object) -> Object`
-- map: `(Array|Object) -> map(predicate:function) -> *`
-- map: `Object -> map(paths:Array<string|{from:string,to:string}>, {flatten:boolean=false}) -> Object`
+- map: `* -> map(predicate:function) -> *`
+- map: `(Array|Object) -> map(paths:Array<string|{from:string, to:string}>, {flatten:boolean=false}) -> Object`
+- merge: `into:Object -> merge(data:Object) -> Object`
+- merge: `into:Array -> merge(data:Array) -> Array`
 - set: `(Array|Object) -> set(path:string, value:*) -> (Array|Object)`
 - toArray: `Object -> toString(predicate:function(Object, key:string):Object) -> Array<*>`
 
@@ -244,6 +251,16 @@ _Note: the following scripts were created with a `.js` extension. This is not ne
 [files-zip-select.js](examples/files-zip-select.js)
 ```
 ./mouse.js run -s ./examples/files-zip-select.js
+```
+
+[math-factorial.js](examples/math-factorial.js)
+```
+./mouse.js run -s ./examples/math-factorial.js
+```
+
+[text-define-words.js](examples/text-define-words.js)
+```
+./mouse.js run -s ./examples/text-define-words.js
 ```
 
 ### Inline

@@ -76,16 +76,15 @@ class ModuleObject extends ModuleIO {
 
 	/**
 	 * Merges param data in <code>params[0]</code> into <param>blob</param>
-	 * @param {Object} blob
+	 * @param {Array|Object} blob
 	 * @returns {Promise<DataBlob>}
 	 * @throws {Error}
 	 */
 	async merge(blob) {
-		let merge=this.params[0];
-		this._assertType(blob, "Object", {
-			allowNull: true
+		this._assertType(blob, ["Array", "Object"], {
+			allowNull: false
 		});
-		return _.merge(blob, merge);
+		return _.merge(blob, this.params[0]);
 	}
 
 

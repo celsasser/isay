@@ -173,16 +173,26 @@ describe("lib.ModuleObject", function() {
 
 	describe("merge", function() {
 		it("should merge json into json", async function() {
-			const jsonSource={property: "value"},
-				jsonMerge={merge: "data"},
+			const source={property: "value"},
+				merge={merge: "data"},
 				instance=_createInstance({
-					params: [jsonMerge]
+					params: [merge]
 				}),
-				result=await instance.merge(jsonSource);
+				result=await instance.merge(source);
 			assert.deepEqual(result, {
 				"merge": "data",
 				"property": "value"
 			});
+		});
+
+		it("should merge array into array", async function() {
+			const source=[{a: 1}, {b: 2}],
+				merge=[{c: 3}, {d: 4}],
+				instance=_createInstance({
+					params: [merge]
+				}),
+				result=await instance.merge(source);
+			assert.deepEqual(result, [{a: 1, c: 3}, {b: 2, d: 4}]);
 		});
 	});
 
