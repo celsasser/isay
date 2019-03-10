@@ -21,7 +21,7 @@ class ModuleStd extends ModuleBase {
 	 */
 	async error(data) {
 		const writer=util.promisify(process.stderr.write.bind(process.stderr));
-		return writer(`${this._toString(data)}\n`)
+		return writer(`${this._inputToString(data)}\n`)
 			.then(Promise.resolve.bind(Promise, data));
 	}
 
@@ -43,25 +43,33 @@ class ModuleStd extends ModuleBase {
 	 */
 	async out(data) {
 		const writer=util.promisify(process.stdout.write.bind(process.stdout));
-		return writer(`${this._toString(data)}\n`)
+		return writer(`${this._inputToString(data)}\n`)
 			.then(Promise.resolve.bind(Promise, data));
 	}
 
 	/**************** Private Interface ****************/
 	/**
-	 * Converts data blob into a string representation if it is not one already
+	 * We want to be able to write data coming from params or data received as input. Here we stick to our rules (see readme.md):
+	 * - if the user has specified an argument then we use it. And only assume that there is one.
+	 * - otherwise we use the blob and make sure
+	 * Whichever is chosen - we render it as a string if it is not one already
 	 * @param {DataBlob} data
 	 * @param {boolean} compact
 	 * @returns {string}
 	 * @private
 	 */
-	_toString(data, compact=false) {
-		if(_.isObject(data)) {
+	_inputToString(data, compact=false) {
+		const input=(this.params.length===0)
+			? data
+			: (this.params.length===1)
+				? this.params[0]
+				: this.params;
+		if(_.isObject(input)) {
 			return (compact)
-				? JSON.stringify(data)
-				: JSON.stringify(data, null, "\t");
+				? JSON.stringify(input)
+				: JSON.stringify(input, null, "\t");
 		} else {
-			return String(data);
+			return String(input);
 		}
 	}
 }

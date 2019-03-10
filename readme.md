@@ -77,6 +77,11 @@ The language used to define _chains_ (and _scripts_ which will follow) is a both
 
 A _domain_ is a conceptual and physical grouping of one or more _functions_. What is the function of a _domain_? It forces a modular breakdown of related functionality that allows for short (but non-abbreviated) _function_ names that may be reused encouraging a smaller, consistent and more terse _function_ lexicon. 
 
+In some cases, you will see variations of the same _function_ below. This is either the result of different parameter configurations or is due to options in how a _function_ receives its input. There are three possibilities:
+
+- **input data**: there are no arguments. We, of course, always use the input data.
+- **arguments**: is no input data. In this case we always use a function's _arguments_.
+- **both**: there is both _input_ and _arguments_. Some function support multiple arguments. But for those that expect only one source of data? We always use _arguments_ over _input_. The logic being that if a programmer has total control over _arguments_. 
 
 #### array
 - each|forEach: `Array<*> -> each(predicate:function) -> Array<*>`
