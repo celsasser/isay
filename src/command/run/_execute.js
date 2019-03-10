@@ -167,38 +167,8 @@ function _parseChain({
 			args[0]=predicateChain.process.bind(predicateChain);
 			callSequence=callSequence.slice(0, predicateHeadIndex);
 		} else if(_.isFunction(args[0])) {
-			// the call's first argument is a function (predicate). Our only concern here is whether it includes a chain which
-			// will not execute properly without our help. So, we parse him as we did the top level chain and then inspect the
-			// results and do chain processing if we find one.
-			const script=args[0].toString();
-			// intercept the call so that we may steal and describe the function with params, parse and run it ourselves
-			args[0]=function(...input) {
-				const parameters=_getFunctionParameters(script),
-					{functionArguments, scopeContext}=input
-						.reduce((result, argument, index)=>{
-							const argumentPojo=_functionArgumentToPojo(argument);
-							result.functionArguments.push(JSON.stringify(argumentPojo));
-							if(parameters.length>index) {
-								result.scopeContext[parameters[index]]=argumentPojo;
-							}
-							return result;
-						}, {
-							functionArguments: [],
-							scopeContext: {}
-						});
-				const {sequence, result}=_parseChain({
-					context: Object.assign({}, context, scopeContext),
-					library,
-					transpiled: `(${script})(${functionArguments.join(",")})`
-				});
-				// now we either have found a chain or we have run a chain free function and have what we need.
-				if(sequence.length>0) {
-					const chain=_buildChain(sequence);
-					return chain.process.apply(chain, input);
-				} else {
-					return result;
-				}
-			};
+			// the call's first argument is a predicate (function).
+			args[0]=_proxyPredicate(args[0]);
 		}
 		callSequence.push({
 			_declarationIndex: declarationIndex,
@@ -209,6 +179,44 @@ function _parseChain({
 			params: args
 		});
 		return runContext;
+	}
+
+	/**
+	 * Our only concern here is whether it includes a chain which will not execute properly without our help.
+	 * So, we parse him as we did the top level chain and then inspect the results and do chain processing if we find one.
+	 * @param {Function} predicate
+	 * @return {Function}
+	 */
+	function _proxyPredicate(predicate) {
+		// intercept the call so that we may steal and describe the function with params, parse and run it ourselves
+		return function(...input) {
+			const script=predicate.toString(),
+				parameters=_getFunctionParameters(script),
+				{farguments, scopeContext}=input
+					.reduce((result, argument, index)=>{
+						const pojo=_functionArgumentToPojo(argument);
+						result.farguments.push(JSON.stringify(pojo));
+						if(parameters.length>index) {
+							result.scopeContext[parameters[index]]=pojo;
+						}
+						return result;
+					}, {
+						farguments: [],
+						scopeContext: {}
+					});
+			const {sequence, result}=_parseChain({
+				context: Object.assign({}, context, scopeContext),
+				library,
+				transpiled: `(${script})(${farguments.join(",")})`
+			});
+			// now we either have found a chain or we have run a chain free function and have what we need.
+			if(sequence.length>0) {
+				const chain=_buildChain(sequence);
+				return chain.process.apply(chain, input);
+			} else {
+				return result;
+			}
+		};
 	}
 
 	/**
@@ -243,6 +251,7 @@ function _parseChain({
 		_type: "urn:graph:proxy",
 		...context
 	});
+	const sandbox=vm.createContext(runContext);
 
 	// this is the crank that gets everything up above rolling. We use our graph-proxy as the context in
 	// which our scripts is run so that we may intercept all calls. What does this buy us? Everything:
@@ -250,7 +259,7 @@ function _parseChain({
 	// 2. we can steal his parsing of arguments
 	// 3. it puts javascript at our (script's) disposal.
 	// todo: stack is pretty weird here. If it can be cleaned up then catch and revise the error
-	const result=vm.runInContext(transpiled, vm.createContext(runContext));
+	const result=vm.runInContext(transpiled, sandbox, {displayErrors: true});
 	return {
 		sequence: callSequence,
 		result
