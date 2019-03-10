@@ -175,8 +175,29 @@ class ModuleArray extends ModuleBase {
 	 */
 	async sort(blob) {
 		const array=this._assertArray(blob);
-		// note: sortBy acts like array.sort when the "by" param is undefined
-		return _.sortBy(array, this.params[0]);
+		if(this.params.length===0) {
+			return array.sort();
+		} else {
+			const sorts=(this.params.length>1)
+				? this.params
+				: (this.params[0].constructor.name==="Array")
+					? this.params[0]
+					: [this.params[0]];
+			const {directions, properties}=sorts.reduce((result, sort)=>{
+				if(sort.startsWith("-")) {
+					result.properties.push(sort.substr(1));
+					result.directions.push("desc");
+				} else {
+					result.properties.push(sort);
+					result.directions.push("asc");
+				}
+				return result;
+			}, {
+				directions: [],
+				properties: []
+			});
+			return _.orderBy(blob, properties, directions);
+		}
 	}
 
 	/**

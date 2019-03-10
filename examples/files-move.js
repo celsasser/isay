@@ -8,6 +8,6 @@
  */
 
 os.find("./examples")
-	.string.split("newline")
+	.string.split({method: "newline"})
 	.array.filter(is.endsWith([".js", ".json"]))
 	.array.each(file.copy("./tmp"))

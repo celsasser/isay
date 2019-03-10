@@ -8,7 +8,7 @@
  */
 
 os.find(".")
-	.string.split("newline")
+	.string.split({method: "newline"})
 	.array.filter(is.startsWith(["./res", "./src", "./test"]))
 	.std.out()
 	.file.zip("./tmp/build")

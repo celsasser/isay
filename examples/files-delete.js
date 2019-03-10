@@ -9,7 +9,7 @@
  */
 
 os.find("./examples")
-	.string.split("newline")
+	.string.split({method: "newline"})
 	.array.each(file.copy("./tmp"))
 	.std.in("./tmp")
 	.file.delete()

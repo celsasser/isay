@@ -79,15 +79,42 @@ describe("lib.ModuleString", function() {
 	});
 
 	describe("split", function() {
+		it("should raise exception if param is unknown", async function() {
+			const instance=_createInstance({
+				params: [10]
+			});
+			instance.split("")
+				.then(assert.notCalled)
+				.catch(error=>{
+					assert.strictEqual(error.message, "expecting Object but found Number");
+				});
+		});
+
 		it("should use white method by default", async function() {
 			const instance=_createInstance({}),
 				blob=await instance.split("a\\ b");
 			assert.deepEqual(blob, ["a\\", "b"]);
 		});
 
+		it("should split via string", async function() {
+			const instance=_createInstance({
+					params: ["."]
+				}),
+				blob=await instance.split("a.b.c.d");
+			assert.deepEqual(blob, ["a", "b", "c", "d"]);
+		});
+
+		it("should split via regex", async function() {
+			const instance=_createInstance({
+					params: [/\W/]
+				}),
+				blob=await instance.split("a.b.c.d");
+			assert.deepEqual(blob, ["a", "b", "c", "d"]);
+		});
+
 		it("should apply default 'delimiter' properly", async function() {
 			const instance=_createInstance({
-					params: ["delimiter"]
+					params: [{method: "delimiter"}]
 				}),
 				blob=await instance.split("a,b, c, d");
 			assert.deepEqual(blob, ["a", "b", "c", "d"]);
@@ -95,7 +122,7 @@ describe("lib.ModuleString", function() {
 
 		it("should apply specified 'delimiter' properly", async function() {
 			const instance=_createInstance({
-					params: ["delimiter", "\\s*:\\s*"]
+					params: [{method: "delimiter", delimiter: "\\s*:\\s*"}]
 				}),
 				blob=await instance.split("a:b: c: d");
 			assert.deepEqual(blob, ["a", "b", "c", "d"]);
@@ -103,7 +130,7 @@ describe("lib.ModuleString", function() {
 
 		it("should apply newline properly", async function() {
 			const instance=_createInstance({
-					params: ["newline"]
+					params: [{method: "newline"}]
 				}),
 				blob=await instance.split("1\n2 \n 3");
 			assert.deepEqual(blob, ["1", "2", "3"]);
@@ -111,10 +138,44 @@ describe("lib.ModuleString", function() {
 
 		it("should apply 'white' properly", async function() {
 			const instance=_createInstance({
-					params: ["white"]
+					params: [{method: "white"}]
 				}),
 				blob=await instance.split("'a b'");
 			assert.deepEqual(blob, ["'a", "b'"]);
+		});
+	});
+
+	describe("lower", function() {
+		it("should reject all but strings", function() {
+			const instance=_createInstance();
+			return instance.lower(10)
+				.then(assert.notCalled)
+				.catch(error=>{
+					assert.strictEqual(error.message, "expecting String but found Number");
+				});
+		});
+
+		it("should properly lower case", function() {
+			const instance=_createInstance();
+			return instance.lower("Ab")
+				.then(result=>assert.strictEqual(result, "ab"));
+		});
+	});
+
+	describe("upper", function() {
+		it("should reject all but strings", function() {
+			const instance=_createInstance();
+			return instance.upper(10)
+				.then(assert.notCalled)
+				.catch(error=>{
+					assert.strictEqual(error.message, "expecting String but found Number");
+				});
+		});
+
+		it("should properly raise case", function() {
+			const instance=_createInstance();
+			return instance.upper("Ab")
+				.then(result=>assert.strictEqual(result, "AB"));
 		});
 	});
 });

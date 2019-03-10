@@ -237,13 +237,13 @@ describe("lib.ModuleArray", function() {
 	});
 
 	describe("sort", function() {
-		it("should properly sort without predicate", async function() {
+		it("should properly sort without value types", async function() {
 			const instance=_createInstance({});
 			const result=await instance.sort([3, 1, 2]);
 			assert.deepEqual(result, [1, 2, 3]);
 		});
 
-		it("should properly reverse with predicate", async function() {
+		it("should properly sort by property in ascending order", async function() {
 			const instance=_createInstance({
 				params: ["a"]
 			});
@@ -258,5 +258,38 @@ describe("lib.ModuleArray", function() {
 				{a: 3}
 			]);
 		});
+
+		it("should properly sort by property in ascending order", async function() {
+			const instance=_createInstance({
+				params: ["-a"]
+			});
+			const result=await instance.sort([
+				{a: 3},
+				{a: 1},
+				{a: 2}
+			]);
+			assert.deepEqual(result, [
+				{a: 3},
+				{a: 2},
+				{a: 1}
+			]);
+		});
+
+		it("should properly sort by primary and secondary when in separate params", async function() {
+			const instance=_createInstance({
+				params: ["a", "b"]
+			});
+			const result=await instance.sort([
+				{a: 2, b: 3},
+				{a: 1, b: 1},
+				{a: 1, b: 2}
+			]);
+			assert.deepEqual(result, [
+				{"a": 1, "b": 1},
+				{"a": 1, "b": 2},
+				{"a": 2, "b": 3}
+			]);
+		});
+
 	});
 });

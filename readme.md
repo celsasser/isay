@@ -61,7 +61,7 @@ Follows is an example:
 
 ```
 os.ls(".")
-   .string.split("newline")
+   .string.split({method: "newline"})
    .array.filter(item=>item.length>0)
    .array.map(item=>`./${item}`)
    .array.sort()
@@ -271,7 +271,7 @@ _Note: the following scripts were created with a `.js` extension. This is not ne
 ### Inline
 You may also include your script inline. 
 ```
-./mouse.js run "os.ls().string.split('newline').array.sort().std.out()"
+./mouse.js run "os.ls().string.split({method: 'newline'}).array.sort().std.out()"
 ```
 
 ### Editor

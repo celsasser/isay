@@ -11,9 +11,9 @@
 */
 
 file.read("./examples/data/the-raven.txt")
+	.string.lower()
 	.string.split(/\W+/)
 	.array.filter(word=>word.length>9)
-	.array.map(word=>word.toLowerCase())
 	.array.unique()
 	.array.sort()
 	.array.map(word=>{

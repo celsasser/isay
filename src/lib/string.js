@@ -14,8 +14,8 @@ const string=require("../common/parse");
  */
 class ModuleString extends ModuleBase {
 	/**
-	 * Replaces <code>params[0]</code> with <code>params[1]</code>. If <code>params[0]</code> then this guy is
-	 * going to apply it globally
+	 * Replaces <code>params[0]</code> with <code>params[1]</code>. If <code>params[0]</code> is a string then this guy
+	 * is going to make an assumption and apply it globally.
 	 * @param {string} data - string to be replaced
 	 * @returns {Promise<DataBlob>}
 	 * @throws {Error}
@@ -48,13 +48,14 @@ class ModuleString extends ModuleBase {
 			return [];
 		} else {
 			this._assertType(data, "String");
-			const method=_.get(this.params, "0", "white");
-			if(method.constructor.name==="RegExp") {
-				return data.split(method);
+			const argument=_.get(this.params, "0", {method: "white"});
+			if(argument.constructor.name==="String" || argument.constructor.name==="RegExp") {
+				return data.split(argument);
 			} else {
-				switch(method) {
+				this._assertType(argument, "Object");
+				switch(argument.method) {
 					case "delimiter": {
-						const delimiter=_.get(this.params, "1", "\\s*,\\s*"),
+						const delimiter=_.get(argument, "delimiter", "\\s*,\\s*"),
 							regex=new RegExp(delimiter);
 						return data.split(regex);
 					}
@@ -78,6 +79,26 @@ class ModuleString extends ModuleBase {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Converts text to lower case
+	 * @param {string} data
+	 * @returns {Promise<string>}
+	 */
+	async lower(data) {
+		this._assertType(data, "String");
+		return data.toLowerCase();
+	}
+
+	/**
+	 * Converts text to upper case
+	 * @param {string} data
+	 * @returns {Promise<string>}
+	 */
+	async upper(data) {
+		this._assertType(data, "String");
+		return data.toUpperCase();
 	}
 }
 

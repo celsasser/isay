@@ -9,7 +9,7 @@
 
 file.create("./tmp/samples.txt")
 	.os.find("./examples -name \"*.js\"")
-	.string.split("newline")
+	.string.split({method: "newline"})
 	.array.each(file.read()
 		.file.write("./tmp/samples.txt", { append: true })
 	)
