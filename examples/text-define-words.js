@@ -16,7 +16,6 @@ file.read("./examples/data/the-raven.txt")
 	.array.map(word=>word.toLowerCase())
 	.array.unique()
 	.array.sort()
-	.debug.dump()
 	.array.map(word=>{
 		os.curl("--get", `https://www.dictionaryapi.com/api/v3/references/collegiate/json/${word}?key=58001a89-66f9-4249-8d04-8464711ce694`)
 			.json.parse()

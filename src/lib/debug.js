@@ -5,24 +5,13 @@
  * Copyright @2019 by Xraymen Inc.
  */
 
-const constant=require("../common/constant");
 const {ModuleIO}=require("./_io");
 
 /**
- * Diagnostic operations and flow control (abort)
+ * Diagnostic actions
  * @typedef {ModuleIO} ModuleDebug
  */
 class ModuleDebug extends ModuleIO {
-	/**
-	 * Forces abort
-	 * @throws {Error}
-	 */
-	async abort() {
-		throw this._createExpectedError({
-			code: constant.error.code.ABORT
-		});
-	}
-
 	/**
 	 * Dumps the state of <param>blob</blob> as well as <code>this.params</code>
 	 * @param {DataBlob} blob
