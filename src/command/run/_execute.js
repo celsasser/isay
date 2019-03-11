@@ -189,7 +189,8 @@ function _parseChain({
 	 */
 	function _proxyPredicate(predicate) {
 		// intercept the call so that we may steal and describe the function with params, parse and run it ourselves
-		return function(...input) {
+		// note: is async because we may return a promise and because if we don't then we will wrap it otherwise when we run it.
+		return async function(...input) {
 			const script=predicate.toString(),
 				parameters=_getFunctionParameters(script),
 				{farguments, scopeContext}=input

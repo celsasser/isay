@@ -24,6 +24,7 @@ describe("command.run.index", function() {
 		it.skip("debug script", async function() {
 			const configuration={
 				options: {
+					input: undefined,
 					script: "test/scripts/script-embedded-predicate-deep.js"
 				}
 			};

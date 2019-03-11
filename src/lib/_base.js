@@ -129,9 +129,15 @@ class ModuleBase {
 				throw new Error(`expecting ${_formatAllowed()} but found ${util.name(value)}`);
 			}
 		} else {
-			const type=(strict)
-				? value.constructor.name
-				: typeof(value);
+			let type;
+			if(strict) {
+				// we don't go any farther than expecting a function to be a "Function"
+				type=(value.constructor.name==="AsyncFunction")
+					? "Function"
+					: value.constructor.name;
+			} else {
+				type=typeof(value);
+			}
 			if(_.isArray(allowed)) {
 				if(_.includes(allowed, type)===false) {
 					throw new Error(`expecting ${_formatAllowed()} but found ${util.name(value)}`);
