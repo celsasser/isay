@@ -15,7 +15,7 @@ class ModuleMath extends ModuleBase {
 	/**
 	 * Adds whatever is in this.params[0], provided it is a number, to the incoming <param>input</param>
 	 * @param {Number|Array<Number>} input
-	 * @returns {Promise<(Number|Array<Number>)}
+	 * @returns {Promise<(Number|Array<Number>)>}
 	 */
 	async add(input) {
 		return this._applyBinary(input, (a, b)=>a+b);
@@ -24,7 +24,7 @@ class ModuleMath extends ModuleBase {
 	/**
 	 * Applies ceiling to the incoming <param>input</param>
 	 * @param {Number|Array<Number>} input
-	 * @returns {Promise<(Number|Array<Number>)}
+	 * @returns {Promise<(Number|Array<Number>)>}
 	 */
 	async ceiling(input) {
 		return this._applyUnary(input, Math.ceil);
@@ -33,7 +33,7 @@ class ModuleMath extends ModuleBase {
 	/**
 	 * Divides incoming <param>input</param> from whatever is in this.params[0] provided it is a number
 	 * @param {Number|Array<Number>} input
-	 * @returns {Promise<(Number|Array<Number>)}
+	 * @returns {Promise<(Number|Array<Number>)>}
 	 */
 	async divide(input) {
 		return this._applyBinary(input, (a, b)=>a/b);
@@ -42,7 +42,7 @@ class ModuleMath extends ModuleBase {
 	/**
 	 * Calculates floor(input/params[0]) and input%params[0]. It incoming <param>input</param> from whatever is in this.params[0] provided it is a number
 	 * @param {Number|Array<Number>} input
-	 * @returns {Promise<([div:Number, mod:Number]|Array<[div:Number, mod:Number]>)>}
+	 * @returns {Promise<([div, mod]|Array<[div, mod]>)>}
 	 */
 	async divmod(input) {
 		this._assertType(input, ["Array", "Number"]);
@@ -53,7 +53,7 @@ class ModuleMath extends ModuleBase {
 			// We can represent this as an array or object. Being in the math domain I am going to keep everything arrays
 			// to keep our interface consistent.
 			return [div, mod];
-		}
+		};
 		if(input.constructor.name==="Array") {
 			return input.map(_calculate);
 		} else {
@@ -64,7 +64,7 @@ class ModuleMath extends ModuleBase {
 	/**
 	 * Applies floor to the incoming <param>input</param>
 	 * @param {Number|Array<Number>} input
-	 * @returns {Promise<(Number|Array<Number>)}
+	 * @returns {Promise<(Number|Array<Number>)>}
 	 */
 	async floor(input) {
 		return this._applyUnary(input, Math.floor);
@@ -93,7 +93,7 @@ class ModuleMath extends ModuleBase {
 	/**
 	 * Multiplies incoming <param>input</param> from whatever is in this.params[0] provided it is a number
 	 * @param {Number|Array<Number>} input
-	 * @returns {Promise<(Number|Array<Number>)}
+	 * @returns {Promise<(Number|Array<Number>)>}
 	 */
 	async multiply(input) {
 		return this._applyBinary(input, (a, b)=>a*b);
@@ -102,7 +102,7 @@ class ModuleMath extends ModuleBase {
 	/**
 	 * Rounds the incoming <param>input</param>
 	 * @param {Number|Array<Number>} input
-	 * @returns {Promise<(Number|Array<Number>)}
+	 * @returns {Promise<(Number|Array<Number>)>}
 	 */
 	async round(input) {
 		return this._applyUnary(input, Math.round);
@@ -111,7 +111,7 @@ class ModuleMath extends ModuleBase {
 	/**
 	 * Subtracts whatever is in this.params[0], provided it is a number, from the incoming <param>input</param>
 	 * @param {Number|Array<Number>} input
-	 * @returns {Promise<(Number|Array<Number>)}
+	 * @returns {Promise<(Number|Array<Number>)>}
 	 */
 	async subtract(input) {
 		return this._applyBinary(input, (a, b)=>a-b);

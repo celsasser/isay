@@ -5,6 +5,7 @@
  * Copyright @2019 by Xraymen Inc.
  */
 
+const _=require("lodash");
 const constant=require("../common/constant");
 const {ModuleIO}=require("./_io");
 
@@ -21,6 +22,22 @@ class ModuleApp extends ModuleIO {
 		throw this._createExpectedError({
 			code: constant.error.code.ABORT
 		});
+	}
+
+	/**
+	 * Asserts that the condition in params[0] predicate are true. It is designed to be used with <code>is</code> and <code>note</code>
+	 * This guy is one of the few exceptions to the input/output rule. He looks at the input returned by the predicate but returns
+	 * <param>blob</param>
+	 * @param {DataBlob} blob
+	 * @return {Promise<*>}
+	 */
+	async assert(blob) {
+		const predicate=this._assertPredicate(this.params[0]),
+			result=await predicate(blob);
+		if(Boolean(result)===false) {
+			throw new Error(_.get(this.params, 1, "assertion failed"));
+		}
+		return blob;
 	}
 
 	/**

@@ -59,6 +59,22 @@ class ModuleNot extends ModuleTest {
 	async startsWith(blob) {
 		return !this._startsWith(blob);
 	}
+
+	/**
+	 * returns true if <param>blob</param> is of one of the types specified in this.params[0]
+	 * @resolves types:(string|Array<string>) in this.params[0]
+	 * @param {DataBlob} blob
+	 * @returns {Promise<boolean>}
+	 */
+	async type(blob) {
+		this._assertType(this.params[0], ["Array", "String"]);
+		try {
+			this._assertType(blob, this.params[0]);
+			return false;
+		} catch(error) {
+			return true;
+		}
+	}
 }
 
 module.exports={

@@ -40,6 +40,54 @@ describe("lib.ModuleApp", function() {
 		});
 	});
 
+	describe("assert", function() {
+		it("should raise exception if params[0] is not a predicate", async function() {
+			const instance=_createInstance({
+				params: ["string"]
+			});
+			return instance.assert()
+				.then(assert.notCalled)
+				.catch(error=>{
+					assert.strictEqual(error.message, "expecting predicate but found String");
+				});
+		});
+
+		it("should return input if predicate returns true", async function() {
+			const instance=_createInstance({
+				params: [input=>{
+					assert.strictEqual(input, "input");
+					return true;
+				}]
+			});
+			return instance.assert("input")
+				.then(result=>{
+					assert.strictEqual(result, "input");
+				});
+		});
+
+		it("should raise default error if predicate returns false", async function() {
+			const instance=_createInstance({
+				params: [input=>input]
+			});
+			return instance.assert(false)
+				.then(assert.notCalled)
+				.catch(error=>{
+					assert.strictEqual(error.message, "assertion failed");
+				});
+		});
+
+		it("should raise specified error if predicate returns false", async function() {
+			const instance=_createInstance({
+				params: [input=>input, "error message"]
+			});
+			return instance.assert(false)
+				.then(assert.notCalled)
+				.catch(error=>{
+					assert.strictEqual(error.message, "error message");
+				});
+		});
+	});
+
 	describe("sleep", function() {
 		it("should throw error if params[0] is not a number", async function() {
 			const instance=_createInstance({

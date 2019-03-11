@@ -290,6 +290,5 @@ describe("lib.ModuleArray", function() {
 				{"a": 2, "b": 3}
 			]);
 		});
-
 	});
 });

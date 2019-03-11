@@ -141,4 +141,37 @@ describe("lib.ModuleIs", function() {
 				.then(value=>assert.strictEqual(value, false));
 		});
 	});
+
+	describe("type", function() {
+		it("should raise exception if params[0] is not an array or string", async function() {
+			const instance=_createInstance({
+				params: [10]
+			});
+			return instance.type()
+				.then(assert.notCalled)
+				.catch(error=>{
+					assert.strictEqual(error.message, "expecting Array or String but found Number");
+				});
+		});
+
+		it("should properly assess positive match", async function() {
+			const instance=_createInstance({
+				params: ["Number"]
+			});
+			return instance.type(10)
+				.then(result=>{
+					assert.strictEqual(result, true);
+				});
+		});
+
+		it("should properly assess a negative match", async function() {
+			const instance=_createInstance({
+				params: ["Number"]
+			});
+			return instance.type("string")
+				.then(result=>{
+					assert.strictEqual(result, false);
+				});
+		});
+	});
 });
