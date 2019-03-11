@@ -263,9 +263,9 @@ _Note: the following scripts were created with a `.js` extension. This is not ne
 ./mouse.js run -s ./examples/math-factorial.js
 ```
 
-[text-define-words.js](examples/text-define-words.js)
+[text-define-words-raven.js](examples/text-define-words-raven.js)
 ```
-./mouse.js run -s ./examples/text-define-words.js
+./mouse.js run -s ./examples/text-define-words-raven.js
 ```
 
 ### Inline

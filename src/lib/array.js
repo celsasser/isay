@@ -149,6 +149,8 @@ class ModuleArray extends ModuleBase {
 		const array=this._assertArray(blob),
 			predicate=this._assertPredicate(this.params[0]);
 		let result=_.get(this.params, 1, []);
+		// todo: hmmm, I think we may be digging a very deep promise.then(promise.then(promise.then...))) hole.
+		//  Think we will probably want to work a process.nextTick into our async iterations.
 		for(let index=0; index<array.length; index++) {
 			result=await predicate(result, array[index], index);
 		}
