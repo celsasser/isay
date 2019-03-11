@@ -24,7 +24,9 @@ exports.run=async function(configuration) {
 	log.verbose("- loading script");
 	const script=await _loadScript(configuration);
 	log.verbose("- loading stdin");
-	const input=await _readStdin();
+	const input=configuration.options.hasOwnProperty("input")
+		? configuration.options.input
+		: await _readStdin();
 	log.verbose("- running script");
 	return await runScript({input, library, script});
 };
@@ -58,9 +60,6 @@ async function _readStdin() {
 	return new Promise((resolve, reject)=>{
 		if(process.stdin.isTTY) {
 			// We are looking for redirected input. We don't treat tty input as stdin.
-			resolve();
-		} if(process.stdin.constructor.name==="Socket") {
-			// I am looking for a way to know whether we are in webstorm (which is not a TTY which also is not going to give us any goodies)
 			resolve();
 		} else {
 			let buffer="",

@@ -60,6 +60,17 @@ exports.OPTIONS=[
 	{
 		actions: ["run"],
 		args: {
+			count: 1
+		},
+		desc: "optional input to the first function in the chain",
+		keys: {
+			short: "i",
+			long: "input"
+		}
+	},
+	{
+		actions: ["run"],
+		args: {
 			count: 1,
 			name: "script"
 		},

@@ -205,7 +205,11 @@ describe("command.run.index", function() {
 		].forEach(({errorText, expected, script})=>{
 			it(`should successfully process '${script}'`, function() {
 				const configuration={
-					options: {script}
+					options: {
+						// note: we specify input so that we don't look at stdin otherwise we hang
+						input: undefined,
+						script
+					}
 				};
 				return run(configuration)
 					.catch(error=>{
@@ -231,6 +235,7 @@ describe("command.run.index", function() {
 		it("should successfully process 'test/scripts/script-os-ls.js'", function() {
 			const configuration={
 				options: {
+					input: undefined,
 					script: "test/scripts/script-os-ls.js"
 				}
 			};
