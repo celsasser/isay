@@ -24,8 +24,9 @@ class ModuleArray extends ModuleBase {
 	 */
 	async each(blob) {
 		const array=this._assertArray(blob),
+			length=array.length,
 			predicate=this._assertPredicate(this.params[0]);
-		for(let index=0; index<array.length; index++) {
+		for(let index=0; index<length; index++) {
 			await predicate(array[index], index);
 		}
 		return blob;
@@ -51,9 +52,10 @@ class ModuleArray extends ModuleBase {
 	 */
 	async filter(blob) {
 		const array=this._assertArray(blob),
+			length=array.length,
 			predicate=this._assertPredicate(this.params[0]),
 			result=[];
-		for(let index=0; index<array.length; index++) {
+		for(let index=0; index<length; index++) {
 			if(await predicate(array[index], index)) {
 				result.push(array[index]);
 			}
@@ -70,8 +72,9 @@ class ModuleArray extends ModuleBase {
 	 */
 	async find(blob) {
 		const array=this._assertArray(blob),
+			length=array.length,
 			predicate=this._assertPredicate(this.params[0]);
-		for(let index=0; index<array.length; index++) {
+		for(let index=0; index<length; index++) {
 			if(await predicate(array[index], index)) {
 				return array[index];
 			}
@@ -88,9 +91,10 @@ class ModuleArray extends ModuleBase {
 	 */
 	async map(blob) {
 		const array=this._assertArray(blob),
+			length=array.length,
 			predicate=this._assertPredicate(this.params[0]),
 			result=[];
-		for(let index=0; index<array.length; index++) {
+		for(let index=0; index<length; index++) {
 			result.push(await predicate(array[index], index));
 		}
 		return result;
@@ -147,11 +151,12 @@ class ModuleArray extends ModuleBase {
 	 */
 	async reduce(blob) {
 		const array=this._assertArray(blob),
+			length=array.length,
 			predicate=this._assertPredicate(this.params[0]);
 		let result=_.get(this.params, 1, []);
 		// todo: hmmm, I think we may be digging a very deep promise.then(promise.then(promise.then...))) hole.
 		//  Think we will probably want to work a process.nextTick into our async iterations.
-		for(let index=0; index<array.length; index++) {
+		for(let index=0; index<length; index++) {
 			result=await predicate(result, array[index], index);
 		}
 		return result;
