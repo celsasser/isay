@@ -8,6 +8,7 @@
 const _=require("lodash");
 const fs=require("fs-extra");
 const jsyaml=require("js-yaml");
+const {assertType}=require("./_data");
 const {ModuleIO}=require("./_io");
 
 /**
@@ -21,7 +22,7 @@ class ModuleYaml extends ModuleIO {
 	 * @throws {Error}
 	 */
 	async parse(data) {
-		this._assertType(data, ["String", "Buffer"]);
+		assertType(data, ["String", "Buffer"]);
 		return jsyaml.load(data.toString("utf8"));
 	}
 

@@ -9,6 +9,7 @@ const _=require("lodash");
 const fs=require("fs-extra");
 const file=require("../common/file");
 const {ModuleIO}=require("./_io");
+const {assertType}=require("./_data");
 
 /**
  * @typedef {ModuleIO} ModuleJson
@@ -21,7 +22,7 @@ class ModuleJson extends ModuleIO {
 	 * @throws {Error}
 	 */
 	async parse(data) {
-		this._assertType(data, ["String", "Buffer"]);
+		assertType(data, ["String", "Buffer"]);
 		return JSON.parse(data.toString("utf8"));
 	}
 

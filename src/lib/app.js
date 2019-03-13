@@ -8,6 +8,7 @@
 const _=require("lodash");
 const constant=require("../common/constant");
 const {ModuleIO}=require("./_io");
+const {assertPredicate, assertType}=require("./_data");
 
 /**
  * A body of functionality that affects application execution
@@ -32,7 +33,7 @@ class ModuleApp extends ModuleIO {
 	 * @return {Promise<*>}
 	 */
 	async assert(blob) {
-		const predicate=this._assertPredicate(this.params[0]),
+		const predicate=assertPredicate(this.params[0]),
 			result=await predicate(blob);
 		if(Boolean(result)===false) {
 			throw new Error(_.get(this.params, 1, "assertion failed"));
@@ -47,7 +48,7 @@ class ModuleApp extends ModuleIO {
 	 * @return {Promise<void>}
 	 */
 	async sleep(blob) {
-		this._assertType(this.params[0], "Number");
+		assertType(this.params[0], "Number");
 		const millis=this.params[0]*1000;
 		return new Promise((resolve)=>{
 			setTimeout(resolve.bind(null, blob), millis);

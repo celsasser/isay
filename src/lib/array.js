@@ -7,6 +7,7 @@
 
 const _=require("lodash");
 const {ModuleBase}=require("./_base");
+const {assertPredicate, assertType}=require("./_data");
 const util=require("../common/util");
 
 /**
@@ -25,7 +26,7 @@ class ModuleArray extends ModuleBase {
 	async each(blob) {
 		const array=this._assertArray(blob),
 			length=array.length,
-			predicate=this._assertPredicate(this.params[0]);
+			predicate=assertPredicate(this.params[0]);
 		for(let index=0; index<length; index++) {
 			await predicate(array[index], index);
 		}
@@ -53,7 +54,7 @@ class ModuleArray extends ModuleBase {
 	async filter(blob) {
 		const array=this._assertArray(blob),
 			length=array.length,
-			predicate=this._assertPredicate(this.params[0]),
+			predicate=assertPredicate(this.params[0]),
 			result=[];
 		for(let index=0; index<length; index++) {
 			if(await predicate(array[index], index)) {
@@ -73,7 +74,7 @@ class ModuleArray extends ModuleBase {
 	async find(blob) {
 		const array=this._assertArray(blob),
 			length=array.length,
-			predicate=this._assertPredicate(this.params[0]);
+			predicate=assertPredicate(this.params[0]);
 		for(let index=0; index<length; index++) {
 			if(await predicate(array[index], index)) {
 				return array[index];
@@ -92,7 +93,7 @@ class ModuleArray extends ModuleBase {
 	async map(blob) {
 		const array=this._assertArray(blob),
 			length=array.length,
-			predicate=this._assertPredicate(this.params[0]),
+			predicate=assertPredicate(this.params[0]),
 			result=[];
 		for(let index=0; index<length; index++) {
 			result.push(await predicate(array[index], index));
@@ -123,15 +124,15 @@ class ModuleArray extends ModuleBase {
 		const params=(this.params.length===0)
 			? _.isArray(blob) ? blob : [blob]
 			: this.params;
-		this._assertType(params[0], "Number");
+		assertType(params[0], "Number");
 		if(params.length===1) {
 			endIndex=params[0];
 		} else {
-			this._assertType(params[1], "Number");
+			assertType(params[1], "Number");
 			startIndex=params[0];
 			endIndex=params[1];
 			if(params.length>=3) {
-				this._assertType(params[2], "Number");
+				assertType(params[2], "Number");
 				increment=params[2];
 			}
 		}
@@ -152,7 +153,7 @@ class ModuleArray extends ModuleBase {
 	async reduce(blob) {
 		const array=this._assertArray(blob),
 			length=array.length,
-			predicate=this._assertPredicate(this.params[0]);
+			predicate=assertPredicate(this.params[0]);
 		let result=_.get(this.params, 1, []);
 		// todo: hmmm, I think we may be digging a very deep promise.then(promise.then(promise.then...))) hole.
 		//  Think we will probably want to work a process.nextTick into our async iterations.

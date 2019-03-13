@@ -6,6 +6,7 @@
  */
 
 const {ModuleIO}=require("./_io");
+const {assertPredicate}=require("./_data");
 
 /**
  * Allows one to loop. But one must think about what looping means for mouse. We are a very basic scripting language
@@ -29,7 +30,7 @@ class ModuleLoop extends ModuleIO {
 	 * @returns {Promise<void>}
 	 */
 	async forever(blob) {
-		const predicate=this._assertPredicate(this.params[0]);
+		const predicate=assertPredicate(this.params[0]);
 		return new Promise((resolve, reject)=>{
 			/**
 			 * Calls the predicate but we want to be careful to avoid creating an endless then chain.

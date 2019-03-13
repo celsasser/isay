@@ -7,6 +7,7 @@
 
 const _=require("lodash");
 const {ModuleBase}=require("./_base");
+const {assertType}=require("./_data");
 
 /**
  * base class for tests so that we can support the positive and negative tests with one set of functionality
@@ -19,8 +20,8 @@ class ModuleTest extends ModuleBase {
 	 * @returns {boolean}
 	 */
 	_endsWith(blob) {
-		this._assertType(blob, "String");
-		this._assertType(this.params[0], ["Array", "String"]);
+		assertType(blob, "String");
+		assertType(this.params[0], ["Array", "String"]);
 		const searchEndings=_.isArray(this.params[0])
 			? this.params[0]
 			: [this.params[0]];
@@ -39,7 +40,7 @@ class ModuleTest extends ModuleBase {
 	 * @returns {boolean}
 	 */
 	_oneOf(blob) {
-		this._assertType(this.params[0], "Array");
+		assertType(this.params[0], "Array");
 		for(let value of this.params[0]) {
 			if(_.isEqual(blob, value)) {
 				return true;
@@ -54,8 +55,8 @@ class ModuleTest extends ModuleBase {
 	 * @returns {boolean}
 	 */
 	_startsWith(blob) {
-		this._assertType(blob, "String");
-		this._assertType(this.params[0], ["Array", "String"]);
+		assertType(blob, "String");
+		assertType(this.params[0], ["Array", "String"]);
 		const searchEndings=_.isArray(this.params[0])
 			? this.params[0]
 			: [this.params[0]];

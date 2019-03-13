@@ -10,6 +10,7 @@ const stringify=require("csv-stringify");
 const parse=require("csv-parse");
 const fs=require("fs-extra");
 const {ModuleIO}=require("./_io");
+const {ensureJson}=require("./_data");
 
 /**
  * Some read and write support for CSV files
@@ -25,8 +26,8 @@ class ModuleCsv extends ModuleIO {
 	 */
 	async parse(data) {
 		const options=(data)
-			? this._ensureJson(this.params[0])
-			: this._ensureJson(this.params[1]);
+			? ensureJson(this.params[0])
+			: ensureJson(this.params[1]);
 		return new Promise((resolve, reject)=>{
 			parse(data, {
 				delimiter: _.get(options, "delimiter", ",")
@@ -63,7 +64,7 @@ class ModuleCsv extends ModuleIO {
 	 */
 	async write(data) {
 		const path=this._getWritePath(),
-			options=this._ensureJson(this.params[1]);
+			options=ensureJson(this.params[1]);
 		return new Promise((resolve, reject)=>{
 			stringify(data, {
 				delimiter: _.get(options, "delimiter", ",")

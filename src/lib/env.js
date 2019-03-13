@@ -7,6 +7,7 @@
 
 const _=require("lodash");
 const {ModuleBase}=require("./_base");
+const {assertType}=require("./_data");
 
 /**
  * @typedef {ModuleBase} ModuleEnv
@@ -20,7 +21,7 @@ class ModuleEnv extends ModuleBase {
 	 */
 	async delete(data) {
 		const variable=this.params[0];
-		this._assertType(variable, "String");
+		assertType(variable, "String");
 		delete process.env[variable];
 		return data;
 	}
@@ -43,8 +44,8 @@ class ModuleEnv extends ModuleBase {
 	async set(data) {
 		const variable=this.params[0],
 			value=_.get(this.params, 1, data);
-		this._assertType(variable, "String");
-		this._assertType(variable, ["Boolean", "Number", "String"]);
+		assertType(variable, "String");
+		assertType(variable, ["Boolean", "Number", "String"]);
 		process.env[variable]=value;
 		return data;
 	}

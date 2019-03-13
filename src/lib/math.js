@@ -6,6 +6,7 @@
  */
 
 const {ModuleBase}=require("./_base");
+const {assertType}=require("./_data");
 
 /**
  * Support for basic arithmetic
@@ -45,8 +46,8 @@ class ModuleMath extends ModuleBase {
 	 * @returns {Promise<([div, mod]|Array<[div, mod]>)>}
 	 */
 	async divmod(input) {
-		this._assertType(input, ["Array", "Number"]);
-		this._assertType(this.params[0], "Number");
+		assertType(input, ["Array", "Number"]);
+		assertType(this.params[0], "Number");
 		const _calculate=(value)=>{
 			const div=Math.floor(value/this.params[0]),
 				mod=(value-div*this.params[0]);
@@ -76,7 +77,7 @@ class ModuleMath extends ModuleBase {
 	 * @returns {Promise<Number>}
 	 */
 	async max(input) {
-		this._assertType(input, "Array");
+		assertType(input, "Array");
 		return Math.max.apply(null, input);
 	}
 
@@ -86,7 +87,7 @@ class ModuleMath extends ModuleBase {
 	 * @returns {Promise<Number>}
 	 */
 	async min(input) {
-		this._assertType(input, "Array");
+		assertType(input, "Array");
 		return Math.min.apply(null, input);
 	}
 
@@ -127,7 +128,7 @@ class ModuleMath extends ModuleBase {
 	 * @private
 	 */
 	_applyUnary(input, operation) {
-		this._assertType(input, ["Array", "Number"]);
+		assertType(input, ["Array", "Number"]);
 		return (input.constructor.name==="Number")
 			? operation(input)
 			: input.map(operation);
@@ -142,9 +143,9 @@ class ModuleMath extends ModuleBase {
 	 * @private
 	 */
 	_applyBinary(input, operator) {
-		this._assertType(input, ["Array", "Number"]);
+		assertType(input, ["Array", "Number"]);
 		if(input.constructor.name==="Number") {
-			this._assertType(this.params[0], "Number");
+			assertType(this.params[0], "Number");
 			return operator(input, this.params[0]);
 		} else if(typeof(this.params[0])==="number") {
 			// here we assume that the user wants to apply this.params[0] to each element: operator(input[n], this.params[0])

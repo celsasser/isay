@@ -7,6 +7,7 @@
 
 const _=require("lodash");
 const {ModuleIO}=require("./_io");
+const {assertPredicate, assertProperties, assertType}=require("./_data");
 
 /**
  * @typedef {ModuleIO} ModuleObject
@@ -21,7 +22,7 @@ class ModuleObject extends ModuleIO {
 	 */
 	async get(blob) {
 		// why do we allow arrays? Because a user may describe a path in terms of indexes: _.get("0.name", [{name: "George"}]
-		this._assertType(blob, ["Array", "Object"], {
+		assertType(blob, ["Array", "Object"], {
 			allowNull: true
 		});
 		return (this.params.length>0)
@@ -39,19 +40,19 @@ class ModuleObject extends ModuleIO {
 	 * @returns {Promise<DataBlob>}
 	 */
 	async map(blob) {
-		this._assertType(this.params[0], ["Array", "Function"]);
+		assertType(this.params[0], ["Array", "Function"]);
 		if(typeof(this.params[0])==="function") {
-			const predicate=this._assertPredicate(this.params[0]);
+			const predicate=assertPredicate(this.params[0]);
 			return predicate(blob);
 		} else {
-			this._assertType(blob, ["Array", "Object"], {
+			assertType(blob, ["Array", "Object"], {
 				allowNull: true
 			});
 			const flatten=_.get(this.params[1], "flatten", false);
 			// The following is standard but also supports some non-standard "pick" functionality.
 			// It includes support for remapping paths. And it also allows one to flatten arrays.
 			return this.params[0].reduce((result, path)=>{
-				this._assertType(path, ["String", "Object"]);
+				assertType(path, ["String", "Object"]);
 				if(typeof(path)==="string") {
 					const value=_.get(blob, path);
 					if(value!==undefined) {
@@ -63,7 +64,7 @@ class ModuleObject extends ModuleIO {
 						_.set(result, path, value);
 					}
 				} else {
-					this._assertProperties(path, ["from", "to"]);
+					assertProperties(path, ["from", "to"]);
 					const value=_.get(blob, path.from);
 					if(value!==undefined) {
 						_.set(result, path.to, value);
@@ -81,7 +82,7 @@ class ModuleObject extends ModuleIO {
 	 * @throws {Error}
 	 */
 	async merge(blob) {
-		this._assertType(blob, ["Array", "Object"], {
+		assertType(blob, ["Array", "Object"], {
 			allowNull: false
 		});
 		return _.merge(blob, this.params[0]);
@@ -111,8 +112,8 @@ class ModuleObject extends ModuleIO {
 	 */
 	async toArray(blob) {
 		const result=[],
-			predicate=this._assertPredicate(_.get(this.params, 0, object=>object));
-		this._assertType(blob, "Object", {
+			predicate=assertPredicate(_.get(this.params, 0, object=>object));
+		assertType(blob, "Object", {
 			allowNull: true
 		});
 		for(let key in blob) {

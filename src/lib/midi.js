@@ -9,6 +9,7 @@ const fs=require("fs-extra");
 const midi=require("midi-file-io");
 const path=require("path");
 const {ModuleIO}=require("./_io");
+const {assertType}=require("./_data");
 
 /**
  * read and write support for midi files.
@@ -47,7 +48,7 @@ class ModuleMidi extends ModuleIO {
 	 */
 	async write(data) {
 		const uri=this._getWritePath();
-		this._assertType(data, "Object");
+		assertType(data, "Object");
 		return fs.ensureDir(path.parse(uri).dir)
 			.then(()=>{
 				midi.writeMidiToFile(data, uri);

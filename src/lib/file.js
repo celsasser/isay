@@ -9,6 +9,7 @@ const _=require("lodash");
 const fs=require("fs-extra");
 const path=require("path");
 const {ModuleIO}=require("./_io");
+const {assertType}=require("./_data");
 const spawn=require("../common/spawn");
 
 /**
@@ -196,8 +197,8 @@ class ModuleFile extends ModuleIO {
 	 * @throws {Error}
 	 */
 	async zip(data) {
-		this._assertType(data, ["String", "Array"]);
-		this._assertType(this.params[0], "String");
+		assertType(data, ["String", "Array"]);
+		assertType(this.params[0], "String");
 		// if we don't terminate it with .zip then zip will. We want the final name so that we may
 		// find it when we want to remove it (if we remove it)
 		const archive=this.params[0].endsWith(".zip")

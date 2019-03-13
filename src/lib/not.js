@@ -7,6 +7,7 @@
 
 const _=require("lodash");
 const {ModuleTest}=require("./_test");
+const {assertType}=require("./_data");
 
 /**
  * support for testing for negative conditions
@@ -67,9 +68,9 @@ class ModuleNot extends ModuleTest {
 	 * @returns {Promise<boolean>}
 	 */
 	async type(blob) {
-		this._assertType(this.params[0], ["Array", "String"]);
+		assertType(this.params[0], ["Array", "String"]);
 		try {
-			this._assertType(blob, this.params[0]);
+			assertType(blob, this.params[0]);
 			return false;
 		} catch(error) {
 			return true;

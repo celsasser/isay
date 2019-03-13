@@ -6,6 +6,7 @@
  */
 
 const {ModuleBase}=require("./_base");
+const {assertPredicate, assertType}=require("./_data");
 
 /**
  * Supports error creation and handling.
@@ -26,7 +27,7 @@ class ModuleError extends ModuleBase {
 		if(this.params.length===0) {
 			return blob;
 		} else if(typeof(this.params[0])==="function") {
-			const predicate=this._assertPredicate(this.params[0], blob);
+			const predicate=assertPredicate(this.params[0], blob);
 			return predicate(error);
 		} else {
 			return this.params[0];
@@ -43,7 +44,7 @@ class ModuleError extends ModuleBase {
 	 * @returns {Promise<void>}
 	 */
 	async throw(blob) {
-		this._assertType(this.params[0], ["Error", "Function", "String"]);
+		assertType(this.params[0], ["Error", "Function", "String"]);
 		if(this.params[0].constructor.name==="Error") {
 			throw this._createExpectedError({
 				error: this.params[0]
@@ -53,7 +54,7 @@ class ModuleError extends ModuleBase {
 				message: this.params[0]
 			});
 		} else {
-			return this._assertPredicate(this.params[0])(blob)
+			return assertPredicate(this.params[0])(blob)
 				.catch(error=>{
 					throw this._createExpectedError({error});
 				});

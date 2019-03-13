@@ -7,6 +7,7 @@
 
 const _=require("lodash");
 const {ModuleBase}=require("./_base");
+const {assertType}=require("./_data");
 const string=require("../common/parse");
 
 /**
@@ -24,9 +25,9 @@ class ModuleString extends ModuleBase {
 		if(data!=null) {
 			let search=this.params[0],
 				replace=this.params[1];
-			this._assertType(data, "String");
-			this._assertType(search, ["RegExp", "String"], {allowNull: false});
-			this._assertType(replace, ["String"], {allowNull: false});
+			assertType(data, "String");
+			assertType(search, ["RegExp", "String"], {allowNull: false});
+			assertType(replace, ["String"], {allowNull: false});
 			if(search.constructor.name!=="RegExp") {
 				search=new RegExp(search, "g");
 			}
@@ -47,12 +48,12 @@ class ModuleString extends ModuleBase {
 		if(data==null) {
 			return [];
 		} else {
-			this._assertType(data, "String");
+			assertType(data, "String");
 			const argument=_.get(this.params, "0", {method: "white"});
 			if(argument.constructor.name==="String" || argument.constructor.name==="RegExp") {
 				return data.split(argument);
 			} else {
-				this._assertType(argument, "Object");
+				assertType(argument, "Object");
 				switch(argument.method) {
 					case "delimiter": {
 						const delimiter=_.get(argument, "delimiter", "\\s*,\\s*"),
@@ -87,7 +88,7 @@ class ModuleString extends ModuleBase {
 	 * @returns {Promise<string>}
 	 */
 	async lower(data) {
-		this._assertType(data, "String");
+		assertType(data, "String");
 		return data.toLowerCase();
 	}
 
@@ -97,7 +98,7 @@ class ModuleString extends ModuleBase {
 	 * @returns {Promise<string>}
 	 */
 	async upper(data) {
-		this._assertType(data, "String");
+		assertType(data, "String");
 		return data.toUpperCase();
 	}
 }
