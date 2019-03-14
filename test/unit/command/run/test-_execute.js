@@ -50,34 +50,94 @@ describe("command.run._execute", function() {
 		});
 	});
 
-	describe("_getFunctionParameters", function() {
+	describe("_parseFunction", function() {
 		it("should return empty array when no params", function() {
-			assert.deepEqual(execute._getFunctionParameters("()=>{}"), []);
-			assert.deepEqual(execute._getFunctionParameters(" ( ) => { }"), []);
-			assert.deepEqual(execute._getFunctionParameters("function(){}"), []);
-			assert.deepEqual(execute._getFunctionParameters(" function ( ) { }"), []);
+			assert.deepEqual(execute._parseFunction("()=>{}"), {
+				body: "{}",
+				params: []
+			});
+			assert.deepEqual(execute._parseFunction(" ( ) => { }"), {
+				body: "{ }",
+				params: []
+			});
+			assert.deepEqual(execute._parseFunction("function(){}"), {
+				body: "{}",
+				params: []
+			});
+			assert.deepEqual(execute._parseFunction(" function ( ) { }"), {
+				body: "{ }",
+				params: []
+			});
 		});
 
 		it("should properly find a single param", function() {
-			assert.deepEqual(execute._getFunctionParameters("(a)=>{}"), ["a"]);
-			assert.deepEqual(execute._getFunctionParameters("( _$Mix )=>{}"), ["_$Mix"]);
-			assert.deepEqual(execute._getFunctionParameters(" ( a ) => { }"), ["a"]);
-			assert.deepEqual(execute._getFunctionParameters(" ( _$Mix ) => { }"), ["_$Mix"]);
-			assert.deepEqual(execute._getFunctionParameters("function(a){}"), ["a"]);
-			assert.deepEqual(execute._getFunctionParameters("function(_$Mix){}"), ["_$Mix"]);
-			assert.deepEqual(execute._getFunctionParameters(" function ( a ) { }"), ["a"]);
-			assert.deepEqual(execute._getFunctionParameters(" function ( _$Mix ) { }"), ["_$Mix"]);
+			assert.deepEqual(execute._parseFunction("(a)=>{}"), {
+				body: "{}",
+				params: ["a"]
+			});
+			assert.deepEqual(execute._parseFunction("( _$Mix )=>{}"), {
+				body: "{}",
+				params: ["_$Mix"]
+			});
+			assert.deepEqual(execute._parseFunction(" ( a ) => { }"), {
+				body: "{ }",
+				params: ["a"]
+			});
+			assert.deepEqual(execute._parseFunction(" ( _$Mix ) => { }"), {
+				body: "{ }",
+				params: ["_$Mix"]
+			});
+			assert.deepEqual(execute._parseFunction("function(a){}"), {
+				body: "{}",
+				params: ["a"]
+			});
+			assert.deepEqual(execute._parseFunction("function(_$Mix){}"), {
+				body: "{}",
+				params: ["_$Mix"]
+			});
+			assert.deepEqual(execute._parseFunction(" function ( a ) { }"), {
+				body: "{ }",
+				params: ["a"]
+			});
+			assert.deepEqual(execute._parseFunction(" function ( _$Mix ) { }"), {
+				body: "{ }",
+				params: ["_$Mix"]
+			});
 		});
 
 		it("should properly find a multiple params", function() {
-			assert.deepEqual(execute._getFunctionParameters("(a,b)=>{}"), ["a", "b"]);
-			assert.deepEqual(execute._getFunctionParameters("(a,b,)=>{}"), ["a", "b"]);
-			assert.deepEqual(execute._getFunctionParameters(" ( a , b ) => {}"), ["a", "b"]);
-			assert.deepEqual(execute._getFunctionParameters(" ( a , b, ) => {}"), ["a", "b"]);
-			assert.deepEqual(execute._getFunctionParameters("function(a,b){}"), ["a", "b"]);
-			assert.deepEqual(execute._getFunctionParameters("function(a,b,){}"), ["a", "b"]);
-			assert.deepEqual(execute._getFunctionParameters(" function ( a , b ) { }"), ["a", "b"]);
-			assert.deepEqual(execute._getFunctionParameters(" function ( a , b, ) { }"), ["a", "b"]);
+			assert.deepEqual(execute._parseFunction("(a,b)=>{}"), {
+				body: "{}",
+				params: ["a", "b"]
+			});
+			assert.deepEqual(execute._parseFunction("(a,b,)=>{}"), {
+				body: "{}",
+				params: ["a", "b"]
+			});
+			assert.deepEqual(execute._parseFunction(" ( a , b ) => {}"), {
+				body: "{}",
+				params: ["a", "b"]
+			});
+			assert.deepEqual(execute._parseFunction(" ( a , b, ) => {}"), {
+				body: "{}",
+				params: ["a", "b"]
+			});
+			assert.deepEqual(execute._parseFunction("function(a,b){}"), {
+				body: "{}",
+				params: ["a", "b"]
+			});
+			assert.deepEqual(execute._parseFunction("function(a,b,){}"), {
+				body: "{}",
+				params: ["a", "b"]
+			});
+			assert.deepEqual(execute._parseFunction(" function ( a , b ) { }"), {
+				body: "{ }",
+				params: ["a", "b"]
+			});
+			assert.deepEqual(execute._parseFunction(" function ( a , b, ) { }"), {
+				body: "{ }",
+				params: ["a", "b"]
+			});
 		});
 	});
 
@@ -91,9 +151,9 @@ describe("command.run._execute", function() {
 		});
 
 		it("should properly insert an index into a single os.action", function() {
-			const script='os.ls("*.js")',
+			const script="os.ls(\"*.js\")",
 				transpiled=execute._transpileScript({library, script});
-			assert.strictEqual(transpiled, 'os.ls(0,"*.js")');
+			assert.strictEqual(transpiled, "os.ls(0,\"*.js\")");
 		});
 
 		it("should properly insert an index into a single [non-os-domain].action", function() {
@@ -103,7 +163,7 @@ describe("command.run._execute", function() {
 		});
 
 		it("should properly transpile a more complex chain", function() {
-			const script='json.read("path").array.map(object.get("property"))',
+			const script="json.read(\"path\").array.map(object.get(\"property\"))",
 				transpiled=execute._transpileScript({library, script});
 			assert.strictEqual(transpiled, "json.read(0,\"path\").array.map(1,object.get(2,\"property\"))");
 		});

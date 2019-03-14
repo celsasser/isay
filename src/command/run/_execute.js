@@ -11,9 +11,9 @@
 
 const _=require("lodash");
 const assert=require("assert");
+const {createHmac}=require("crypto");
 const vm=require("vm");
 const lib_os=require("../../lib/os");
-const log=require("../../common/log");
 const util=require("../../common/util");
 
 
@@ -99,26 +99,30 @@ function _functionArgumentToPojo(argument) {
  * Note: There are javascript variations of declaring a function's params that we don't parse. Could we?
  *    Yes, but we are not javascript. We are a controlled subset. Stay in the lines...
  * @param {string} script
- * @returns {Array<string>}
+ * @returns {{body:string, params:Array<string>}}
+ * @throws {Error}
  * @private
  */
-function _getFunctionParameters(script) {
-	let params;
-	// we are only going to support the arrow operator
-	if((params=_.get(script.match(/^\s*function\s*\(\s*(.*?)\s*\)/), 1))===undefined) {
-		if((params=_.get(script.match(/^\s*\(\s*(.*?)\s*\)\s*=>/), 1))===undefined) {
-			params=_.get(script.match(/^(.*?)=>/), 1);
+function _parseFunction(script) {
+	let match,
+		regex;
+	regex=/^\s*function\s*\(\s*(.*?)\s*\)\s*/g;
+	if((match=regex.exec(script))===null) {
+		regex=/^\s*\(\s*(.*?)\s*\)\s*=>\s*/g;
+		if((match=regex.exec(script))===null) {
+			regex=/^(.*?)=>\s*/g;
+			match=regex.exec(script);
 		}
 	}
 
-	if(params!==undefined) {
-		return params.split(/\s*,\s*/)
-			.filter(param=>param.length>0);
+	if(match!==null) {
+		return {
+			body: script.substr(regex.lastIndex),
+			params: match[1].split(/\s*,\s*/)
+				.filter(param=>param.length>0)
+		};
 	} else {
-		log.error(`_getFunctionParameters: failed to find script params - script="${script}"`);
-		// let's assume it's our error for now. We use params for creating scopes. As long as
-		// the function isn't nested more than one level deep all will be fine.
-		return [];
+		throw new Error(`unable to parse function "${script}"`);
 	}
 }
 
@@ -144,6 +148,10 @@ function _parseChain({
 	 * @type {Array<ModuleDescriptor>}
 	 */
 	let callSequence=[];
+	/**
+	 * @type {Object<string,{body:string,compiled:Function,context:Object,params:Array<string>}>}
+	 */
+	const predicateMap={};
 
 	/**
 	 * Creates and adds a ModuleDescriptor to our call-sequence
@@ -192,30 +200,53 @@ function _parseChain({
 		// note: is async because we may return a promise and because if we don't then we will wrap it otherwise when we run it.
 		return async function(...input) {
 			const script=predicate.toString(),
-				parameters=_getFunctionParameters(script),
-				{farguments, scopeContext}=input
-					.reduce((result, argument, index)=>{
-						const pojo=_functionArgumentToPojo(argument);
-						result.farguments.push(JSON.stringify(pojo));
-						if(parameters.length>index) {
-							result.scopeContext[parameters[index]]=pojo;
-						}
-						return result;
-					}, {
-						farguments: [],
-						scopeContext: {}
+				hash=createHmac("sha256", JSON.stringify(context)).update(script).digest("hex"),
+				cached=predicateMap[hash];
+			if(cached) {
+				// We have already processed this function (see below) and know that it is a pure javascript function. We
+				// can take advantage of this knowledge and call him directly (once he is compiled)
+				if(!cached.compiled) {
+					// note: we know that the context for this function is the current sandbox because of the way we
+					// create the hash. Different contexts will result in different hashes for the same function.
+					cached.compiled=vm.compileFunction(cached.body, cached.params, {
+						parsingContext: sandbox
 					});
-			const {sequence, result}=_parseChain({
-				context: Object.assign({}, context, scopeContext),
-				library,
-				transpiled: `(${script})(${farguments.join(",")})`
-			});
-			// now we either have found a chain or we have run a chain free function and have what we need.
-			if(sequence.length>0) {
-				const chain=_buildChain(sequence);
-				return chain.process.apply(chain, input);
+				}
+				return cached.compiled(...input);
 			} else {
-				return result;
+				const {body, params}=_parseFunction(script),
+					{args, _context}=input
+						.reduce((result, argument, index)=>{
+							const pojo=_functionArgumentToPojo(argument);
+							result.args.push(JSON.stringify(pojo));
+							if(params.length>index) {
+								result._context[params[index]]=pojo;
+							}
+							return result;
+						}, {
+							args: [],
+							_context: {}
+						});
+				const {sequence, result}=_parseChain({
+					context: Object.assign({}, context, _context),
+					library,
+					transpiled: `(${script})(${args.join(",")})`
+				});
+				// now we either have found a chain or we have run a chain free function and have what we need.
+				if(sequence.length>0) {
+					const chain=_buildChain(sequence);
+					return chain.process.apply(chain, input);
+				} else {
+					// this guy is a no nonsense javascript function. We can call him directly in the future. Here we cache him
+					// and wait. If this very same function with the same context gets called again then see up above for more
+					// information on how we process cached functions.
+					predicateMap[hash]={
+						body,
+						context,
+						params
+					};
+					return result;
+				}
 			}
 		};
 	}
@@ -299,7 +330,7 @@ module.exports={
 	runScript,
 	_buildChain,
 	_functionArgumentToPojo,
-	_getFunctionParameters,
+	_parseFunction,
 	_parseChain,
 	_transpileScript
 };
