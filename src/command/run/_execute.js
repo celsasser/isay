@@ -13,7 +13,8 @@ const _=require("lodash");
 const assert=require("assert");
 const {createHmac}=require("crypto");
 const vm=require("vm");
-const lib_os=require("../../lib/os");
+const {ModuleOs}=require("../../lib/os");
+const {ModuleTest}=require("../../lib/_test");
 const util=require("../../common/util");
 
 
@@ -42,35 +43,122 @@ function _buildChain(descriptors) {
 	/**
 	 * Builds chain of modules. Works it's way forward
 	 * @param {number} index
-	 * @param {ModuleBase} next
+	 * @param {ModuleBase} nextModule
 	 * @param {ModuleBase} catchModule - "catch" handler
+	 * @param elseModule
+	 * @param thenModule
 	 * @returns {ModuleBase}
 	 */
-	function _build(index, next=undefined, catchModule=undefined) {
+	function _build({
+		index,
+		catchModule=undefined,
+		elseModule=undefined,
+		nextModule=undefined,
+		thenModule=undefined
+	}) {
+		/**
+		 * Asserts the state of the following params.
+		 * Note: we allow an else without a then. There is no good reason to disallow it and could be preferred.
+		 * @param {boolean} assertNotElse
+		 * @param {boolean} assertNotThen
+		 * @param {boolean} assertDeep - asserts that we are not at the top of the stack
+		 */
+		function _preflightCheck({
+			assertDeep=false,
+			assertNotElse=false,
+			assertNotThen=false
+		}) {
+			if(assertDeep && index===0) {
+				throw new Error("unexpected encountered head of the chain");
+			}
+			if(assertNotThen && thenModule) {
+				throw new Error("misplaced then statement");
+			}
+			if(assertNotElse && elseModule) {
+				throw new Error("misplaced else statement");
+			}
+		}
+
 		if(index<0) {
-			return next;
+			return nextModule;
 		} else {
 			const descriptor=descriptors[index];
 			const instance=new descriptor.class({
 				action: descriptor.action,
 				catchModule,
 				domain: descriptor.domain,
+				elseModule,
 				method: descriptor.method,
-				nextModule: next,
-				params: descriptor.params
+				nextModule,
+				params: descriptor.params,
+				thenModule
 			});
-			if(descriptor.action==="catch") {
-				// This instance is a catch handler. We never want to flow into him. If an error is thrown then
-				// we want to flow around him. But from here on he will be installed as the catch handler.
-				// At least until another one is installed.
-				return _build(index-1, next, instance);
-			} else {
-				return _build(index-1, instance, catchModule);
+			// Every action within ModuleTest may take a then and else action. If this guy was that action then
+			// our thenModule and elseModule have found a home.
+			if(instance instanceof ModuleTest
+				&& descriptor.action!=="then"
+				&& descriptor.action!=="else") {
+				elseModule=undefined;
+				thenModule=undefined;
+			}
+			switch(descriptor.action) {
+				case "catch": {
+					_preflightCheck({
+						assertDeep: true,
+						assertNotElse: true,
+						assertNotThen: true
+					});
+					// This instance is a catch handler. We never want to flow into him. If an error is thrown then we want
+					// to flow around him. But from here on he will be installed as the catch handler (until superseded)
+					return _build({
+						index: index-1,
+						catchModule: instance,
+						nextModule
+					});
+				}
+				case "then": {
+					_preflightCheck({
+						assertDeep: true,
+						assertNotThen: true
+					});
+					return _build({
+						index: index-1,
+						catchModule,
+						elseModule,
+						nextModule,
+						thenModule: instance
+					});
+				}
+				case "else": {
+					_preflightCheck({
+						assertDeep: true,
+						assertNotElse: true,
+						assertNotThen: true
+					});
+					return _build({
+						index: index-1,
+						catchModule,
+						elseModule: instance,
+						nextModule
+					});
+
+				}
+				default: {
+					_preflightCheck({
+						assertNotElse: true,
+						assertNotThen: true
+					});
+					return _build({
+						index: index-1,
+						catchModule,
+						nextModule: instance,
+					});
+				}
 			}
 		}
 	}
 
-	return _build(descriptors.length-1);
+	return _build({index: descriptors.length-1});
 }
 
 /**
@@ -260,7 +348,7 @@ function _parseChain({
 				if(!(property in target)) {
 					target[property]=_addCall.bind(null, {
 						action: property,
-						class: lib_os.ModuleOs,
+						class: ModuleOs,
 						domain: "os",
 						method: "executionHandler"
 					});
