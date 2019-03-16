@@ -7,7 +7,7 @@
 
 const _=require("lodash");
 const {ModuleBase}=require("./_base");
-const {assertType}=require("./_data");
+const {assertPredicate, assertType}=require("./_data");
 
 /**
  * Base class for tests so that we can support the positive and negative tests with one set of functionality
@@ -48,7 +48,7 @@ class ModuleTest extends ModuleBase {
 	 * @returns {Promise<boolean>}
 	 */
 	async empty(blob) {
-		return _.isEmpty(blob)===this._positive;
+		return this._processTestResult(blob, _.isEmpty(blob));
 	}
 
 	/**
@@ -64,10 +64,10 @@ class ModuleTest extends ModuleBase {
 			: [this.params[0]];
 		for(let search of searchEndings) {
 			if(blob.endsWith(search)) {
-				return this._positive;
+				return this._processTestResult(blob, true);
 			}
 		}
-		return !this._positive;
+		return this._processTestResult(blob, false);
 	}
 
 	/**
@@ -76,7 +76,8 @@ class ModuleTest extends ModuleBase {
 	 * @returns {Promise<boolean>}
 	 */
 	async equal(blob) {
-		return _.isEqual(blob, this.params[0])===this._positive;
+		const result=_.isEqual(blob, this.params[0]);
+		return this._processTestResult(blob, result);
 	}
 
 	/**
@@ -89,10 +90,10 @@ class ModuleTest extends ModuleBase {
 		assertType(this.params[0], "Array");
 		for(let value of this.params[0]) {
 			if(_.isEqual(blob, value)) {
-				return this._positive;
+				return this._processTestResult(blob, true);
 			}
 		}
-		return !this._positive;
+		return this._processTestResult(blob, false);
 	}
 
 	/**
@@ -108,10 +109,25 @@ class ModuleTest extends ModuleBase {
 			: [this.params[0]];
 		for(let search of searchEndings) {
 			if(blob.startsWith(search)) {
-				return this._positive;
+				return this._processTestResult(blob, true);
 			}
 		}
-		return !this._positive;
+		return this._processTestResult(blob, false);
+	}
+
+	/**
+	 * Intended to allow predicates to get in the testing business but defers to casting if there is no predicate.
+	 * @param {DataBlob} blob
+	 * @returns {Promise<boolean>}
+	 */
+	async test(blob) {
+		if(this.params.length>0) {
+			const predicate=assertPredicate(this.params[0]);
+			return predicate(blob)
+				.then(result=>this._processTestResult(blob, Boolean(result)));
+		} else {
+			return this._processTestResult(blob, Boolean(blob));
+		}
 	}
 
 	/**
@@ -124,13 +140,42 @@ class ModuleTest extends ModuleBase {
 		assertType(this.params[0], ["Array", "String"]);
 		try {
 			assertType(blob, this.params[0]);
-			return this._positive;
+			return this._processTestResult(blob, true);
 		} catch(error) {
-			return !this._positive;
+			return this._processTestResult(blob, false);
 		}
 	}
 
 	/********************* Private Interface *********************/
+	/**
+	 * Processes the result of whatever test up above's results. Puts the result to if/then/else processing.
+	 * @param {DataBlob} input
+	 * @param {boolean} positive - should be the result of the test itself. <param>this._positive</param> comparison will be applied here.
+	 * @returns {Promise<DataBlob>} - what gets returned depends on whether there is then/else processing.
+	 *  - if neither exists then <param>positive</param> will be returned
+	 *  - else either <param>input</param> or the result of then/else will be returned.
+	 * @private
+	 */
+	_processTestResult(input, positive) {
+		const state=positive===this._positive;
+		if(this._thenModule || this._elseModule) {
+			if(state) {
+				if(this._thenModule) {
+					return this._thenModule.process(input);
+				} else {
+					return Promise.resolve(input);
+				}
+			} else {
+				if(this._elseModule) {
+					return this._elseModule.process(input);
+				} else {
+					return Promise.resolve(input);
+				}
+			}
+		} else {
+			return Promise.resolve(state);
+		}
+	}
 }
 
 module.exports={
