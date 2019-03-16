@@ -10,6 +10,7 @@
 const fs=require("fs-extra");
 const path=require("path");
 const {toLocalPath}=require("../common/file");
+const {ModuleBase}=require("./_base");
 
 /********************* Types *********************/
 
@@ -22,6 +23,20 @@ const {toLocalPath}=require("../common/file");
  * @private
  */
 function loadLibrary() {
+	/**
+	 * Recursively iterates through the class and picks up all descriptors up to ModuleBase
+	 * @param {class} clss
+	 * @return {Object<string, PropertyDescriptor>}
+	 */
+	function _getModuleDescriptors(clss) {
+		let result={};
+		while(clss!==ModuleBase) {
+			result=Object.assign(Object.getOwnPropertyDescriptors(clss.prototype), result);
+			clss=Object.getPrototypeOf(clss);
+		}
+		return result;
+	}
+
 	const libraryPath=toLocalPath("./src/lib");
 	return fs.readdirSync(toLocalPath("./src/lib"))
 		.filter(filename=>{
@@ -36,7 +51,7 @@ function loadLibrary() {
 			const module=require(path.join(libraryPath, filename));
 			const _processClassName=(name)=>{
 				const clss=module[name],
-					descriptors=Object.getOwnPropertyDescriptors(clss.prototype);
+					descriptors=_getModuleDescriptors(clss);
 				Object.keys(descriptors)
 					.filter(name=>{
 						return typeof descriptors[name].value==="function"

@@ -25,7 +25,7 @@ describe("command.run.index", function() {
 			const configuration={
 				options: {
 					input: undefined,
-					script: "test/scripts/script-function-predicate.js"
+					script: "test/scripts/script-catch-one.js"
 				}
 			};
 			return run(configuration)

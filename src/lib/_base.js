@@ -16,27 +16,27 @@ const log=require("../common/log");
 class ModuleBase {
 	/**
 	 * @param {string} action
+	 * @param {ModuleBase} catchModule - exceptions thrown during processing are forwarded to it if set
 	 * @param {string} domain
 	 * @param {string} method
 	 * @param {boolean} objectMode
-	 * @param {ModuleBase} output
+	 * @param {ModuleBase} nextModule
 	 * @param {Array<*>} params
-	 * @param {ModuleBase} trap - it's catch but we are using "trap" to get around reserved keyword problems
 	 */
 	constructor({
 		action,
+		catchModule=undefined,
 		domain,
 		method,
-		output=undefined,
-		params=[],
-		trap=undefined
+		nextModule=undefined,
+		params=[]
 	}) {
 		this.action=action;
 		this.domain=domain;
 		this.method=method;
 		this.params=params;
-		this._output=output;
-		this._trap=trap;
+		this._catchModule=catchModule;
+		this._nextModule=nextModule;
 	}
 
 	/**
@@ -84,13 +84,13 @@ class ModuleBase {
 				await _logVerbose();
 			}
 			blob= await this[this.method](blob, ...args);
-			return (this._output)
-				? this._output.process(blob)
+			return (this._nextModule)
+				? this._nextModule.process(blob)
 				: Promise.resolve(blob);
 		} catch(error) {
-			if(this._trap) {
+			if(this._catchModule) {
 				// we have a "catch" error handler so we let him handle it.
-				return this._trap.process(error, blob, ...args);
+				return this._catchModule.process(error, blob, ...args);
 			} else {
 				// look to see whether this was reported by us. If so then it means that
 				// the chain was nested. We just want the top level error.
