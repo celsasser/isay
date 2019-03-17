@@ -11,9 +11,11 @@ file.read("./examples/data/the-raven.txt")
 			: 1;
 		return result;
 	}, {})
-	.object.toArray((count, word)=>({
-		count,
-		word
-	}))
+	.object.toArray((count, word)=>{
+		return {
+			count,
+			word
+		}
+	})
 	.array.sort(["-count", "word"])
 	std.out()

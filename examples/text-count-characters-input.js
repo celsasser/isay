@@ -20,9 +20,11 @@ app.assert(is.type("String"))
 			: 1;
 		return result;
 	}, {})
-		.object.toArray((count, character)=>({
-		count,
-		character
-	}))
+	.object.toArray((count, character)=>{
+		return {
+			count,
+			character
+		}
+	})
 	.array.sort(["-count", "character"])
 	std.out()

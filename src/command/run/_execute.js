@@ -13,6 +13,8 @@ const _=require("lodash");
 const assert=require("assert");
 const {createHmac}=require("crypto");
 const vm=require("vm");
+const {getApplicationConfiguration}=require("../configuration");
+const log=require("../../common/log");
 const lib_os=require("../../lib/os");
 const util=require("../../common/util");
 
@@ -69,8 +71,34 @@ function _buildChain(descriptors) {
 			}
 		}
 	}
-
 	return _build(descriptors.length-1);
+}
+
+/**
+ * Determines whether we can compile this function and makes sure the results expected will be those that are expected.
+ * @param {string} body
+ * @param {Array<*>} params
+ * @param {} sandbox
+ * @returns {Function|null}
+ * @private
+ */
+function _compileFunction({
+	body,
+	params,
+	sandbox
+}) {
+	// make sure the version they are running supports it.
+	if(!vm.compileFunction) {
+		return null;
+	}
+	// compile does not do a very good job with es6 predicates. It compiles them as functions
+	// but does not seem to return the value with the following notation: (input)=>value
+	if(body.indexOf("return")<0) {
+		log.warn("compiler warning: predicates should explicitly return values");
+	}
+	return vm.compileFunction(body, params, {
+		parsingContext: sandbox
+	});
 }
 
 /**
@@ -205,48 +233,53 @@ function _parseChain({
 			if(cached) {
 				// We have already processed this function (see below) and know that it is a pure javascript function. We
 				// can take advantage of this knowledge and call him directly (once he is compiled)
-				if(!cached.compiled) {
+				if(cached.compiled) {
+					return cached.compiled(...input);
+				} else {
 					// note: we know that the context for this function is the current sandbox because of the way we
 					// create the hash. Different contexts will result in different hashes for the same function.
-					cached.compiled=vm.compileFunction(cached.body, cached.params, {
-						parsingContext: sandbox
+					cached.compiled=_compileFunction({
+						body: cached.body,
+						params: cached.params,
+						sandbox
 					});
+					if(cached.compiled) {
+						return cached.compiled(...input);
+					}
 				}
-				return cached.compiled(...input);
+			}
+			const {body, params}=_parseFunction(script),
+				{args, _context}=input
+					.reduce((result, argument, index)=>{
+						const pojo=_functionArgumentToPojo(argument);
+						result.args.push(JSON.stringify(pojo));
+						if(params.length>index) {
+							result._context[params[index]]=pojo;
+						}
+						return result;
+					}, {
+						args: [],
+						_context: {}
+					});
+			const {sequence, result}=_parseChain({
+				context: Object.assign({}, context, _context),
+				library,
+				transpiled: `(${script})(${args.join(",")})`
+			});
+			// now we either have found a chain or we have run a chain free function and have what we need.
+			if(sequence.length>0) {
+				const chain=_buildChain(sequence);
+				return chain.process.apply(chain, input);
 			} else {
-				const {body, params}=_parseFunction(script),
-					{args, _context}=input
-						.reduce((result, argument, index)=>{
-							const pojo=_functionArgumentToPojo(argument);
-							result.args.push(JSON.stringify(pojo));
-							if(params.length>index) {
-								result._context[params[index]]=pojo;
-							}
-							return result;
-						}, {
-							args: [],
-							_context: {}
-						});
-				const {sequence, result}=_parseChain({
-					context: Object.assign({}, context, _context),
-					library,
-					transpiled: `(${script})(${args.join(",")})`
-				});
-				// now we either have found a chain or we have run a chain free function and have what we need.
-				if(sequence.length>0) {
-					const chain=_buildChain(sequence);
-					return chain.process.apply(chain, input);
-				} else {
-					// this guy is a no nonsense javascript function. We can call him directly in the future. Here we cache him
-					// and wait. If this very same function with the same context gets called again then see up above for more
-					// information on how we process cached functions.
-					predicateMap[hash]={
-						body,
-						context,
-						params
-					};
-					return result;
-				}
+				// this guy is a no nonsense javascript function. We can call him directly in the future. Here we cache him
+				// and wait. If this very same function with the same context gets called again then see up above for more
+				// information on how we process cached functions.
+				predicateMap[hash]={
+					body,
+					context,
+					params
+				};
+				return result;
 			}
 		};
 	}

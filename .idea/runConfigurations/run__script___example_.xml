@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="run: script - example " type="NodeJSConfigurationType" application-parameters="run -s ./examples/os-ping-range.js" path-to-js-file="mouse.js" working-dir="$PROJECT_DIR$">
+  <configuration default="false" name="run: script - example " type="NodeJSConfigurationType" application-parameters="run -d -s ./examples/text-count-words-raven.js" path-to-js-file="mouse.js" working-dir="$PROJECT_DIR$">
     <method v="2" />
   </configuration>
 </component>

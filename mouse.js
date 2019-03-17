@@ -14,11 +14,27 @@ const log=require("./src/common/log");
 const cli=require("./src/cli");
 
 /**
+ * Makes sure the environment can support the app. Makes recommendations if improvements can be gained.
+ * @param {CliParsed} configuration
+ * @private
+ */
+function _assertEnvironment(configuration) {
+	const version=process.versions.node.split(".")
+		.map(version=>Number(version));
+	if(configuration.options.debug) {
+		if(version[0]<10) {
+			log.warn(`NodeJS version=${process.version}. May get performance gains by upgrading to v10.x.x or greater`);
+		}
+	}
+}
+
+/**
  * Parse the command line and create a command instance.
  * Note: we don't handle exceptions here as everything should be handled by <code>cli</code> and unknown actions
  * should not make it out of <code>cli</code> alive. Also, <code>cli</code> has the right to exit the process.
  */
 const configuration=setApplicationConfiguration(cli.parse());
+_assertEnvironment(configuration);
 log.verbose(`loading "${configuration.action}" module`);
 const command=require(`./src/command/${configuration.action}`);
 
