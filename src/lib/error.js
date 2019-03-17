@@ -22,6 +22,7 @@ class ModuleError extends ModuleBase {
 	 * @param {Error} error
 	 * @param {DataBlob} blob
 	 * @returns {Promise<*>}
+	 * @attribute flow
 	 */
 	async catch(error, blob) {
 		if(this.params.length===0) {
@@ -42,6 +43,7 @@ class ModuleError extends ModuleBase {
 	 * @resolves text:(string|Error} in this.params[0]
 	 * @param {DataBlob} blob
 	 * @returns {Promise<void>}
+	 * @attribute flow
 	 */
 	async throw(blob) {
 		assertType(this.params[0], ["Error", "Function", "String"]);

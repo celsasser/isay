@@ -41,6 +41,26 @@ describe("lib.ModuleTest", function() {
 		});
 	});
 
+	describe("empty", function() {
+		it("should return true if input is considered empty", async function() {
+			const instance=_createInstance();
+			assert.strictEqual(await instance.empty(), true);
+			assert.strictEqual(await instance.empty(null), true);
+			assert.strictEqual(await instance.empty({}), true);
+			assert.strictEqual(await instance.empty([]), true);
+		});
+
+		it("should negate if positive is false", async function() {
+			const instance=_createInstance({
+				positive: false
+			});
+			assert.strictEqual(await instance.empty(), false);
+			assert.strictEqual(await instance.empty(null), false);
+			assert.strictEqual(await instance.empty({}), false);
+			assert.strictEqual(await instance.empty([]), false);
+		});
+	});
+
 	describe("endsWith", function() {
 		it("should raise exception if blob is not a string", async function() {
 			const instance=_createInstance({
@@ -92,6 +112,35 @@ describe("lib.ModuleTest", function() {
 			});
 			return instance.endsWith("one.two")
 				.then(value=>assert.strictEqual(value, false));
+		});
+	});
+
+	[
+		"else",
+		"then"
+	].forEach(action=>{
+		describe(action, function() {
+			it("should raise exception if params[0] is not a predicate", async function() {
+				const instance=_createInstance();
+				return instance[action]("input")
+					.then(assert.notCalled)
+					.catch(error=>{
+						assert.strictEqual(error.message, "missing predicate function");
+					});
+			});
+
+			it("should return result of param", async function() {
+				const instance=_createInstance({
+					params: [input=>{
+						assert.strictEqual(input, "input");
+						return "output";
+					}]
+				});
+				return instance[action]("input")
+					.then(result=>{
+						assert.strictEqual(result, "output");
+					});
+			});
 		});
 	});
 

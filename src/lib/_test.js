@@ -71,6 +71,18 @@ class ModuleTest extends ModuleBase {
 	}
 
 	/**
+	 * Is a flow handler much like then and catch. May be used to flow to via a non-flow <code>ModuleTest</code> action
+	 * @resolves predicate:ActionPredicate in this.params[0]
+	 * @param {DataBlob} blob
+	 * @return {Promise<DataBlob>}
+	 * @attribute flow
+	 */
+	async else(blob) {
+		const predicate=assertPredicate(this.params[0]);
+		return predicate(blob);
+	}
+
+	/**
 	 * returns true if <param>blob</param> is equal to <code>params[0]</code>
 	 * @param {DataBlob} blob
 	 * @returns {Promise<boolean>}
@@ -128,6 +140,18 @@ class ModuleTest extends ModuleBase {
 		} else {
 			return this._processTestResult(blob, Boolean(blob));
 		}
+	}
+
+	/**
+	 * Is a flow handler much like else and catch. May be used to flow to via a non-flow <code>ModuleTest</code> action
+	 * @resolves predicate:ActionPredicate in this.params[0]
+	 * @param {DataBlob} blob
+	 * @return {Promise<DataBlob>}
+	 * @attribute flow
+	 */
+	async then(blob) {
+		const predicate=assertPredicate(this.params[0]);
+		return predicate(blob);
 	}
 
 	/**
