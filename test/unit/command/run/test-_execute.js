@@ -54,18 +54,22 @@ describe("command.run._execute", function() {
 		it("should return empty array when no params", function() {
 			assert.deepEqual(execute._parseFunction("()=>{}"), {
 				body: "{}",
+				es6: true,
 				params: []
 			});
 			assert.deepEqual(execute._parseFunction(" ( ) => { }"), {
 				body: "{ }",
+				es6: true,
 				params: []
 			});
 			assert.deepEqual(execute._parseFunction("function(){}"), {
 				body: "{}",
+				es6: false,
 				params: []
 			});
 			assert.deepEqual(execute._parseFunction(" function ( ) { }"), {
 				body: "{ }",
+				es6: false,
 				params: []
 			});
 		});
@@ -73,34 +77,42 @@ describe("command.run._execute", function() {
 		it("should properly find a single param", function() {
 			assert.deepEqual(execute._parseFunction("(a)=>{}"), {
 				body: "{}",
+				es6: true,
 				params: ["a"]
 			});
 			assert.deepEqual(execute._parseFunction("( _$Mix )=>{}"), {
 				body: "{}",
+				es6: true,
 				params: ["_$Mix"]
 			});
 			assert.deepEqual(execute._parseFunction(" ( a ) => { }"), {
 				body: "{ }",
+				es6: true,
 				params: ["a"]
 			});
 			assert.deepEqual(execute._parseFunction(" ( _$Mix ) => { }"), {
 				body: "{ }",
+				es6: true,
 				params: ["_$Mix"]
 			});
 			assert.deepEqual(execute._parseFunction("function(a){}"), {
 				body: "{}",
+				es6: false,
 				params: ["a"]
 			});
 			assert.deepEqual(execute._parseFunction("function(_$Mix){}"), {
 				body: "{}",
+				es6: false,
 				params: ["_$Mix"]
 			});
 			assert.deepEqual(execute._parseFunction(" function ( a ) { }"), {
 				body: "{ }",
+				es6: false,
 				params: ["a"]
 			});
 			assert.deepEqual(execute._parseFunction(" function ( _$Mix ) { }"), {
 				body: "{ }",
+				es6: false,
 				params: ["_$Mix"]
 			});
 		});
@@ -108,34 +120,42 @@ describe("command.run._execute", function() {
 		it("should properly find a multiple params", function() {
 			assert.deepEqual(execute._parseFunction("(a,b)=>{}"), {
 				body: "{}",
+				es6: true,
 				params: ["a", "b"]
 			});
 			assert.deepEqual(execute._parseFunction("(a,b,)=>{}"), {
 				body: "{}",
+				es6: true,
 				params: ["a", "b"]
 			});
 			assert.deepEqual(execute._parseFunction(" ( a , b ) => {}"), {
 				body: "{}",
+				es6: true,
 				params: ["a", "b"]
 			});
 			assert.deepEqual(execute._parseFunction(" ( a , b, ) => {}"), {
 				body: "{}",
+				es6: true,
 				params: ["a", "b"]
 			});
 			assert.deepEqual(execute._parseFunction("function(a,b){}"), {
 				body: "{}",
+				es6: false,
 				params: ["a", "b"]
 			});
 			assert.deepEqual(execute._parseFunction("function(a,b,){}"), {
 				body: "{}",
+				es6: false,
 				params: ["a", "b"]
 			});
 			assert.deepEqual(execute._parseFunction(" function ( a , b ) { }"), {
 				body: "{ }",
+				es6: false,
 				params: ["a", "b"]
 			});
 			assert.deepEqual(execute._parseFunction(" function ( a , b, ) { }"), {
 				body: "{ }",
+				es6: false,
 				params: ["a", "b"]
 			});
 		});

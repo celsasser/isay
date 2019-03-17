@@ -69,6 +69,16 @@
  */
 
 /**
+ * @typedef {Object} CompilerFunction
+ * @property {string} body
+ * @property {Function} compiled
+ * @property {string} compilable
+ * @property {Object} context
+ * @property {boolean} es6
+ * @property {Array<string>} params
+ */
+
+/**
  * @typedef {Object} LibraryNode
  * @property {string} action
  * @property {class} class

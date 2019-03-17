@@ -3,9 +3,11 @@
  */
 
 array.range(1, 10)
-	.array.map(value=>{
+	.array.map(function(value) {
 		array.range(1, value+1)
 			.math.multiply()
-			.object.map(result=>`${value}! = ${result}`)
+			.object.map(function(result) {
+				return `${value}! = ${result}`
+			})
 	})
 	.std.out()

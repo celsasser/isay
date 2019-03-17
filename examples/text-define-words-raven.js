@@ -13,10 +13,12 @@
 file.read("./examples/data/the-raven.txt")
 	.string.lower()
 	.string.split(/\W+/)
-	.array.filter(word=>word.length>9)
+	.array.filter(function(word) {
+		return word.length>9
+	})
 	.array.unique()
 	.array.sort()
-	.array.map(word=>{
+	.array.map(function(word) {
 		os.curl("--get", `https://www.dictionaryapi.com/api/v3/references/collegiate/json/${word}?key=58001a89-66f9-4249-8d04-8464711ce694`)
 			.json.parse()
 			.object.map([
