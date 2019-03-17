@@ -27,4 +27,4 @@ app.assert(is.type("String"))
 		}
 	})
 	.array.sort(["-count", "character"])
-	std.out()
+	.std.out()

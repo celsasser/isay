@@ -21,9 +21,6 @@ json.read("./examples/data/pets.json")
 	.array.sort("maturity")
 	.array.reverse()
 	.array.map(function(element, index) {
-		return {
-			index,
-			...element
-		}
+		return {index, ...element}
 	})
 	.std.out()

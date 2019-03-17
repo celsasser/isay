@@ -238,6 +238,8 @@ function _parseChain({
 			const script=predicate.toString(),
 				hash=createHmac("sha256", JSON.stringify(context)).update(script).digest("hex"),
 				cached=predicateMap[hash];
+
+			// if we have encountered this guy before with the same content then he may be compiled or compilable
 			if(cached && cached.compilable!==false) {
 				// We have already processed this function (see below) and know that it is a pure javascript function. We
 				// may be able to take advantage of this knowledge and call him directly if he can be compiled

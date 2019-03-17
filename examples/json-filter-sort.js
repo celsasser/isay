@@ -8,7 +8,7 @@
 
 json.read("./examples/data/pets.json")
 	.array.filter(function(pet) {
-		return pet.species==="dog"
+		return pet.species==="dog";
 	})
 	.array.sort("name")
 	.std.out()

@@ -7,7 +7,7 @@ array.range(1, 10)
 		array.range(1, value+1)
 			.math.multiply()
 			.object.map(function(result) {
-				return `${value}! = ${result}`
+				return `${value}! = ${result}`;
 			})
 	})
 	.std.out()

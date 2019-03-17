@@ -19,11 +19,16 @@ const cli=require("./src/cli");
  * @private
  */
 function _assertEnvironment(configuration) {
-	const version=process.versions.node.split(".")
+	const versions=process.versions.node.split(".")
 		.map(version=>Number(version));
+	const version=versions[0]*10000 + versions[1]*100 + versions[0];
 	if(configuration.options.debug) {
-		if(version[0]<10) {
+		if(versions[0]<10) {
 			log.warn(`NodeJS version=${process.version}. May get performance gains by upgrading to v10.x.x or greater`);
+		} else if(versions[0]<11) {
+			if(version<101402) {
+				log.warn(`NodeJS version=${process.version}. May avoid function compilation bugs by upgrading to v10.14.2 or greater`);
+			}
 		}
 	}
 }
