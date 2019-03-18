@@ -71,15 +71,9 @@ function assertType(value, allowed, {
 			throw new Error(`expecting ${_formatAllowed()} but found ${util.name(value)}`);
 		}
 	} else {
-		let type;
-		if(strict) {
-			// we don't go any farther than expecting a function to be a "Function"
-			type=(value.constructor.name==="AsyncFunction")
-				? "Function"
-				: value.constructor.name;
-		} else {
-			type=typeof(value);
-		}
+		const type=(strict)
+			? _getConstructorName(value)
+			: typeof(value);
 		if(_.isArray(allowed)) {
 			if(_.includes(allowed, type)===false) {
 				throw new Error(`expecting ${_formatAllowed()} but found ${util.name(value)}`);
@@ -89,6 +83,20 @@ function assertType(value, allowed, {
 				throw new Error(`expecting ${_formatAllowed()} but found ${util.name(value)}`);
 			}
 		}
+	}
+}
+
+/**
+ * Asserts that the values types are the same
+ * @param {*} value1
+ * @param {*} value2
+ * @throws {Error}
+ */
+function assertTypesEqual(value1, value2) {
+	const type1=_getConstructorName(value1),
+		type2=_getConstructorName(value2);
+	if(type1!==type2) {
+		throw new Error(`expecting same types but found ${type1} and ${type2}`);
 	}
 }
 
@@ -118,12 +126,32 @@ function isPredicate(value) {
 	return _.isFunction(value);
 }
 
-
+/**
+ * Gets the constructor name of the specified value if not null or undefined otherwise returns
+ * "null" or "undefined"
+ * @param {*} value
+ * @returns {string}
+ * @private
+ */
+function _getConstructorName(value) {
+	if(value===undefined) {
+		return "undefined";
+	} else if(value===null) {
+		return "null";
+	} else {
+		const type=value.constructor.name;
+		// we don't go any farther than expecting a function to be a "Function"
+		return (type==="AsyncFunction")
+			? "Function"
+			: type;
+	}
+}
 
 module.exports={
 	assertPredicate,
 	assertProperties,
 	assertType,
+	assertTypesEqual,
 	ensureJson,
 	isPredicate
 };

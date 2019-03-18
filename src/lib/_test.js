@@ -7,7 +7,7 @@
 
 const _=require("lodash");
 const {ModuleBase}=require("./_base");
-const {assertPredicate, assertType, isPredicate}=require("./_data");
+const {assertPredicate, assertType, assertTypesEqual, isPredicate}=require("./_data");
 
 /**
  * Base class for tests so that we can support the positive and negative tests with one set of functionality
@@ -90,6 +90,24 @@ class ModuleTest extends ModuleBase {
 	async equal(blob) {
 		const result=_.isEqual(blob, this.params[0]);
 		return this._processTestResult(blob, result);
+	}
+
+	/**
+	 * Tests for <param>blob</param> > this.params[0]
+	 * @param {DataBlob} blob
+	 * @return {Promise<DataBlob>}
+	 */
+	async greaterThan(blob) {
+		return this._processBinaryTest(blob, (v1, v2)=>v1>v2);
+	}
+
+	/**
+	 * Tests for <param>blob</param> < this.params[0]
+	 * @param {DataBlob} blob
+	 * @return {Promise<DataBlob>}
+	 */
+	async lessThan(blob) {
+		return this._processBinaryTest(blob, (v1, v2)=>v1<v2);
 	}
 
 	/**
@@ -177,6 +195,22 @@ class ModuleTest extends ModuleBase {
 	}
 
 	/********************* Private Interface *********************/
+	/**
+	 * Performs the <param>test</param> on <param>blob</param> and this.params[0] and forwards the result
+	 * to <code>this._processTestResult</code>
+	 * @param {DataBlob} blob
+	 * @param {function(v1:*, v2:*):boolean} test
+	 * @returns {Promise<DataBlob>}
+	 * @private
+	 */
+	_processBinaryTest(blob, test) {
+		assertType(blob, ["Date", "Number", "String"]);
+		assertType(this.params[0], ["Date", "Number", "String"]);
+		assertTypesEqual(blob, this.params[0]);
+		const result=test(blob, this.params[0]);
+		return this._processTestResult(blob, result);
+	}
+
 	/**
 	 * Processes then/else action
 	 * @param {DataBlob} blob

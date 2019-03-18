@@ -153,6 +153,64 @@ describe("lib.ModuleTest", function() {
 		});
 	});
 
+	[
+		["greaterThan", 1],
+		["lessThan", -1]
+	].forEach(([action, direction])=>{
+		describe(action, function() {
+			it("should raise an exception if the input is not a supported type", async function() {
+				const instance=_createInstance({
+					params: [1]
+				});
+				return instance[action]()
+					.then(assert.notCalled)
+					.catch(error=>{
+						assert.strictEqual(error.message, "expecting Date, Number or String but found undefined");
+					});
+			});
+
+			it("should raise an exception if params[0] is not a supported type", async function() {
+				const instance=_createInstance();
+				return instance[action](1)
+					.then(assert.notCalled)
+					.catch(error=>{
+						assert.strictEqual(error.message, "expecting Date, Number or String but found undefined");
+					});
+			});
+
+			it("should raise an exception if input and params[0] are not of same type", async function() {
+				const instance=_createInstance({
+					params: ["string"]
+				});
+				return instance[action](1)
+					.then(assert.notCalled)
+					.catch(error=>{
+						assert.strictEqual(error.message, "expecting same types but found Number and String");
+					});
+			});
+
+			it("should test input=1 and params[0]=0 properly", async function() {
+				const instance=_createInstance({
+					params: [0]
+				});
+				return instance[action](1)
+					.then(result=>{
+						assert.strictEqual(result, (direction>0));
+					});
+			});
+
+			it("should test input=1 and params[0]=2 properly", async function() {
+				const instance=_createInstance({
+					params: [2]
+				});
+				return instance[action](1)
+					.then(result=>{
+						assert.strictEqual(result, (direction<0));
+					});
+			});
+		});
+	})
+
 	describe("oneOf", function() {
 		it("should raise exception if param is not an array", async function() {
 			const instance=_createInstance({
