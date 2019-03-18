@@ -25,7 +25,7 @@ describe("command.run.index", function() {
 			const configuration={
 				options: {
 					input: undefined,
-					script: "test/scripts/script-catch-one.js"
+					script: "test/scripts/script-function-cache.js"
 				}
 			};
 			return run(configuration)
@@ -135,6 +135,10 @@ describe("command.run.index", function() {
 					"range(3)=[0,1,2]",
 					"range(4)=[0,1,2,3]"
 				]
+			},
+			{
+				script: "test/scripts/script-function-cache.js",
+				expected: [1, 2]
 			},
 			{
 				script: "test/scripts/script-function-predicate.js",

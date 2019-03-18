@@ -6,15 +6,17 @@ file.read("./examples/data/the-raven.txt")
 	.string.lower()
 	.string.replace(/\s+/g, "")
 	.string.split("")
-	.array.reduce((result, character)=>{
+	.array.reduce(function(result, character) {
 		result[character]=result[character]
 			? result[character]+1
 			: 1;
 		return result;
 	}, {})
-	.object.toArray((count, character)=>({
-		count,
-		character
-	}))
+	.object.toArray(function(count, character) {
+		return {
+			count,
+			character
+		}
+	})
 	.array.sort(["-count", "character"])
-	std.out()
+	.std.out()

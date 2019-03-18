@@ -64,11 +64,11 @@ class ModuleIO extends ModuleBase {
 		if(data!=null) {
 			result=Object.assign({
 				path: data
-			}, this.params[0] || defaults);
+			}, defaults, this.params[0]);
 		} else {
 			result=Object.assign({
 				path: this.params[0]
-			}, this.params[1] || defaults);
+			}, defaults, this.params[1]);
 		}
 		this._assetPath(result.path);
 		return result;
@@ -97,7 +97,7 @@ class ModuleIO extends ModuleBase {
 	}) {
 		const result=Object.assign({
 			path: this.params[0]
-		}, this.params[1] || defaults);
+		}, defaults, this.params[1]);
 		this._assetPath(result.path);
 		return result;
 	}

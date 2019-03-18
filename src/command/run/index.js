@@ -58,7 +58,10 @@ async function _loadScript(configuration) {
  */
 async function _readStdin() {
 	return new Promise((resolve, reject)=>{
-		if(process.stdin.isTTY) {
+		if(process.env.hasOwnProperty("JB_DEBUG_FILE")) {
+			// we are running in the debugger which is not a tty and causes us to hang.
+			resolve();
+		} else if(process.stdin.isTTY) {
 			// We are looking for redirected input. We don't treat tty input as stdin.
 			resolve();
 		} else {

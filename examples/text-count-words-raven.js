@@ -5,15 +5,17 @@
 file.read("./examples/data/the-raven.txt")
 	.string.lower()
 	.string.split(/\W+/)
-	.array.reduce((result, word)=>{
+	.array.reduce(function(result, word) {
 		result[word]=result[word]
 			? result[word]+1
 			: 1;
 		return result;
 	}, {})
-	.object.toArray((count, word)=>({
-		count,
-		word
-	}))
+	.object.toArray(function(count, word) {
+		return {
+			count,
+			word
+		}
+	})
 	.array.sort(["-count", "word"])
-	std.out()
+	.std.out()

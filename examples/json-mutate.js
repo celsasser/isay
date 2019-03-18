@@ -9,14 +9,18 @@
  */
 
 json.read("./examples/data/pets.json")
-	.array.map((element, index)=>({
-		maturity: (element.species==="dog")
-			? element.age**2
-			: element.age*2,
-		name: element.name,
-		type: element.species,
-	}))
+	.array.map(function(element, index) {
+		return {
+			maturity: (element.species==="dog")
+				? element.age**2
+				: element.age*2,
+			name: element.name,
+			type: element.species
+		}
+	})
 	.array.sort("maturity")
 	.array.reverse()
-	.array.map((element, index)=>({index, ...element}))
+	.array.map(function(element, index) {
+		return {index, ...element}
+	})
 	.std.out()

@@ -125,7 +125,7 @@ exports.parse=function() {
 			OPTIONS.filter(optionCfg=>_.includes(optionCfg.actions, this.action))
 				.forEach(optionCfg=>{
 					const key=optionCfg.keys.long;
-					if(this.options[key]) {
+					if(this.options.hasOwnProperty(key)) {
 						_.set(result.options, key, this.options[key]);
 					}
 				});

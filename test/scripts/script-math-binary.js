@@ -3,8 +3,8 @@
  */
 array.range(1, 5)
 	.array.map(value=>{
-	array.range(1, value+1)
-		.math.multiply()
-		.object.map(result=>`${value}! = ${result}`)
+		array.range(1, value+1)
+			.math.multiply()
+			.object.map(result=>`${value}! = ${result}`)
 	})
 	.std.out()
