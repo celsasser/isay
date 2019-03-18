@@ -13,7 +13,6 @@ const util=require("../common/util");
  * @param {Object} object
  * @param {string|Array<string>} properties
  * @throws {Error}
- * @protected
  */
 function assertProperties(object, properties) {
 	if(typeof(properties)==="string") {
@@ -31,7 +30,6 @@ function assertProperties(object, properties) {
  * the are asynchronous. If <param>predicate</param> is not found to be async then we make him async
  * @param {Function} predicate
  * @returns {Promise<*>}
- * @protected
  */
 function assertPredicate(predicate) {
 	if(predicate==null) {
@@ -56,7 +54,6 @@ function assertPredicate(predicate) {
  * @param {boolean} allowNull
  * @param {boolean} strict - if strict then will use value.constructor.name otherwise will use typedef(value)
  * @throws {Error}
- * @protected
  */
 function assertType(value, allowed, {
 	allowNull=false,
@@ -99,7 +96,6 @@ function assertType(value, allowed, {
  * He will make an attempt to ensure that the object is parsed JSON.
  * @param {*} data
  * @returns {Object}
- * @protected
  */
 function ensureJson(data) {
 	if(_.isPlainObject(data)) {
@@ -112,9 +108,22 @@ function ensureJson(data) {
 	return data;
 }
 
+/**
+ * A "predicate" is a function that takes 1 or more arguments and returns a single value. This
+ * guy determines whether <param>value</param> is qualified to be one
+ * @param {Function} value
+ * @returns {boolean}
+ */
+function isPredicate(value) {
+	return _.isFunction(value);
+}
+
+
+
 module.exports={
 	assertPredicate,
 	assertProperties,
 	assertType,
-	ensureJson
+	ensureJson,
+	isPredicate
 };

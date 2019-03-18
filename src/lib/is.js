@@ -37,6 +37,7 @@ class ModuleIs extends ModuleTest {
 			action,
 			catchModule,
 			domain,
+			elseModule,
 			method,
 			nextModule,
 			params,

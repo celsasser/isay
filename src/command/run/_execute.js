@@ -46,8 +46,8 @@ function _buildChain(descriptors) {
 	 * @param {number} index
 	 * @param {ModuleBase} nextModule
 	 * @param {ModuleBase} catchModule - "catch" handler
-	 * @param elseModule
-	 * @param thenModule
+	 * @param {ModuleBase} elseModule
+	 * @param {ModuleBase} thenModule
 	 * @returns {ModuleBase}
 	 */
 	function _build({
@@ -57,32 +57,33 @@ function _buildChain(descriptors) {
 		nextModule=undefined,
 		thenModule=undefined
 	}) {
-		/**
-		 * Asserts the state of the following params.
-		 * Note: we allow an else without a then. There is no good reason to disallow it and could be preferred.
-		 * @param {boolean} assertNotElse
-		 * @param {boolean} assertNotThen
-		 * @param {boolean} assertDeep - asserts that we are not at the top of the stack
-		 */
-		function _preflightCheck({
-			assertDeep=false,
-			assertNotElse=false,
-			assertNotThen=false
-		}) {
-			if(assertDeep && index===0) {
-				throw new Error("unexpected encountered head of the chain");
-			}
-			if(assertNotThen && thenModule) {
-				throw new Error("misplaced then statement");
-			}
-			if(assertNotElse && elseModule) {
-				throw new Error("misplaced else statement");
-			}
-		}
-
 		if(index<0) {
 			return nextModule;
 		} else {
+			/**
+			 * Asserts the state of the following params.
+			 * Note: we allow an else without a then. There is no good reason to disallow it and could be preferred.
+			 * @param {boolean} assertNotElse
+			 * @param {boolean} assertNotThen
+			 * @param {boolean} assertDeep - asserts that we are not at the top of the stack
+			 */
+			// eslint-disable-next-line no-inner-declarations
+			function _preflightCheck({
+				assertDeep=false,
+				assertNotElse=false,
+				assertNotThen=false
+			}) {
+				if(assertDeep && index===0) {
+					throw new Error(`unexpected ${descriptor.domain}.${descriptor.action} head of the chain`);
+				}
+				if(assertNotThen && thenModule) {
+					throw new Error(`misplaced ${thenModule.domain}.${thenModule.action} statement`);
+				}
+				if(assertNotElse && elseModule) {
+					throw new Error(`misplaced ${elseModule.domain}.${elseModule.action} statement`);
+				}
+			}
+
 			const descriptor=descriptors[index];
 			const instance=new descriptor.class({
 				action: descriptor.action,
@@ -142,7 +143,6 @@ function _buildChain(descriptors) {
 						elseModule: instance,
 						nextModule
 					});
-
 				}
 				default: {
 					_preflightCheck({

@@ -7,7 +7,7 @@
 
 const _=require("lodash");
 const {ModuleBase}=require("./_base");
-const {assertPredicate, assertType}=require("./_data");
+const {assertPredicate, assertType, isPredicate}=require("./_data");
 
 /**
  * Base class for tests so that we can support the positive and negative tests with one set of functionality
@@ -43,7 +43,7 @@ class ModuleTest extends ModuleBase {
 	}
 
 	/**
-	 * returns true if empty
+	 * Returns true if empty as tested by lodash
 	 * @param {DataBlob} blob
 	 * @returns {Promise<boolean>}
 	 */
@@ -52,7 +52,7 @@ class ModuleTest extends ModuleBase {
 	}
 
 	/**
-	 * returns true if <param>blob</param> ends with value, or one of the values, in this.params[0]
+	 * returns true if <param>blob</param> ends with the value, or one of the values, in this.params[0]
 	 * @param {string} blob
 	 * @returns {Promise<boolean>}
 	 */
@@ -73,13 +73,13 @@ class ModuleTest extends ModuleBase {
 	/**
 	 * Is a flow handler much like then and catch. May be used to flow to via a non-flow <code>ModuleTest</code> action
 	 * @resolves predicate:ActionPredicate in this.params[0]
+	 * @resolves result:* in this.params[0]
 	 * @param {DataBlob} blob
 	 * @return {Promise<DataBlob>}
 	 * @attribute flow
 	 */
 	async else(blob) {
-		const predicate=assertPredicate(this.params[0]);
-		return predicate(blob);
+		return this._processIfFlow(blob);
 	}
 
 	/**
@@ -129,14 +129,20 @@ class ModuleTest extends ModuleBase {
 
 	/**
 	 * Intended to allow predicates to get in the testing business but defers to casting if there is no predicate.
+	 * @resolves predicate:ActionPredicate in this.params[0]
+	 * @resolves state:* in this.params[0] - probably want to use <code>equal</code> but this guy supports it
 	 * @param {DataBlob} blob
 	 * @returns {Promise<boolean>}
 	 */
 	async test(blob) {
 		if(this.params.length>0) {
-			const predicate=assertPredicate(this.params[0]);
-			return predicate(blob)
-				.then(result=>this._processTestResult(blob, Boolean(result)));
+			if(isPredicate(this.params[0])) {
+				const predicate=assertPredicate(this.params[0]);
+				return predicate(blob)
+					.then(result=>this._processTestResult(blob, Boolean(result)));
+			} else {
+				return this._processTestResult(blob, Boolean(this.params[0]));
+			}
 		} else {
 			return this._processTestResult(blob, Boolean(blob));
 		}
@@ -145,13 +151,13 @@ class ModuleTest extends ModuleBase {
 	/**
 	 * Is a flow handler much like else and catch. May be used to flow to via a non-flow <code>ModuleTest</code> action
 	 * @resolves predicate:ActionPredicate in this.params[0]
+	 * @resolves result:* in this.params[0]
 	 * @param {DataBlob} blob
 	 * @return {Promise<DataBlob>}
 	 * @attribute flow
 	 */
 	async then(blob) {
-		const predicate=assertPredicate(this.params[0]);
-		return predicate(blob);
+		return this._processIfFlow(blob);
 	}
 
 	/**
@@ -172,30 +178,38 @@ class ModuleTest extends ModuleBase {
 
 	/********************* Private Interface *********************/
 	/**
+	 * Processes then/else action
+	 * @param {DataBlob} blob
+	 * @returns {Promise<*>}
+	 * @private
+	 */
+	_processIfFlow(blob) {
+		if(this.params.length===0) {
+			return Promise.resolve(blob);
+		} else if(isPredicate(this.params[0])) {
+			const predicate=assertPredicate(this.params[0]);
+			return predicate(blob);
+		} else {
+			return Promise.resolve(this.params[0]);
+		}
+	}
+
+	/**
 	 * Processes the result of whatever test up above's results. Puts the result to if/then/else processing.
 	 * @param {DataBlob} input
 	 * @param {boolean} positive - should be the result of the test itself. <param>this._positive</param> comparison will be applied here.
 	 * @returns {Promise<DataBlob>} - what gets returned depends on whether there is then/else processing.
-	 *  - if neither exists then <param>positive</param> will be returned
-	 *  - else either <param>input</param> or the result of then/else will be returned.
+	 *  - if test-state==true and there is a then handler then the result of <code>this._thenModule.process(input)</code> will be returned
+	 *  - if test-state==false and there is an else handler then the result of <code>this._elseModule.process(input)</code> will be returned
+	 *  - else test-state will be returned
 	 * @private
 	 */
 	_processTestResult(input, positive) {
 		const state=positive===this._positive;
-		if(this._thenModule || this._elseModule) {
-			if(state) {
-				if(this._thenModule) {
-					return this._thenModule.process(input);
-				} else {
-					return Promise.resolve(input);
-				}
-			} else {
-				if(this._elseModule) {
-					return this._elseModule.process(input);
-				} else {
-					return Promise.resolve(input);
-				}
-			}
+		if(this._thenModule && state) {
+			return this._thenModule.process(input);
+		} else if(this._elseModule && !state) {
+			return this._elseModule.process(input);
 		} else {
 			return Promise.resolve(state);
 		}

@@ -25,7 +25,7 @@ describe("command.run.index", function() {
 			const configuration={
 				options: {
 					input: undefined,
-					script: "test/scripts/script-function-cache.js"
+					script: "test/scripts/script-test-else-negative.js"
 				}
 			};
 			return run(configuration)
@@ -62,6 +62,10 @@ describe("command.run.index", function() {
 			{
 				script: "test/scripts/script-catch-five.js",
 				expected: [2, 3]
+			},
+			{
+				script: "test/scripts/script-catch-head.js",
+				errorText: "unexpected error.catch head of the chain"
 			},
 			{
 				script: "test/scripts/script-chain.js",
@@ -190,6 +194,42 @@ describe("command.run.index", function() {
 						"type": "cat"
 					}
 				}
+			},
+			{
+				script: "test/scripts/script-test-else-head.js",
+				errorText: "unexpected is.else head of the chain"
+			},
+			{
+				script: "test/scripts/script-test-else-invalid.js",
+				errorText: "misplaced is.else statement"
+			},
+			{
+				script: "test/scripts/script-test-else-negative.js",
+				expected: true
+			},
+			{
+				script: "test/scripts/script-test-else-positive.js",
+				expected: "else"
+			},
+			{
+				script: "test/scripts/script-test-then-else.js",
+				expected: [0, 2, 4, 12, 16, 20]
+			},
+			{
+				script: "test/scripts/script-test-then-head.js",
+				errorText: "unexpected is.then head of the chain"
+			},
+			{
+				script: "test/scripts/script-test-then-invalid.js",
+				errorText: "misplaced is.then statement"
+			},
+			{
+				script: "test/scripts/script-test-then-negative.js",
+				expected: false
+			},
+			{
+				script: "test/scripts/script-test-then-positive.js",
+				expected: "then"
 			},
 			{
 				script: "test/scripts/script-throw-error.js",

@@ -120,16 +120,15 @@ describe("lib.ModuleTest", function() {
 		"then"
 	].forEach(action=>{
 		describe(action, function() {
-			it("should raise exception if params[0] is not a predicate", async function() {
+			it("should return input if no params", async function() {
 				const instance=_createInstance();
 				return instance[action]("input")
-					.then(assert.notCalled)
-					.catch(error=>{
-						assert.strictEqual(error.message, "missing predicate function");
+					.then(result=>{
+						assert.strictEqual(result, "input");
 					});
 			});
 
-			it("should return result of param", async function() {
+			it("should return result of predicate if params[0] is a function", async function() {
 				const instance=_createInstance({
 					params: [input=>{
 						assert.strictEqual(input, "input");
@@ -139,6 +138,16 @@ describe("lib.ModuleTest", function() {
 				return instance[action]("input")
 					.then(result=>{
 						assert.strictEqual(result, "output");
+					});
+			});
+
+			it("should return params[0] if it is not a function", async function() {
+				const instance=_createInstance({
+					params: ["param"]
+				});
+				return instance[action]("input")
+					.then(result=>{
+						assert.strictEqual(result, "param");
 					});
 			});
 		});
@@ -234,7 +243,6 @@ describe("lib.ModuleTest", function() {
 			return instance.startsWith("one.two")
 				.then(value=>assert.strictEqual(value, false));
 		});
-
 	});
 
 	describe("test", function() {
@@ -252,18 +260,26 @@ describe("lib.ModuleTest", function() {
 			assert.strictEqual(await instance.test(0), false);
 		});
 
-		it("should raise exception if first param is not a predicate", async function() {
-			const instance=_createInstance({
-				params: ["string"]
-			});
-			return instance.test("input")
-				.then(assert.notCalled)
-				.catch(error=>{
-					assert.strictEqual(error.message, "expecting predicate but found String");
+		[
+			[true, true],
+			[1, true],
+			["true", true],
+			[false, false],
+			[0, false],
+			["", false]
+		].forEach(([param, expected])=>{
+			it(`should return ${expected} if params[0]=${param}`, async function() {
+				const instance=_createInstance({
+					params: [param]
 				});
+				return instance.test("input")
+					.then(result=>{
+						assert.strictEqual(result, expected);
+					});
+			});
 		});
 
-		it("should properly return result of predicate", async function() {
+		it("should properly return result of params[0] if it is a predicate", async function() {
 			const instance=_createInstance({
 				params: [input=>{
 					assert.strictEqual(input, "input");
@@ -295,7 +311,6 @@ describe("lib.ModuleTest", function() {
 			});
 			assert.strictEqual(await instance.test(true), false);
 		});
-
 	});
 
 	describe("type", function() {
