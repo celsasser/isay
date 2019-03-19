@@ -12,7 +12,7 @@ const {ModuleStd}=require("../../../src/lib/std");
 describe("lib.ModuleStd", function() {
 	function _createInstance({
 		action="action",
-		domain="parse",
+		domain="domain",
 		method="method",
 		params=[]
 	}={}) {

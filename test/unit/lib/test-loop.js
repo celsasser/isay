@@ -12,7 +12,7 @@ const {ModuleLoop}=require("../../../src/lib/loop");
 describe("lib.ModuleLoop", function() {
 	function _createInstance({
 		action="action",
-		domain="parse",
+		domain="domain",
 		method="method",
 		params=[]
 	}={}) {

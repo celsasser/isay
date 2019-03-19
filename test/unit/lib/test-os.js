@@ -13,7 +13,7 @@ const spawn=require("../../../src/common/spawn");
 describe("lib.ModuleOs", function() {
 	function _createInstance({
 		action="action",
-		domain="parse",
+		domain="domain",
 		method="method",
 		params=[]
 	}={}) {

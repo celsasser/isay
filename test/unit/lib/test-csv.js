@@ -12,7 +12,7 @@ const {ModuleCsv}=require("../../../src/lib/csv");
 describe("lib.ModuleCsv", function() {
 	function _createInstance({
 		action="action",
-		domain="parse",
+		domain="domain",
 		method="method",
 		params=[]
 	}={}) {

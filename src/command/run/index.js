@@ -57,12 +57,24 @@ async function _loadScript(configuration) {
  * @private
  */
 async function _readStdin() {
-	return new Promise((resolve, reject)=>{
-		if(process.env.hasOwnProperty("JB_DEBUG_FILE")) {
-			// we are running in the debugger which is not a tty and causes us to hang.
-			resolve();
-		} else if(process.stdin.isTTY) {
+	/**
+	 * Whether there is potentially usable stdin
+	 * @return {boolean}
+	 */
+	function _canReadStdin() {
+		if(process.stdin.isTTY) {
 			// We are looking for redirected input. We don't treat tty input as stdin.
+			return false;
+		}
+		if(/webstorm/i.test(_.get(process.env, "XPC_SERVICE_NAME", ""))) {
+			// looks like we are being run from within webstorm
+			return false;
+		}
+		return true;
+	}
+
+	return new Promise((resolve, reject)=>{
+		if(_canReadStdin()===false) {
 			resolve();
 		} else {
 			let buffer="",

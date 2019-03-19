@@ -13,7 +13,7 @@ const {ModuleMidi}=require("../../../src/lib/midi");
 describe("lib.ModuleMidi", function() {
 	function _createInstance({
 		action="action",
-		domain="parse",
+		domain="domain",
 		method="method",
 		params=[]
 	}={}) {

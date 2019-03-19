@@ -11,7 +11,7 @@ const {ModuleIO}=require("../../../src/lib/_io");
 describe("lib.ModuleIO", function() {
 	function _createInstance({
 		action="action",
-		domain="parse",
+		domain="domain",
 		method="method",
 		params=[]
 	}={}) {

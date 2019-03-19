@@ -11,17 +11,23 @@ const {ModuleTest}=require("../../../src/lib/_test");
 describe("lib.ModuleTest", function() {
 	function _createInstance({
 		action="action",
-		domain="parse",
+		catchModule=undefined,
+		domain="domain",
+		elseModule=undefined,
 		method="method",
 		params=[],
-		positive=true
+		positive=true,
+		thenModule=undefined,
 	}={}) {
 		return new ModuleTest({
 			action,
+			catchModule,
 			domain,
+			elseModule,
 			method,
 			params,
-			positive
+			positive,
+			thenModule
 		});
 	}
 
@@ -38,6 +44,17 @@ describe("lib.ModuleTest", function() {
 				positive: false
 			});
 			assert.strictEqual(instance._positive, false);
+		});
+
+		it("should properly construct with modules", function() {
+			const instance=_createInstance({
+				catchModule: "catch",
+				elseModule: "else",
+				thenModule: "then"
+			});
+			assert.strictEqual(instance._catchModule, "catch");
+			assert.strictEqual(instance._elseModule, "else");
+			assert.strictEqual(instance._thenModule, "then");
 		});
 	});
 
@@ -185,7 +202,7 @@ describe("lib.ModuleTest", function() {
 				return instance[action](1)
 					.then(assert.notCalled)
 					.catch(error=>{
-						assert.strictEqual(error.message, "expecting same types but found Number and String");
+						assert.strictEqual(error.message, "expecting same type but found Number and String");
 					});
 			});
 
@@ -209,7 +226,7 @@ describe("lib.ModuleTest", function() {
 					});
 			});
 		});
-	})
+	});
 
 	describe("oneOf", function() {
 		it("should raise exception if param is not an array", async function() {

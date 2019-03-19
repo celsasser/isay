@@ -18,7 +18,6 @@ class ModuleNot extends ModuleTest {
 	 * @param {string} domain
 	 * @param {ModuleBase} elseModule - else module handler if there is one
 	 * @param {string} method
-	 * @param {boolean} objectMode
 	 * @param {ModuleBase} nextModule
 	 * @param {Array<*>} params
 	 * @param {ModuleBase} thenModule - if module if there is one
@@ -37,6 +36,7 @@ class ModuleNot extends ModuleTest {
 			action,
 			catchModule,
 			domain,
+			elseModule,
 			method,
 			nextModule,
 			params,

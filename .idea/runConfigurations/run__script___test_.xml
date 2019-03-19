@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="run: script - test " type="NodeJSConfigurationType" application-parameters="run -d -s ./test/scripts//script-function-cache.js" path-to-js-file="mouse.js" working-dir="$PROJECT_DIR$">
+  <configuration default="false" name="run: script - test " type="NodeJSConfigurationType" application-parameters="run -d -s ./test/scripts//script-test-then-else.js" path-to-js-file="mouse.js" working-dir="$PROJECT_DIR$">
     <method v="2" />
   </configuration>
 </component>

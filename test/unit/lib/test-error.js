@@ -11,7 +11,7 @@ const {ModuleError}=require("../../../src/lib/error");
 describe("lib.ModuleError", function() {
 	function _createInstance({
 		action="action",
-		domain="parse",
+		domain="domain",
 		method="method",
 		params=[]
 	}={}) {

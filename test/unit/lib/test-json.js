@@ -12,7 +12,7 @@ const {ModuleJson}=require("../../../src/lib/json");
 describe("lib.ModuleJson", function() {
 	function _createInstance({
 		action="action",
-		domain="parse",
+		domain="domain",
 		method="method",
 		params=[]
 	}={}) {

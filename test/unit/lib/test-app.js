@@ -13,7 +13,7 @@ const {ModuleApp}=require("../../../src/lib/app");
 describe("lib.ModuleApp", function() {
 	function _createInstance({
 		action="action",
-		domain="parse",
+		domain="domain",
 		method="method",
 		params=[]
 	}={}) {

@@ -11,7 +11,7 @@ const {ModuleMath}=require("../../../src/lib/math");
 describe("lib.ModuleMath", function() {
 	function _createInstance({
 		action="action",
-		domain="parse",
+		domain="domain",
 		method="method",
 		params=[]
 	}={}) {

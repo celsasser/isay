@@ -13,7 +13,7 @@ const {ModuleYaml}=require("../../../src/lib/yaml");
 describe("lib.ModuleYaml", function() {
 	function _createInstance({
 		action="action",
-		domain="parse",
+		domain="domain",
 		method="method",
 		params=[]
 	}={}) {

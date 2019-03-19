@@ -11,7 +11,7 @@ const {ModuleObject}=require("../../../src/lib/object");
 describe("lib.ModuleObject", function() {
 	function _createInstance({
 		action="action",
-		domain="parse",
+		domain="domain",
 		method="method",
 		params=[]
 	}={}) {

@@ -12,7 +12,7 @@ const {ModuleFile}=require("../../../src/lib/file");
 describe("lib.ModuleFile", function() {
 	function _createInstance({
 		action="action",
-		domain="parse",
+		domain="domain",
 		method="method",
 		params=[]
 	}={}) {

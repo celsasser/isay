@@ -96,7 +96,7 @@ function assertTypesEqual(value1, value2) {
 	const type1=_getConstructorName(value1),
 		type2=_getConstructorName(value2);
 	if(type1!==type2) {
-		throw new Error(`expecting same types but found ${type1} and ${type2}`);
+		throw new Error(`expecting same type but found ${type1} and ${type2}`);
 	}
 }
 

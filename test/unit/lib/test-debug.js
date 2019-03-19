@@ -12,7 +12,7 @@ const {ModuleDebug}=require("../../../src/lib/debug");
 describe("lib.ModuleDebug", function() {
 	function _createInstance({
 		action="action",
-		domain="parse",
+		domain="domain",
 		method="method",
 		params=[]
 	}={}) {

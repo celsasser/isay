@@ -11,7 +11,7 @@ const {ModuleString}=require("../../../src/lib/string");
 describe("lib.ModuleString", function() {
 	function _createInstance({
 		action="action",
-		domain="parse",
+		domain="domain",
 		method="method",
 		params=[]
 	}={}) {

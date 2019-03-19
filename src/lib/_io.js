@@ -53,7 +53,7 @@ class ModuleIO extends ModuleBase {
 	 * @resolves options:(Object|undefined) in this.params[0]|this.params[1]
 	 * @param {string|undefined} data
 	 * @param {Object} defaults
-	 * @returns {{path:string, encoding:string, ...options}}
+	 * @returns {{path:string, encoding:string}} - will include whatever other options are discovered
 	 * @throws {Error}
 	 * @protected
 	 */

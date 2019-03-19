@@ -15,11 +15,10 @@ const log=require("../common/log");
  */
 class ModuleBase {
 	/**
-	 * @param {string} action
+	 * @param {string} action - the API name of the action
 	 * @param {ModuleBase} catchModule - exceptions thrown during processing are forwarded to it if set
 	 * @param {string} domain
-	 * @param {string} method
-	 * @param {boolean} objectMode
+	 * @param {string} method - the internal name of the action's method.
 	 * @param {ModuleBase} nextModule
 	 * @param {Array<*>} params
 	 */

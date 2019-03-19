@@ -11,7 +11,7 @@ const {ModuleEnv}=require("../../../src/lib/env");
 describe("lib.ModuleEnv", function() {
 	function _createInstance({
 		action="action",
-		domain="parse",
+		domain="domain",
 		method="method",
 		params=[]
 	}={}) {

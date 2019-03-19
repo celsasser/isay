@@ -11,7 +11,7 @@ const {ModulePath}=require("../../../src/lib/path");
 describe("lib.ModulePath", function() {
 	function _createInstance({
 		action="action",
-		domain="parse",
+		domain="domain",
 		method="method",
 		params=[]
 	}={}) {
