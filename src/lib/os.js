@@ -42,9 +42,18 @@ class ModuleOs extends ModuleBase {
 	 * @private
 	 */
 	_paramsToArguments() {
-		return (this.params.length===1)
-			? parse.shell(this.params[0])
-			: this.params;
+		if(this.params.length===1) {
+			if(_.isArray(this.params[0])) {
+				return this.params[0];
+			} else if(typeof(this.params[0])==="string") {
+				return parse.shell(this.params[0]);
+			} else {
+				return this.params;
+			}
+
+		} else {
+			return this.params;
+		}
 	}
 }
 

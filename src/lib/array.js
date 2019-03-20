@@ -108,17 +108,17 @@ class ModuleArray extends ModuleBase {
 	 *
 	 * If there are parameters then we assume the sequence is defined by them. If not then
 	 * the configuration should be in <param>blob</param>
-	 * @resolves endIndex:Number in (this.params[0]|blob)
-	 * @resolves fromIndex:Number in this.params[0]
-	 * @resolves endIndex:Number in this.params[1]
+	 * @resolves stopIndex:Number in (this.params[0]|blob)
+	 * @resolves startIndex:Number in this.params[0]
+	 * @resolves stopIndex:Number in this.params[1]
 	 * @resolves increment:Number in this.params[2]
 	 * @param {DataBlob} blob
 	 * @returns {Promise<Array<Number>>}
 	 */
 	async range(blob) {
-		let endIndex,
-			increment=1,
+		let increment=1,
 			startIndex=0,
+			stopIndex,
 			result=[];
 		// If there are parameters then we assume the sequence is defined by them otherwise it should be in <param>blob</param>
 		const params=(this.params.length===0)
@@ -126,17 +126,17 @@ class ModuleArray extends ModuleBase {
 			: this.params;
 		assertType(params[0], "Number");
 		if(params.length===1) {
-			endIndex=params[0];
+			stopIndex=params[0];
 		} else {
 			assertType(params[1], "Number");
 			startIndex=params[0];
-			endIndex=params[1];
+			stopIndex=params[1];
 			if(params.length>=3) {
 				assertType(params[2], "Number");
 				increment=params[2];
 			}
 		}
-		for(startIndex; startIndex<endIndex; startIndex+=increment) {
+		for(startIndex; startIndex<stopIndex; startIndex+=increment) {
 			result.push(startIndex);
 		}
 		return result;
@@ -172,6 +172,43 @@ class ModuleArray extends ModuleBase {
 	async reverse(blob) {
 		const array=this._assertArray(blob);
 		return array.reverse();
+	}
+
+	/**
+	 * Takes a slice of the input array and returns the result
+	 * @resolves startIndex:Number in params[0]
+	 * @resolves stopIndex:Number in params[1]
+	 * @resolves {start:Number, stop:Number, count:Number} in params[0]
+	 * @param {DataBlob} blob
+	 * @returns {Promise<DataBlob>}
+	 */
+	async slice(blob) {
+		const array=this._assertArray(blob),
+			_normalizeIndex=(index)=>(index>=0)
+				? index
+				: array.length-(0-index)%array.length;
+		let startIndex=0,
+			stopIndex=array.length;
+		if(this.params.length>0) {
+			assertType(this.params[0], ["Number", "Object"]);
+			if(this.params[0].constructor.name==="Object") {
+				const {count, start, stop}=this.params[0];
+				if(start!==undefined) {
+					startIndex=_normalizeIndex(start);
+					if(stop!=undefined) {
+						stopIndex=_normalizeIndex(stop);
+					} else if(count!==undefined) {
+						stopIndex=startIndex+count;
+					}
+				}
+			} else {
+				startIndex=_normalizeIndex(this.params[0]);
+				if(this.params.length>1) {
+					stopIndex=_normalizeIndex(this.params[1]);
+				}
+			}
+		}
+		return array.slice(startIndex, stopIndex);
 	}
 
 	/**
