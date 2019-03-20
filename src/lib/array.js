@@ -186,7 +186,7 @@ class ModuleArray extends ModuleBase {
 		const array=this._assertArray(blob),
 			_normalizeIndex=(index)=>(index>=0)
 				? index
-				: array.length-(0-index)%array.length;
+				: (array.length+index)%array.length;
 		let startIndex=0,
 			stopIndex=array.length;
 		if(this.params.length>0) {
@@ -195,9 +195,17 @@ class ModuleArray extends ModuleBase {
 				const {count, start, stop}=this.params[0];
 				if(start!==undefined) {
 					startIndex=_normalizeIndex(start);
-					if(stop!=undefined) {
-						stopIndex=_normalizeIndex(stop);
-					} else if(count!==undefined) {
+				}
+				if(stop!=undefined) {
+					stopIndex=_normalizeIndex(stop);
+				}
+				if(count!==undefined) {
+					if(stop!==undefined) {
+						if(start!==undefined) {
+							throw new Error(`invalid slice configuration - ${JSON.stringify(this.params[0])}`);
+						}
+						startIndex=stopIndex-count;
+					} else {
 						stopIndex=startIndex+count;
 					}
 				}

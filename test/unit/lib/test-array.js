@@ -211,6 +211,141 @@ describe("lib.ModuleArray", function() {
 		});
 	});
 
+	describe("slice", function() {
+		it("should raise exception if input is not a blog", async function() {
+			const instance=_createInstance();
+			return instance.slice("string")
+				.then(assert.notCalled)
+				.catch(error=>{
+					assert.strictEqual(error.message, "expecting array but found String");
+				});
+		});
+
+		it("should return input if there are no params", async function() {
+			const instance=_createInstance();
+			return instance.slice([1])
+				.then(result=>{
+					assert.deepStrictEqual(result, [1]);
+				});
+		});
+
+		it("should raise exception if params[0] is not an expected type", async function() {
+			const instance=_createInstance({
+				params: ["string"]
+			});
+			return instance.slice([1])
+				.then(assert.notCalled)
+				.catch(error=>{
+					assert.strictEqual(error.message, "expecting Number or Object but found String");
+				});
+		});
+
+		[0, 1, 2, 3, 4].forEach(start=>{
+			const input=[1, 2, 3];
+			it(`should properly process a positive start offset: start=${start}, input=${JSON.stringify(input)}`, async function() {
+					const instance=_createInstance({
+						params: [start]
+					});
+				return instance.slice(input)
+					.then(result=>{
+						assert.deepStrictEqual(result, input.slice(start));
+					});
+			});
+		});
+
+		[0, 1, 2, 3, 4].forEach(stop=>{
+			const input=[1, 2, 3];
+			it(`should properly process a positive stop offset: stop=${stop}, input=${JSON.stringify(input)}`, async function() {
+				const instance=_createInstance({
+					params: [0, stop]
+				});
+				return instance.slice(input)
+					.then(result=>{
+						assert.deepStrictEqual(result, input.slice(0, stop));
+					});
+			});
+		});
+
+		[
+			[-1, [3]],
+			[-2, [2, 3]],
+			[-3, [1, 2, 3]],
+			[-4, [3]],
+			[-5, [2, 3]],
+			[-6, [1, 2, 3]]
+		].forEach(([start, expected])=>{
+			const input=[1, 2, 3];
+			it(`should properly process a negative start offset: start=${start}, input=${JSON.stringify(input)}`, async function() {
+				const instance=_createInstance({
+					params: [start]
+				});
+				return instance.slice(input)
+					.then(result=>{
+						assert.deepStrictEqual(result, expected);
+					});
+			});
+		});
+
+		[
+			[-1, [1, 2]],
+			[-2, [1]],
+			[-3, []],
+			[-4, [1, 2]],
+			[-5, [1]],
+			[-6, []]
+		].forEach(([stop, expected])=>{
+			const input=[1, 2, 3];
+			it(`should properly process a negative stop offset: stop=${stop}, input=${JSON.stringify(input)}`, async function() {
+				const instance=_createInstance({
+					params: [0, stop]
+				});
+				return instance.slice(input)
+					.then(result=>{
+						assert.deepStrictEqual(result, expected);
+					});
+			});
+		});
+
+		it("should raise an exception if start, stop and count are all configured in params[0] object", async function() {
+			const instance=_createInstance({
+				params: [{
+					start: 0,
+					stop: 0,
+					count: 0
+				}]
+			});
+			return instance.slice([1])
+				.then(assert.notCalled)
+				.catch(error=>{
+					assert.strictEqual(error.message, 'invalid slice configuration - {"start":0,"stop":0,"count":0}');
+				});
+		});
+
+		[
+			[{start: 0}, [1, 2, 3]],
+			[{start: 1}, [2, 3]],
+			[{stop: 3}, [1, 2, 3]],
+			[{stop: 2}, [1, 2]],
+			[{start: 1, stop: -1}, [2]],
+			[{start: -2, stop: -1}, [2]],
+			[{start: 0, count: 3}, [1, 2, 3]],
+			[{start: 1, count: 1}, [2]],
+			[{stop: 3, count: 3}, [1, 2, 3]],
+			[{stop: 2, count: 1}, [2]]
+		].forEach(([object, expected])=>{
+			const input=[1, 2, 3];
+			it(`should properly process a object param: object=${JSON.stringify(object)}, input=${JSON.stringify(input)}`, async function() {
+				const instance=_createInstance({
+					params: [object]
+				});
+				return instance.slice(input)
+					.then(result=>{
+						assert.deepStrictEqual(result, expected);
+					});
+			});
+		});
+	});
+
 	describe("sort", function() {
 		it("should properly sort without value types", async function() {
 			const instance=_createInstance({});
