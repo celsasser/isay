@@ -7,7 +7,7 @@
 
 const _=require("lodash");
 const {ModuleBase}=require("./_base");
-const {assertPredicate, assertType}=require("./_data");
+const {assertPredicate, assertType, normalizeArrayIndex}=require("./_data");
 const util=require("../common/util");
 
 /**
@@ -17,10 +17,22 @@ const util=require("../common/util");
  */
 class ModuleArray extends ModuleBase {
 	/**
+	 * Appends this.params[0] to blob and returns the results
+	 * @resolves data:DataBlob in this.params[0] - appended data
+	 * @resolves {index:Number=blob.length, expand:boolean=false} in this.params[1]
+	 * @param {DataBlob} blob
+	 * @returns {Promise<Array<DataBlob>>}
+	 * @throws {Error}
+	 */
+	async append(blob) {
+		return this._insert(blob, true);
+	}
+
+	/**
 	 * Calls predicate for every element in blob
 	 * @resolves predicate:ArrayPredicate in this.params[0]
 	 * @param {DataBlob} blob
-	 * @returns {Promise<DataBlob>}
+	 * @returns {Promise<Array<DataBlob>>}
 	 * @throws {Error} if <param>blob</param> cannot be treated as an array
 	 */
 	async each(blob) {
@@ -37,7 +49,7 @@ class ModuleArray extends ModuleBase {
 	 * Calls right through to <code>each</code>
 	 * @resolves predicate:ArrayPredicate in this.params[0]
 	 * @param {DataBlob} blob
-	 * @returns {Promise<DataBlob>}
+	 * @returns {Promise<Array<DataBlob>>}
 	 * @throws {Error} if <param>blob</param> cannot be treated as an array
 	 */
 	async forEach(blob) {
@@ -48,8 +60,8 @@ class ModuleArray extends ModuleBase {
 	 * Filters array selecting truthy returns by predicate
 	 * @resolves predicate:ArrayPredicate in this.params[0]
 	 * @param {DataBlob} blob
-	 * @returns {Promise<DataBlob>}
-	 * @throws {Error} if <param>blob</param> cannot be treated as an array
+	 * @returns {Promise<Array<DataBlob>>}
+	 * @throws {Error}
 	 */
 	async filter(blob) {
 		const array=this._assertArray(blob),
@@ -68,8 +80,8 @@ class ModuleArray extends ModuleBase {
 	 * Finds first element using predicate
 	 * @resolves predicate:ArrayPredicate in this.params[0]
 	 * @param {DataBlob} blob
-	 * @returns {Promise<DataBlob>}
-	 * @throws {Error} if <param>blob</param> cannot be treated as an array
+	 * @returns {Promise<Array<DataBlob>>}
+	 * @throws {Error}
 	 */
 	async find(blob) {
 		const array=this._assertArray(blob),
@@ -84,11 +96,23 @@ class ModuleArray extends ModuleBase {
 	}
 
 	/**
+	 * Inserts this.params[0] into blob and returns the results
+	 * @resolves data:DataBlob in this.params[0] - inserted data
+	 * @resolves {index:Number=0, expand:boolean=false} in this.params[1]
+	 * @param {DataBlob} blob
+	 * @returns {Promise<Array<DataBlob>>}
+	 * @throws {Error}
+	 */
+	async insert(blob) {
+		return this._insert(blob, false);
+	}
+
+	/**
 	 * Maps each element using predicate's results
 	 * @resolves predicate:ArrayPredicate in this.params[0]
 	 * @param {DataBlob} blob
-	 * @returns {Promise<DataBlob>}
-	 * @throws {Error} if <param>blob</param> cannot be treated as an array
+	 * @returns {Promise<Array<DataBlob>>}
+	 * @throws {Error}
 	 */
 	async map(blob) {
 		const array=this._assertArray(blob),
@@ -148,7 +172,7 @@ class ModuleArray extends ModuleBase {
 	 * @resolves startingValue: in this.params[1] - defaults to []
 	 * @param {DataBlob} blob
 	 * @returns {Promise<DataBlob>}
-	 * @throws {Error} if <param>blob</param> cannot be treated as an array
+	 * @throws {Error}
 	 */
 	async reduce(blob) {
 		const array=this._assertArray(blob),
@@ -158,7 +182,7 @@ class ModuleArray extends ModuleBase {
 		// todo: hmmm, I think we may be digging a very deep promise.then(promise.then(promise.then...))) hole.
 		//  Think we will probably want to work a process.nextTick into our async iterations.
 		for(let index=0; index<length; index++) {
-			result=await predicate(result, array[index], index);
+			result= await predicate(result, array[index], index);
 		}
 		return result;
 	}
@@ -166,7 +190,7 @@ class ModuleArray extends ModuleBase {
 	/**
 	 * Reverses elements. No params supported
 	 * @param {DataBlob} blob
-	 * @returns {Promise<DataBlob>}
+	 * @returns {Promise<Array<DataBlob>>}
 	 * @throws {Error} if <param>blob</param> cannot be treated as an array
 	 */
 	async reverse(blob) {
@@ -180,13 +204,11 @@ class ModuleArray extends ModuleBase {
 	 * @resolves stopIndex:Number in params[1]
 	 * @resolves {start:Number, stop:Number, count:Number} in params[0]
 	 * @param {DataBlob} blob
-	 * @returns {Promise<DataBlob>}
+	 * @returns {Promise<Array<DataBlob>>}
+	 * @throws {Error}
 	 */
 	async slice(blob) {
-		const array=this._assertArray(blob),
-			_normalizeIndex=(index)=>(index>=0)
-				? index
-				: (array.length+index)%array.length;
+		const array=this._assertArray(blob);
 		let startIndex=0,
 			stopIndex=array.length;
 		if(this.params.length>0) {
@@ -194,10 +216,10 @@ class ModuleArray extends ModuleBase {
 			if(this.params[0].constructor.name==="Object") {
 				const {count, start, stop}=this.params[0];
 				if(start!==undefined) {
-					startIndex=_normalizeIndex(start);
+					startIndex=normalizeArrayIndex(blob, start, true);
 				}
 				if(stop!=undefined) {
-					stopIndex=_normalizeIndex(stop);
+					stopIndex=normalizeArrayIndex(blob, stop, false);
 				}
 				if(count!==undefined) {
 					if(stop!==undefined) {
@@ -210,9 +232,9 @@ class ModuleArray extends ModuleBase {
 					}
 				}
 			} else {
-				startIndex=_normalizeIndex(this.params[0]);
+				startIndex=normalizeArrayIndex(blob, this.params[0], true);
 				if(this.params.length>1) {
-					stopIndex=_normalizeIndex(this.params[1]);
+					stopIndex=normalizeArrayIndex(blob, this.params[1], false);
 				}
 			}
 		}
@@ -223,8 +245,8 @@ class ModuleArray extends ModuleBase {
 	 * Sorts array elements. By default it sorts using lodash's default comparison operator.
 	 * @resolves sortBy:(string|function) in this.params[0] - defaults to undefined
 	 * @param {DataBlob} blob
-	 * @returns {Promise<DataBlob>}
-	 * @throws {Error} if <param>blob</param> cannot be treated as an array
+	 * @returns {Promise<Array<DataBlob>>}
+	 * @throws {Error}
 	 */
 	async sort(blob) {
 		const array=this._assertArray(blob);
@@ -256,8 +278,8 @@ class ModuleArray extends ModuleBase {
 	/**
 	 * Returns unique elements using a deep comparison of elements.
 	 * @param {DataBlob} blob
-	 * @returns {Promise<DataBlob>}
-	 * @throws {Error} if <param>blob</param> cannot be treated as an array
+	 * @returns {Promise<Array<DataBlob>>}
+	 * @throws {Error}
 	 */
 	async unique(blob) {
 		const array=this._assertArray(blob);
@@ -268,7 +290,8 @@ class ModuleArray extends ModuleBase {
 	/**
 	 * Validates and applies the function to the blob using all params as input.
 	 * @param {DataBlob} blob
-	 * @return {Array<*>}
+	 * @return {Array<DataBlob>}
+	 * @throws {Error}
 	 * @private
 	 */
 	_assertArray(blob) {
@@ -280,6 +303,43 @@ class ModuleArray extends ModuleBase {
 			throw new Error(`expecting array but found ${util.name(blob)}`);
 		}
 	}
+
+	/**
+	 * General purpose append/insert function for use by our public append/insert methods.
+	 * @resolves data:DataBlob in this.params[0] - inserted data
+	 * @resolves {index:Number=blob.length, expand:boolean=false} in this.params[1]
+	 * @param {DataBlob} blob
+	 * @param {boolean} tail - whether to default to head or tail as index point
+	 * @returns {Array<DataBlob>}
+	 * @throws {Error}
+	 * @private
+	 */
+	_insert(blob, tail=true) {
+		let array=this._assertArray(blob);
+		assertType(this.params[1], "Object", {
+			allowUndefined: true
+		});
+
+		let {
+			index=(tail) ? array.length : 0,
+			expand=false
+		}=(this.params[1] || {});
+		index=normalizeArrayIndex(array, index);
+		if(expand) {
+			const concat=this._assertArray(this.params[0]);
+			return array.slice(0, index)
+				.concat(concat)
+				.concat(array.slice(index));
+		} else {
+			assertType(this.params[0], "*", {
+				allowNull: true
+			});
+			array=array.slice();	// honor immutability rules
+			array.splice(index, 0, this.params[0]);
+			return array;
+		}
+	}
+
 }
 
 module.exports={

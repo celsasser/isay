@@ -23,7 +23,8 @@ class ModuleObject extends ModuleIO {
 	async get(blob) {
 		// why do we allow arrays? Because a user may describe a path in terms of indexes: _.get("0.name", [{name: "George"}]
 		assertType(blob, ["Array", "Object"], {
-			allowNull: true
+			allowNull: true,
+			allowUndefined: true
 		});
 		return (this.params.length>0)
 			? _.get(blob, this.params[0])
@@ -46,7 +47,8 @@ class ModuleObject extends ModuleIO {
 			return predicate(blob);
 		} else {
 			assertType(blob, ["Array", "Object"], {
-				allowNull: true
+				allowNull: true,
+				allowUndefined: true
 			});
 			const flatten=_.get(this.params[1], "flatten", false);
 			// The following is standard but also supports some non-standard "pick" functionality.
@@ -82,9 +84,7 @@ class ModuleObject extends ModuleIO {
 	 * @throws {Error}
 	 */
 	async merge(blob) {
-		assertType(blob, ["Array", "Object"], {
-			allowNull: false
-		});
+		assertType(blob, ["Array", "Object"]);
 		return _.merge(blob, this.params[0]);
 	}
 
@@ -114,7 +114,8 @@ class ModuleObject extends ModuleIO {
 		const result=[],
 			predicate=assertPredicate(_.get(this.params, 0, object=>object));
 		assertType(blob, "Object", {
-			allowNull: true
+			allowNull: true,
+			allowUndefined: true
 		});
 		for(let key in blob) {
 			result.push(await predicate(blob[key], key));

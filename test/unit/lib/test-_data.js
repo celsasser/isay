@@ -11,7 +11,8 @@ const {
 	assertProperties,
 	assertType,
 	assertTypesEqual,
-	ensureJson
+	ensureJson,
+	normalizeArrayIndex
 }=require("../../../src/lib/_data");
 
 describe("lib.ModuleArray", function() {
@@ -64,10 +65,20 @@ describe("lib.ModuleArray", function() {
 			assertType(null, "String", {allowNull: true});
 		});
 
-		it("should throw exception if null and not allowed", function() {
+		it("should allow undefined if allowed", function() {
+			assertType(undefined, "String", {allowUndefined: true});
+		});
+
+		it("should throw exception if null not allowed", function() {
 			assert.throws(()=>{
 				assertType(null, "String", {allowNull: false});
 			}, error=>error.message==="expecting String but found null");
+		});
+
+		it("should throw exception if undefined not allowed", function() {
+			assert.throws(()=>{
+				assertType(undefined, "String", {allowUndefined: false});
+			}, error=>error.message==="expecting String but found undefined");
 		});
 
 		it("should test and pass single type properly", function() {
@@ -78,6 +89,18 @@ describe("lib.ModuleArray", function() {
 			assert.throws(()=>{
 				assertType("value", "Number");
 			}, error=>error.message==="expecting Number but found String");
+		});
+
+		it("should properly assert wildcard type", function() {
+			assert.throws(()=>{
+				assertType(null, "*", {
+					allowNull: false
+				});
+			}, error=>error.message==="expecting a value but found null");
+		});
+
+		it("should properly allow wildcard type", function() {
+			assertType("value", "*");
 		});
 	});
 
@@ -119,6 +142,30 @@ describe("lib.ModuleArray", function() {
 		].forEach(input=>{
 			it(`should convert ${input} encoding`, function() {
 				assert.deepEqual(ensureJson(input), JSON.parse(input));
+			});
+		});
+	});
+
+	describe("normalizeArrayIndex", function() {
+		[
+			[[0], 0, 0],
+			[[0], 1, 1],
+			[[0], -1, 0],
+			[[0], -2, 1]
+		].forEach(([array, index, expected])=>{
+			it(`should properly translate start index of ${index} to ${expected} for ${JSON.stringify(array)}`, function() {
+				assert.strictEqual(normalizeArrayIndex(array, index, true), expected);
+			});
+		});
+
+		[
+			[[0], 0, 0],
+			[[0], 1, 1],
+			[[0], -1, 0],
+			[[0], -2, 0]
+		].forEach(([array, index, expected])=>{
+			it(`should properly translate end index of ${index} to ${expected} for ${JSON.stringify(array)}`, function() {
+				assert.strictEqual(normalizeArrayIndex(array, index, false), expected);
 			});
 		});
 	});

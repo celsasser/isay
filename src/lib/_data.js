@@ -50,23 +50,30 @@ function assertPredicate(predicate) {
 /**
  * Asserts that <param>value</param> is one of the <param>allowed</param> types
  * @param {*} value
- * @param {string|Array<string>} allowed
+ * @param {string|"*"|Array<string>} allowed - "*" will allow any type
  * @param {boolean} allowNull
+ * @param {boolean} allowUndefined
  * @param {boolean} strict - if strict then will use value.constructor.name otherwise will use typedef(value)
  * @throws {Error}
  */
 function assertType(value, allowed, {
 	allowNull=false,
+	allowUndefined=false,
 	strict=true
 }={}) {
 	function _formatAllowed() {
 		return _.isArray(allowed)
 			? allowed.slice(0, allowed.length-1)
-				.join(", ")
-			+` or ${allowed[allowed.length-1]}`
-			: allowed;
+				.join(", ") + ` or ${allowed[allowed.length-1]}`
+			: (allowed==="*")
+				? "a value"
+				: allowed;
 	}
-	if(value==null) {
+	if(value===undefined) {
+		if(!allowUndefined) {
+			throw new Error(`expecting ${_formatAllowed()} but found ${util.name(value)}`);
+		}
+	} else if(value===null) {
 		if(!allowNull) {
 			throw new Error(`expecting ${_formatAllowed()} but found ${util.name(value)}`);
 		}
@@ -79,8 +86,10 @@ function assertType(value, allowed, {
 				throw new Error(`expecting ${_formatAllowed()} but found ${util.name(value)}`);
 			}
 		} else {
-			if(type!==allowed) {
-				throw new Error(`expecting ${_formatAllowed()} but found ${util.name(value)}`);
+			if(allowed!=="*") {
+				if(type!==allowed) {
+					throw new Error(`expecting ${_formatAllowed()} but found ${util.name(value)}`);
+				}
 			}
 		}
 	}
@@ -127,6 +136,29 @@ function isPredicate(value) {
 }
 
 /**
+ * Works with python style negative indexes. If <param>index</param>=0 then returns index
+ * @param {Array<*>} array
+ * @param {Number} index
+ * @param {boolean} isStart - if the index is negative and out range then we set it to high or
+ * 	low depending on how it is being used as a from-start index or from-end reference.
+ * @returns {number}
+ */
+function normalizeArrayIndex(array, index, isStart=true) {
+	if(index>=0) {
+		return index;
+	} else {
+		index=array.length+index;
+		if(index<0) {
+			// here we want to return high or low so that its out of bounds nature
+			// does not yield results.
+			return isStart ? array.length : 0;
+		} else {
+			return index;
+		}
+	}
+};
+
+/**
  * Gets the constructor name of the specified value if not null or undefined otherwise returns
  * "null" or "undefined"
  * @param {*} value
@@ -153,5 +185,6 @@ module.exports={
 	assertType,
 	assertTypesEqual,
 	ensureJson,
-	isPredicate
+	isPredicate,
+	normalizeArrayIndex
 };

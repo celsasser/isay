@@ -23,6 +23,99 @@ describe("lib.ModuleArray", function() {
 		});
 	}
 
+	describe("_insert", function() {
+		it("should throw exception if input not an array", function() {
+			const instance=_createInstance();
+			assert.throws(()=>instance._insert("string"),
+				error=>error.message==="expecting array but found String");
+		});
+
+		it("should throw exception if param[1] is anything but undefined or an object", function() {
+			const instance=_createInstance({
+				params: ["data", "string"]
+			});
+			assert.throws(()=>instance._insert([]),
+				error=>error.message==="expecting Object but found String");
+		});
+
+		it("should append to end if tail=true and no insert point is given", function() {
+			const instance=_createInstance({
+				params: [1]
+			});
+			assert.deepStrictEqual(instance._insert([0], true), [0, 1]);
+		});
+
+		it("should insert at beginning if tail=false and no insert point is given", function() {
+			const instance=_createInstance({
+				params: [1]
+			});
+			assert.deepStrictEqual(instance._insert([0], false), [1, 0]);
+		});
+
+		it("should expand at end if tail=true and no insert point is given", function() {
+			const instance=_createInstance({
+				params: [[1, 2], {expand: true}]
+			});
+			assert.deepStrictEqual(instance._insert([0], true), [0, 1, 2]);
+		});
+
+		it("should expand at beginning if tail=false and no insert point is given", function() {
+			const instance=_createInstance({
+				params: [[1, 2], {expand: true}]
+			});
+			assert.deepStrictEqual(instance._insert([0], false), [1, 2, 0]);
+		});
+
+		it("should not expand an array param if expand is not true", function() {
+			const instance=_createInstance({
+				params: [[1], {index: 1}]
+			});
+			assert.deepStrictEqual(instance._insert([0, 2]), [0, [1], 2]);
+		});
+
+		[
+			[0, [1, 0, 2]],
+			[1, [0, 1, 2]],
+			[2, [0, 2, 1]],
+			[3, [0, 2, 1]]
+		].forEach(([index, expected])=>{
+			it(`should insert 1 into [0, 2] at ${index} and return ${JSON.stringify(expected)}`, function() {
+				const instance=_createInstance({
+					params: [1, {index}]
+				});
+				assert.deepStrictEqual(instance._insert([0, 2]), expected);
+			});
+		});
+
+		[
+			[0, [1, 2, 0, 3]],
+			[1, [0, 1, 2, 3]],
+			[2, [0, 3, 1, 2]],
+			[3, [0, 3, 1, 2]]
+		].forEach(([index, expected])=>{
+			it(`should expand [1, 2] into [0, 3] at ${index} and return ${JSON.stringify(expected)}`, function() {
+				const instance=_createInstance({
+					params: [[1, 2], {
+						index,
+						expand: true
+					}]
+				});
+				assert.deepStrictEqual(instance._insert([0, 3]), expected);
+			});
+		});
+
+		it(`should throw exception if expand=true and params[0] is not an array`, function() {
+			const instance=_createInstance({
+				params: [1, {
+					expand: true
+				}]
+			});
+			assert.throws(()=>{
+				instance._insert([0, 3]);
+			}, error=>error.message==="expecting array but found Number");
+		});
+	});
+
 	describe("_assertArray", function() {
 		it("should throw exception if not an array", function() {
 			const instance=_createInstance();
@@ -33,6 +126,46 @@ describe("lib.ModuleArray", function() {
 			const instance=_createInstance(),
 				input=[];
 			assert.strictEqual(instance._assertArray(input), input);
+		});
+	});
+
+	// we test _insert thoroughly. Here we just do some sanity checking
+	describe("append", function() {
+		it("should throw exception if input not an array", async function() {
+			const instance=_createInstance();
+			return instance.append("string")
+				.then(assert.notCalled)
+				.catch(error=>error.message==="expecting array but found String");
+		});
+
+		it("should properly append", async function() {
+			const instance=_createInstance({
+				params: [1]
+			});
+			return instance.append([0])
+				.then(result=>{
+					assert.deepStrictEqual(result, [0, 1]);
+				});
+		});
+	});
+
+	// we test _insert thoroughly. Here we just do some sanity checking
+	describe("insert", function() {
+		it("should throw exception if input not an array", async function() {
+			const instance=_createInstance();
+			return instance.insert("string")
+				.then(assert.notCalled)
+				.catch(error=>error.message==="expecting array but found String");
+		});
+
+		it("should properly append", async function() {
+			const instance=_createInstance({
+				params: [1]
+			});
+			return instance.insert([0])
+				.then(result=>{
+					assert.deepStrictEqual(result, [1, 0]);
+				});
 		});
 	});
 
@@ -243,9 +376,9 @@ describe("lib.ModuleArray", function() {
 		[0, 1, 2, 3, 4].forEach(start=>{
 			const input=[1, 2, 3];
 			it(`should properly process a positive start offset: start=${start}, input=${JSON.stringify(input)}`, async function() {
-					const instance=_createInstance({
-						params: [start]
-					});
+				const instance=_createInstance({
+					params: [start]
+				});
 				return instance.slice(input)
 					.then(result=>{
 						assert.deepStrictEqual(result, input.slice(start));
@@ -270,9 +403,8 @@ describe("lib.ModuleArray", function() {
 			[-1, [3]],
 			[-2, [2, 3]],
 			[-3, [1, 2, 3]],
-			[-4, [3]],
-			[-5, [2, 3]],
-			[-6, [1, 2, 3]]
+			[-4, []],
+			[-5, []]
 		].forEach(([start, expected])=>{
 			const input=[1, 2, 3];
 			it(`should properly process a negative start offset: start=${start}, input=${JSON.stringify(input)}`, async function() {
@@ -290,9 +422,7 @@ describe("lib.ModuleArray", function() {
 			[-1, [1, 2]],
 			[-2, [1]],
 			[-3, []],
-			[-4, [1, 2]],
-			[-5, [1]],
-			[-6, []]
+			[-4, []]
 		].forEach(([stop, expected])=>{
 			const input=[1, 2, 3];
 			it(`should properly process a negative stop offset: stop=${stop}, input=${JSON.stringify(input)}`, async function() {
@@ -317,7 +447,7 @@ describe("lib.ModuleArray", function() {
 			return instance.slice([1])
 				.then(assert.notCalled)
 				.catch(error=>{
-					assert.strictEqual(error.message, 'invalid slice configuration - {"start":0,"stop":0,"count":0}');
+					assert.strictEqual(error.message, "invalid slice configuration - {\"start\":0,\"stop\":0,\"count\":0}");
 				});
 		});
 
@@ -328,6 +458,7 @@ describe("lib.ModuleArray", function() {
 			[{stop: 2}, [1, 2]],
 			[{start: 1, stop: -1}, [2]],
 			[{start: -2, stop: -1}, [2]],
+			[{start: -2, stop: -2}, []],
 			[{start: 0, count: 3}, [1, 2, 3]],
 			[{start: 1, count: 1}, [2]],
 			[{stop: 3, count: 3}, [1, 2, 3]],
