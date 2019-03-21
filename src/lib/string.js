@@ -8,60 +8,74 @@
 const _=require("lodash");
 const {ModuleBase}=require("./_base");
 const {assertType}=require("./_data");
+const {formatMouseSpecification}=require("./_format");
 const string=require("../common/parse");
 
 /**
- * @typedef {ModuleBase} ModuleStd
+ * @typedef {ModuleBase} ModuleString
  */
 class ModuleString extends ModuleBase {
 	/**
-	 * Replaces <code>params[0]</code> with <code>params[1]</code>. If <code>params[0]</code> is a string then this guy
-	 * is going to make an assumption and apply it globally.
-	 * @param {string} data - string to be replaced
-	 * @returns {Promise<DataBlob>}
+	 * Formats the data in <param>blob<param>. We are using a somewhat hybrid approach to formatting. It's a little
+	 * sprintf, it's a little es6 template and it's a little custom. See <code>formatMouseSpecification</code> for more information.
+	 * @param {DataBlob} blob
+	 * @return {Promise<string>}
 	 * @throws {Error}
 	 */
-	async replace(data) {
-		if(data!=null) {
+	async format(blob) {
+		assertType(blob, ["Array", "Object"]);
+		assertType(this.params[0], "String");
+		return formatMouseSpecification(this.params[0], blob);
+	}
+
+	/**
+	 * Replaces <code>params[0]</code> with <code>params[1]</code>. If <code>params[0]</code> is a string then this guy
+	 * is going to make an assumption and apply it globally.
+	 * @param {string} blob - string to be replaced
+	 * @returns {Promise<string>}
+	 * @throws {Error}
+	 */
+	async replace(blob) {
+		if(blob!=null) {
 			let search=this.params[0],
 				replace=this.params[1];
-			assertType(data, "String");
+			assertType(blob, "String");
 			assertType(search, ["RegExp", "String"]);
 			assertType(replace, ["String"]);
 			if(search.constructor.name!=="RegExp") {
 				search=new RegExp(search, "g");
 			}
-			data=data.replace(search, replace);
+			blob=blob.replace(search, replace);
 		}
-		return data;
+		return blob;
 	}
 
 	/**
 	 * Parses string to array using specified method in this.params[0]
 	 * @resolves method:string in this.params[0]. Defaults to "white"
 	 * @supported {"delimiter"|"newline"|"shell"|"white"|RegExp}
-	 * @param {string} data
-	 * @returns {Promise<DataBlob>}
+	 * @param {string} blob
+	 * @returns {Promise<string>}
 	 * @throws {Error}
 	 */
-	async split(data) {
-		if(data==null) {
+	async split(blob) {
+		if(blob==null) {
 			return [];
 		} else {
-			assertType(data, "String");
+			assertType(blob, "String");
 			const argument=_.get(this.params, "0", {method: "white"});
 			if(argument.constructor.name==="String" || argument.constructor.name==="RegExp") {
-				return data.split(argument);
+				return blob.split(argument);
 			} else {
 				assertType(argument, "Object");
 				switch(argument.method) {
 					case "delimiter": {
 						const delimiter=_.get(argument, "delimiter", "\\s*,\\s*"),
 							regex=new RegExp(delimiter);
-						return data.split(regex);
+						return blob.split(regex);
 					}
 					case "newline": {
-						const result=data.split(/\s*\n\s*/);
+						const result=blob.split(/\s*\n\s*/);
 						if(_.last(result)==="") {
 							// What are we doing here? It's an executive decision that we may back out of. The reason is because function such as
 							// "ls", "find" all return with a trailing newline which when parsed will result in an empty line. And split
@@ -71,11 +85,11 @@ class ModuleString extends ModuleBase {
 						return result;
 					}
 					case "shell": {
-						return string.shell(data);
+						return string.shell(blob);
 					}
 					case "white":
 					default: {
-						return data.split(/\s+/);
+						return blob.split(/\s+/);
 					}
 				}
 			}
@@ -84,22 +98,22 @@ class ModuleString extends ModuleBase {
 
 	/**
 	 * Converts text to lower case
-	 * @param {string} data
+	 * @param {string} blob
 	 * @returns {Promise<string>}
 	 */
-	async lower(data) {
-		assertType(data, "String");
-		return data.toLowerCase();
+	async lower(blob) {
+		assertType(blob, "String");
+		return blob.toLowerCase();
 	}
 
 	/**
 	 * Converts text to upper case
-	 * @param {string} data
+	 * @param {string} blob
 	 * @returns {Promise<string>}
 	 */
-	async upper(data) {
-		assertType(data, "String");
-		return data.toUpperCase();
+	async upper(blob) {
+		assertType(blob, "String");
+		return blob.toUpperCase();
 	}
 }
 

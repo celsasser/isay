@@ -23,6 +23,30 @@ describe("lib.ModuleArray", function() {
 		});
 	}
 
+	describe("_normalizeIndex", function() {
+		[
+			[[0], 0, 0],
+			[[0], 1, 1],
+			[[0], -1, 0],
+			[[0], -2, 1]
+		].forEach(([array, index, expected])=>{
+			it(`should properly translate start index of ${index} to ${expected} for ${JSON.stringify(array)}`, function() {
+				assert.strictEqual(ModuleArray._normalizeIndex(array, index, true), expected);
+			});
+		});
+
+		[
+			[[0], 0, 0],
+			[[0], 1, 1],
+			[[0], -1, 0],
+			[[0], -2, 0]
+		].forEach(([array, index, expected])=>{
+			it(`should properly translate end index of ${index} to ${expected} for ${JSON.stringify(array)}`, function() {
+				assert.strictEqual(ModuleArray._normalizeIndex(array, index, false), expected);
+			});
+		});
+	});
+
 	describe("_insert", function() {
 		it("should throw exception if input not an array", function() {
 			const instance=_createInstance();

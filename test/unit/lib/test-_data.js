@@ -11,8 +11,7 @@ const {
 	assertProperties,
 	assertType,
 	assertTypesEqual,
-	ensureJson,
-	normalizeArrayIndex
+	ensureJson
 }=require("../../../src/lib/_data");
 
 describe("lib.ModuleArray", function() {
@@ -142,30 +141,6 @@ describe("lib.ModuleArray", function() {
 		].forEach(input=>{
 			it(`should convert ${input} encoding`, function() {
 				assert.deepEqual(ensureJson(input), JSON.parse(input));
-			});
-		});
-	});
-
-	describe("normalizeArrayIndex", function() {
-		[
-			[[0], 0, 0],
-			[[0], 1, 1],
-			[[0], -1, 0],
-			[[0], -2, 1]
-		].forEach(([array, index, expected])=>{
-			it(`should properly translate start index of ${index} to ${expected} for ${JSON.stringify(array)}`, function() {
-				assert.strictEqual(normalizeArrayIndex(array, index, true), expected);
-			});
-		});
-
-		[
-			[[0], 0, 0],
-			[[0], 1, 1],
-			[[0], -1, 0],
-			[[0], -2, 0]
-		].forEach(([array, index, expected])=>{
-			it(`should properly translate end index of ${index} to ${expected} for ${JSON.stringify(array)}`, function() {
-				assert.strictEqual(normalizeArrayIndex(array, index, false), expected);
 			});
 		});
 	});

@@ -11,7 +11,7 @@ const parse=require("../common/parse");
 const spawn=require("../common/spawn");
 
 /**
- * @typedef {ModuleBase} ModuleStd
+ * @typedef {ModuleBase} ModuleOs
  */
 class ModuleOs extends ModuleBase {
 	/**

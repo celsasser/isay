@@ -135,29 +135,7 @@ function isPredicate(value) {
 	return _.isFunction(value);
 }
 
-/**
- * Works with python style negative indexes. If <param>index</param>=0 then returns index
- * @param {Array<*>} array
- * @param {Number} index
- * @param {boolean} isStart - if the index is negative and out range then we set it to high or
- * 	low depending on how it is being used as a from-start index or from-end reference.
- * @returns {number}
- */
-function normalizeArrayIndex(array, index, isStart=true) {
-	if(index>=0) {
-		return index;
-	} else {
-		index=array.length+index;
-		if(index<0) {
-			// here we want to return high or low so that its out of bounds nature
-			// does not yield results.
-			return isStart ? array.length : 0;
-		} else {
-			return index;
-		}
-	}
-};
-
+/********************* Private Interface *********************/
 /**
  * Gets the constructor name of the specified value if not null or undefined otherwise returns
  * "null" or "undefined"
@@ -185,6 +163,5 @@ module.exports={
 	assertType,
 	assertTypesEqual,
 	ensureJson,
-	isPredicate,
-	normalizeArrayIndex
+	isPredicate
 };

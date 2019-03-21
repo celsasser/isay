@@ -7,7 +7,7 @@
 
 const _=require("lodash");
 const {ModuleBase}=require("./_base");
-const {assertPredicate, assertType, normalizeArrayIndex}=require("./_data");
+const {assertPredicate, assertType}=require("./_data");
 const util=require("../common/util");
 
 /**
@@ -216,10 +216,10 @@ class ModuleArray extends ModuleBase {
 			if(this.params[0].constructor.name==="Object") {
 				const {count, start, stop}=this.params[0];
 				if(start!==undefined) {
-					startIndex=normalizeArrayIndex(blob, start, true);
+					startIndex=ModuleArray._normalizeIndex(blob, start, true);
 				}
 				if(stop!=undefined) {
-					stopIndex=normalizeArrayIndex(blob, stop, false);
+					stopIndex=ModuleArray._normalizeIndex(blob, stop, false);
 				}
 				if(count!==undefined) {
 					if(stop!==undefined) {
@@ -232,9 +232,9 @@ class ModuleArray extends ModuleBase {
 					}
 				}
 			} else {
-				startIndex=normalizeArrayIndex(blob, this.params[0], true);
+				startIndex=ModuleArray._normalizeIndex(blob, this.params[0], true);
 				if(this.params.length>1) {
-					stopIndex=normalizeArrayIndex(blob, this.params[1], false);
+					stopIndex=ModuleArray._normalizeIndex(blob, this.params[1], false);
 				}
 			}
 		}
@@ -288,6 +288,30 @@ class ModuleArray extends ModuleBase {
 
 	/********************* Private Interface *********************/
 	/**
+	 * Works with python style negative indexes. If <param>index</param>=0 then returns index
+	 * @param {Array<*>} array
+	 * @param {Number} index
+	 * @param {boolean} isStart - if the index is negative and out range then we set it to high or
+	 * 	low depending on how it is being used as a from-start index or from-end reference.
+	 * @returns {number}
+	 * @private
+	 */
+	static _normalizeIndex(array, index, isStart=true) {
+		if(index>=0) {
+			return index;
+		} else {
+			index=array.length+index;
+			if(index<0) {
+				// here we want to return high or low so that its out of bounds nature
+				// does not yield results.
+				return isStart ? array.length : 0;
+			} else {
+				return index;
+			}
+		}
+	};
+
+	/**
 	 * Validates and applies the function to the blob using all params as input.
 	 * @param {DataBlob} blob
 	 * @return {Array<DataBlob>}
@@ -324,7 +348,7 @@ class ModuleArray extends ModuleBase {
 			index=(tail) ? array.length : 0,
 			expand=false
 		}=(this.params[1] || {});
-		index=normalizeArrayIndex(array, index);
+		index=ModuleArray._normalizeIndex(array, index);
 		if(expand) {
 			const concat=this._assertArray(this.params[0]);
 			return array.slice(0, index)
@@ -339,7 +363,6 @@ class ModuleArray extends ModuleBase {
 			return array;
 		}
 	}
-
 }
 
 module.exports={
