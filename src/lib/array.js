@@ -309,7 +309,7 @@ class ModuleArray extends ModuleBase {
 				return index;
 			}
 		}
-	};
+	}
 
 	/**
 	 * Validates and applies the function to the blob using all params as input.

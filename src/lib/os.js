@@ -50,7 +50,6 @@ class ModuleOs extends ModuleBase {
 			} else {
 				return this.params;
 			}
-
 		} else {
 			return this.params;
 		}

@@ -22,9 +22,9 @@ function formatMouseSpecification(spec, data) {
 	let match,
 		result=spec;
 	const regex=/(\$\\{)|(\${([^:]+?:)?([^1-9])?(\d+)?(\.\d+)?([lrc])})/g;
-	for(let index=0; (match=regex.exec(spec)); index++) {
+	for(let index=0; (match=regex.exec(result)); index++) {
 		if(match[1]!==undefined) {
-			result=`${result.substr(0, regex.lastIndex)}$\{${result.substr(regex.lastIndex+match[1].length)}`;
+			result=`${result.substr(0, match.index)}$\{${result.substr(regex.lastIndex)}`;
 		} else {
 			/**
 			 * @param {*} data
@@ -50,26 +50,32 @@ function formatMouseSpecification(spec, data) {
 				if(width!==undefined) {
 					switch(align) {
 						case "l": {
-							return _.padStart(fill, width, formatted);
+							return _.padEnd(formatted, width, fill);
 						}
 						case "r": {
-							return _.padEnd(fill, width, formatted);
+							return _.padStart(formatted, width, fill);
 						}
 						case "c": {
-							return _.pad(fill, width, formatted);
+							return _.pad(formatted, width, fill);
 						}
 					}
 				}
 				return formatted;
 			}
 
-			let path=(match[2]!==undefined) ? match[2].substr(0, match[2].length-1) : index,
-				fill=match[3] || " ",
-				width=(match[4]!==undefined) ? Number(match[4]) : undefined,
-				precision=(match[5]!==undefined) ? Number(match[5].substr(1)) : undefined,
-				align=match[6],
-				formatted=_pad(_format(_.get(data, path)));
-			result=`${result.substr(0, regex.lastIndex)}${formatted}${result.substr(regex.lastIndex+match[0].length)}`;
+			let path=(match[3]!==undefined) ? match[3].substr(0, match[3].length-1) : index,
+				fill=match[4] || " ",
+				width=(match[5]!==undefined) ? Number(match[5]) : undefined,
+				precision=(match[6]!==undefined) ? Number(match[6].substr(1)) : undefined,
+				align=match[7],
+				format=_.get(data, path);
+			if(format===undefined) {
+				throw new Error(`data[${path}] cannot be found`);
+			} else {
+				let formatted=_pad(_format(format));
+				result=`${result.substr(0, match.index)}${formatted}${result.substr(regex.lastIndex)}`;
+				regex.lastIndex=match.index+formatted.length;
+			}
 		}
 	}
 	return result;

@@ -128,7 +128,7 @@ describe("lib.ModuleArray", function() {
 			});
 		});
 
-		it(`should throw exception if expand=true and params[0] is not an array`, function() {
+		it("should throw exception if expand=true and params[0] is not an array", function() {
 			const instance=_createInstance({
 				params: [1, {
 					expand: true

@@ -23,6 +23,40 @@ describe("lib.ModuleString", function() {
 		});
 	}
 
+	describe("format", function() {
+		it("should raise exception if blob is not an array or object", function() {
+			const instance=_createInstance({
+				params: ["spec"]
+			});
+			instance.format("string")
+				.then(assert.notCalled)
+				.catch(error=>{
+					assert.strictEqual(error.message, "expecting Array or Object but found String");
+				});
+		});
+
+		it("should raise exception if spec is not a string", function() {
+			const instance=_createInstance({
+				params: [{}]
+			});
+			instance.format([])
+				.then(assert.notCalled)
+				.catch(error=>{
+					assert.strictEqual(error.message, "expecting String but found Object");
+				});
+		});
+
+		it("should properly format according to spec and return result", async function() {
+			const instance=_createInstance({
+				params: ["${l}"]
+			});
+			return instance.format(["input"])
+				.then(result=>{
+					assert.strictEqual(result, "input");
+				});
+		});
+	});
+
 	describe("replace", function() {
 		[
 			["input", 0, "search", "replace"],
