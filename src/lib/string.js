@@ -8,7 +8,10 @@
 const _=require("lodash");
 const {ModuleBase}=require("./_base");
 const {assertType}=require("./_data");
-const {formatMouseSpecification}=require("./_format");
+const {
+	formatMouseSpecification,
+	unformatMouseSpecification
+}=require("./_format");
 const string=require("../common/parse");
 
 /**
@@ -97,6 +100,10 @@ class ModuleString extends ModuleBase {
 					}
 					case "shell": {
 						return string.shell(blob);
+					}
+					case "unformat": {
+						assertType(argument.format, "String");
+						return unformatMouseSpecification(argument.format, blob);
 					}
 					case "white":
 					default: {

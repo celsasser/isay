@@ -6,9 +6,21 @@
  */
 
 const assert=require("../../support/assert");
-const {formatMouseSpecification}=require("../../../src/lib/_format");
+const proxy=require("../../support/proxy");
+const {
+	formatMouseSpecification,
+	unformatMouseSpecification
+}=require("../../../src/lib/_format");
 
 describe("lib._format", function() {
+	beforeEach(function() {
+		proxy.log.stub();
+	});
+
+	afterEach(function() {
+		proxy.log.unstub();
+	});
+
 	describe("formatMouseSpecification", function() {
 		it("should return spec string if no format specs are in the spec string", function() {
 			assert.strictEqual(formatMouseSpecification(""), "");
@@ -37,7 +49,7 @@ describe("lib._format", function() {
 			["${a:l}", {a: 5}, "5"],
 			["${a:l}", {a: "five"}, "five"],
 			["${a.b:l}", {a: {b: 5}}, "5"],
-			["${a.b:l}", {a: {b: "five"}}, "five"],
+			["${a.b:l}", {a: {b: "five"}}, "five"]
 		].forEach(([spec, data, expected])=>{
 			it(`should properly make basic single substitutions for spec=${spec} and data=${JSON.stringify(data)}`, function() {
 				assert.strictEqual(formatMouseSpecification(spec, data), expected);
@@ -71,6 +83,110 @@ describe("lib._format", function() {
 		].forEach(([spec, data, expected])=>{
 			it(`should properly format more complex configuration: spec=${spec} and data=${JSON.stringify(data)}`, function() {
 				assert.strictEqual(formatMouseSpecification(spec, data), expected);
+			});
+		});
+	});
+
+	describe("unformatMouseSpecification", function() {
+		it("should throw error (by default) if there are literal mismatches", function() {
+			assert.throws(unformatMouseSpecification.bind(null, "spec", "encoded"),
+				error=>error.message==="failed to match \"spec\" to \"encoded\"");
+		});
+
+		it("should return empty array if literal mismatches and not throwing errors", function() {
+			assert.deepStrictEqual(unformatMouseSpecification("spec", "encoded", {
+				exceptionOnMismatch: false
+			}), []);
+			assert.strictEqual(proxy.log.debug.callCount, 1);
+		});
+
+		[
+			["${4l}", "4   ", ["4"]],
+			["${-4l}", "4---", ["4"]],
+			["${4r}", "   4", ["4"]],
+			["${04r}", "0004", ["4"]],
+			["${4c}", " 4  ", ["4"]],
+			["${04c}", "0040", ["4"]]
+		].forEach(([spec, encoding, expected])=>{
+			it(`should successfully parse single field spec (w/width)=${spec} for ${encoding}`, function() {
+				assert.deepStrictEqual(unformatMouseSpecification(spec, encoding), expected);
+			});
+		});
+
+		[
+			["${l}", "4   ", ["4"]],
+			["${-l}", "4---", ["4"]],
+			["${r}", "   4", ["4"]],
+			["${0r}", "0004", ["4"]],
+			["${c}", " 4  ", ["4"]],
+			["${0c}", "0040", ["4"]]
+		].forEach(([spec, encoding, expected])=>{
+			it(`should successfully parse single field spec (wo/width)=${spec} for ${encoding}`, function() {
+				assert.deepStrictEqual(unformatMouseSpecification(spec, encoding), expected);
+			});
+		});
+
+		[
+			["a${02r}", "b01", "failed to match \"a\" to \"b\""],
+			["${02r}a${02r}", "01b02", "failed to match \"a\" to \"b\""],
+			["${02r}a${02r}b", "01a02c", "failed to match \"b\" to \"c\""]
+		].forEach(([spec, encoding, errorText])=>{
+			it(`should catch literal mismatches around fields for spec=${spec}, encoding=${encoding}`, function() {
+				assert.throws(unformatMouseSpecification.bind(null, spec, encoding),
+					error=>error.message===errorText);
+			});
+		});
+
+		[
+			["${3l}${3l}", "4  5  ", ["4", "5"]],
+			["${3r}${3r}", "  4  5", ["4", "5"]],
+			["${3c}${3c}", " 4  5 ", ["4", "5"]],
+			// this one is debatable - the width spec is not fulfilled but it's the last spec. We are going to let it ride.
+			["${2l}${2l}", "4 5", ["4", "5"]],
+			["${2l}${2l}", "4455", ["44", "55"]],
+			["${2r}${2l}", "4455", ["44", "55"]],
+			["${-2l}${-2r}", "4--5", ["4", "5"]],
+			["${-2l}-${-2r}", "4---5", ["4", "5"]]
+		].forEach(([spec, encoding, expected])=>{
+			it(`should successfully parse complex field spec (w/width)=${spec} for ${encoding}`, function() {
+				assert.deepStrictEqual(unformatMouseSpecification(spec, encoding), expected);
+			});
+		});
+
+		it("should fail if more fields specs than there are encoded fields (with width)", function() {
+			assert.throws(unformatMouseSpecification.bind(null, "${2r}{2r}", "2 "),
+				error=>error.message==="failed to match \"{2r}\" to \"\"");
+		});
+
+		[
+			["${l}${l}", "4  5  ", ["4", "5"]],
+			["${r}${r}", "  4  5", ["4", "5"]],
+			["${c}${c}", " 4  5 ", ["4", "5"]],
+			["${l}|${-r}", "4   |---5", ["4", "5"]],
+			[" ${l}${-c} ", " 4 -5- ", ["4", "5"]]
+		].forEach(([spec, encoding, expected])=>{
+			it(`should successfully parse complex field spec (wo/width)=${spec} for ${encoding}`, function() {
+				assert.deepStrictEqual(unformatMouseSpecification(spec, encoding), expected);
+			});
+		});
+
+		[
+			["${r}${l}", " 45 ", ["45", ""]],
+			["${l}${l}", "44aa", ["44aa", ""]]
+		].forEach(([spec, encoding, expected])=>{
+			it(`should return wonky results due to ambiguity when no width included: spec=${spec} for ${encoding}`, function() {
+				assert.deepStrictEqual(unformatMouseSpecification(spec, encoding), expected);
+			});
+		});
+
+		[
+			["${0:2l}", "4 ", ["4"]],
+			["${a:2l}", "4 ", {a: "4"}],
+			["${0:2l}${a:2l}", "4 c ", {0: "4", a: "c"}],
+			["${a.b:2l}${a.c:2l}", "4455", {a: {b: "44", c: "55"}}]
+		].forEach(([spec, encoding, expected])=>{
+			it(`should properly encode result for specs including path variables: spec=${spec}, encoding=${encoding}`, function() {
+				assert.deepStrictEqual(unformatMouseSpecification(spec, encoding), expected);
 			});
 		});
 	});

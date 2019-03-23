@@ -193,6 +193,30 @@ describe("lib.ModuleString", function() {
 				blob=await instance.split("'a b'");
 			assert.deepEqual(blob, ["'a", "b'"]);
 		});
+
+		it("should raise exception if method='unformat' and format is missing from configuration", async function() {
+			const instance=_createInstance({
+				params: [{
+					method: "unformat"
+				}]
+			});
+			return instance.split(" a b")
+				.then(assert.notCalled)
+				.catch(error=>{
+					assert.strictEqual(error.message, "expecting String but found undefined");
+				});
+		});
+
+		it("should forward method='unformat' to unformatMouseSpecification if requirements satisified", async function() {
+			const instance=_createInstance({
+					params: [{
+						format: "${2r}${2r}",
+						method: "unformat"
+					}]
+				}),
+				result=await instance.split(" a b");
+			assert.deepStrictEqual(result, ["a", "b"]);
+		});
 	});
 
 	describe("lower", function() {
