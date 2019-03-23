@@ -7,7 +7,7 @@
 
 const _=require("lodash");
 const {ModuleBase}=require("./_base");
-const {assertPredicate, assertType}=require("./_data");
+const {assertPredicate, assertType, isPredicate}=require("./_data");
 const util=require("../common/util");
 
 /**
@@ -19,6 +19,7 @@ class ModuleArray extends ModuleBase {
 	/**
 	 * Appends this.params[0] to blob and returns the results
 	 * @resolves data:DataBlob in this.params[0] - appended data
+	 * @resolves predicate:function():Array<*> in this.params[0]
 	 * @resolves {index:Number=blob.length, expand:boolean=false} in this.params[1]
 	 * @param {DataBlob} blob
 	 * @returns {Promise<Array<DataBlob>>}
@@ -30,7 +31,7 @@ class ModuleArray extends ModuleBase {
 
 	/**
 	 * Calls predicate for every element in blob
-	 * @resolves predicate:ArrayPredicate in this.params[0]
+	 * @resolves predicate:MapPredicate in this.params[0]
 	 * @param {DataBlob} blob
 	 * @returns {Promise<Array<DataBlob>>}
 	 * @throws {Error} if <param>blob</param> cannot be treated as an array
@@ -47,7 +48,7 @@ class ModuleArray extends ModuleBase {
 
 	/**
 	 * Calls right through to <code>each</code>
-	 * @resolves predicate:ArrayPredicate in this.params[0]
+	 * @resolves predicate:MapPredicate in this.params[0]
 	 * @param {DataBlob} blob
 	 * @returns {Promise<Array<DataBlob>>}
 	 * @throws {Error} if <param>blob</param> cannot be treated as an array
@@ -58,7 +59,7 @@ class ModuleArray extends ModuleBase {
 
 	/**
 	 * Filters array selecting truthy returns by predicate
-	 * @resolves predicate:ArrayPredicate in this.params[0]
+	 * @resolves predicate:MapPredicate in this.params[0]
 	 * @param {DataBlob} blob
 	 * @returns {Promise<Array<DataBlob>>}
 	 * @throws {Error}
@@ -78,7 +79,7 @@ class ModuleArray extends ModuleBase {
 
 	/**
 	 * Finds first element using predicate
-	 * @resolves predicate:ArrayPredicate in this.params[0]
+	 * @resolves predicate:MapPredicate in this.params[0]
 	 * @param {DataBlob} blob
 	 * @returns {Promise<Array<DataBlob>>}
 	 * @throws {Error}
@@ -98,6 +99,7 @@ class ModuleArray extends ModuleBase {
 	/**
 	 * Inserts this.params[0] into blob and returns the results
 	 * @resolves data:DataBlob in this.params[0] - inserted data
+	 * @resolves predicate:function():Array<*> in this.params[0]
 	 * @resolves {index:Number=0, expand:boolean=false} in this.params[1]
 	 * @param {DataBlob} blob
 	 * @returns {Promise<Array<DataBlob>>}
@@ -109,7 +111,7 @@ class ModuleArray extends ModuleBase {
 
 	/**
 	 * Maps each element using predicate's results
-	 * @resolves predicate:ArrayPredicate in this.params[0]
+	 * @resolves predicate:MapPredicate in this.params[0]
 	 * @param {DataBlob} blob
 	 * @returns {Promise<Array<DataBlob>>}
 	 * @throws {Error}
@@ -292,7 +294,7 @@ class ModuleArray extends ModuleBase {
 	 * @param {Array<*>} array
 	 * @param {Number} index
 	 * @param {boolean} isStart - if the index is negative and out range then we set it to high or
-	 * 	low depending on how it is being used as a from-start index or from-end reference.
+	 *    low depending on how it is being used as a from-start index or from-end reference.
 	 * @returns {number}
 	 * @private
 	 */
@@ -331,35 +333,42 @@ class ModuleArray extends ModuleBase {
 	/**
 	 * General purpose append/insert function for use by our public append/insert methods.
 	 * @resolves data:DataBlob in this.params[0] - inserted data
+	 * @resolves predicate:function():Array<*> in this.params[0]
 	 * @resolves {index:Number=blob.length, expand:boolean=false} in this.params[1]
 	 * @param {DataBlob} blob
 	 * @param {boolean} tail - whether to default to head or tail as index point
-	 * @returns {Array<DataBlob>}
+	 * @returns {Promise<Array<DataBlob>>}
 	 * @throws {Error}
 	 * @private
 	 */
-	_insert(blob, tail=true) {
+	async _insert(blob, tail=true) {
 		let array=this._assertArray(blob);
 		assertType(this.params[1], "Object", {
 			allowUndefined: true
 		});
 
-		let {
+		let concat, {
 			index=(tail) ? array.length : 0,
 			expand=false
 		}=(this.params[1] || {});
+
 		index=ModuleArray._normalizeIndex(array, index);
+		if(isPredicate(this.params[0])) {
+			concat= await assertPredicate(this.params[0])();
+		} else {
+			concat=this.params[0];
+		}
 		if(expand) {
-			const concat=this._assertArray(this.params[0]);
+			concat=this._assertArray(concat);
 			return array.slice(0, index)
 				.concat(concat)
 				.concat(array.slice(index));
 		} else {
-			assertType(this.params[0], "*", {
+			assertType(concat, "*", {
 				allowNull: true
 			});
 			array=array.slice();	// honor immutability rules
-			array.splice(index, 0, this.params[0]);
+			array.splice(index, 0, concat);
 			return array;
 		}
 	}

@@ -85,6 +85,7 @@ class ModuleIO extends ModuleBase {
 		return path;
 	}
 
+	// eslint-disable-next-line valid-jsdoc
 	/**
 	 * Writes data to path that should be in <code>this.params[0]</code>.
 	 * Write options may optionally be in <code>this.params[1]</code>

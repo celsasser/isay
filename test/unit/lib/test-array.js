@@ -48,53 +48,85 @@ describe("lib.ModuleArray", function() {
 	});
 
 	describe("_insert", function() {
-		it("should throw exception if input not an array", function() {
+		it("should throw exception if input not an array", async function() {
 			const instance=_createInstance();
-			assert.throws(()=>instance._insert("string"),
-				error=>error.message==="expecting array but found String");
+			return instance._insert("string")
+				.then(assert.notCalled)
+				.catch(error=>{
+					assert.strictEqual(error.message, "expecting array but found String");
+				});
 		});
 
-		it("should throw exception if param[1] is anything but undefined or an object", function() {
+		it("should throw exception if param[0] is undefined", async function() {
+			const instance=_createInstance({
+				params: []
+			});
+			return instance._insert([])
+				.then(assert.notCalled)
+				.catch(error=>{
+					assert.strictEqual(error.message, "expecting a value but found undefined");
+				});
+		});
+
+		it("should throw exception if param[1] is anything but undefined or an object", async function() {
 			const instance=_createInstance({
 				params: ["data", "string"]
 			});
-			assert.throws(()=>instance._insert([]),
-				error=>error.message==="expecting Object but found String");
+			return instance._insert([])
+				.then(assert.notCalled)
+				.catch(error=>{
+					assert.strictEqual(error.message, "expecting Object but found String");
+				});
 		});
 
-		it("should append to end if tail=true and no insert point is given", function() {
+		it("should append to end if tail=true and no insert point is given", async function() {
 			const instance=_createInstance({
 				params: [1]
 			});
-			assert.deepStrictEqual(instance._insert([0], true), [0, 1]);
+			return instance._insert([0], true)
+				.then(result=>{
+					assert.deepStrictEqual(result, [0, 1]);
+				});
 		});
 
-		it("should insert at beginning if tail=false and no insert point is given", function() {
+		it("should insert at beginning if tail=false and no insert point is given", async function() {
 			const instance=_createInstance({
 				params: [1]
 			});
-			assert.deepStrictEqual(instance._insert([0], false), [1, 0]);
+			return instance._insert([0], false)
+				.then(result=>{
+					assert.deepStrictEqual(result, [1, 0]);
+				});
 		});
 
-		it("should expand at end if tail=true and no insert point is given", function() {
+		it("should expand at end if tail=true and no insert point is given", async function() {
 			const instance=_createInstance({
 				params: [[1, 2], {expand: true}]
 			});
-			assert.deepStrictEqual(instance._insert([0], true), [0, 1, 2]);
+			return instance._insert([0], true)
+				.then(result=>{
+					assert.deepStrictEqual(result, [0, 1, 2]);
+				});
 		});
 
-		it("should expand at beginning if tail=false and no insert point is given", function() {
+		it("should expand at beginning if tail=false and no insert point is given", async function() {
 			const instance=_createInstance({
 				params: [[1, 2], {expand: true}]
 			});
-			assert.deepStrictEqual(instance._insert([0], false), [1, 2, 0]);
+			return instance._insert([0], false)
+				.then(result=>{
+					assert.deepStrictEqual(result, [1, 2, 0]);
+				});
 		});
 
-		it("should not expand an array param if expand is not true", function() {
+		it("should not expand an array param if expand is not true", async function() {
 			const instance=_createInstance({
 				params: [[1], {index: 1}]
 			});
-			assert.deepStrictEqual(instance._insert([0, 2]), [0, [1], 2]);
+			return instance._insert([0, 2])
+				.then(result=>{
+					assert.deepStrictEqual(result, [0, [1], 2]);
+				});
 		});
 
 		[
@@ -103,11 +135,14 @@ describe("lib.ModuleArray", function() {
 			[2, [0, 2, 1]],
 			[3, [0, 2, 1]]
 		].forEach(([index, expected])=>{
-			it(`should insert 1 into [0, 2] at ${index} and return ${JSON.stringify(expected)}`, function() {
+			it(`should insert 1 into [0, 2] at ${index} and return ${JSON.stringify(expected)}`, async function() {
 				const instance=_createInstance({
 					params: [1, {index}]
 				});
-				assert.deepStrictEqual(instance._insert([0, 2]), expected);
+				return instance._insert([0, 2])
+					.then(result=>{
+						assert.deepStrictEqual(result, expected);
+					});
 			});
 		});
 
@@ -117,26 +152,70 @@ describe("lib.ModuleArray", function() {
 			[2, [0, 3, 1, 2]],
 			[3, [0, 3, 1, 2]]
 		].forEach(([index, expected])=>{
-			it(`should expand [1, 2] into [0, 3] at ${index} and return ${JSON.stringify(expected)}`, function() {
+			it(`should expand [1, 2] into [0, 3] at ${index} and return ${JSON.stringify(expected)}`, async function() {
 				const instance=_createInstance({
 					params: [[1, 2], {
 						index,
 						expand: true
 					}]
 				});
-				assert.deepStrictEqual(instance._insert([0, 3]), expected);
+				return instance._insert([0, 3])
+					.then(result=>{
+						assert.deepStrictEqual(result, expected);
+					});
 			});
 		});
 
-		it("should throw exception if expand=true and params[0] is not an array", function() {
+		it("should properly process predicate value result", function() {
+			const instance=_createInstance({
+				params: [()=>{
+					assert.strictEqual(arguments.length, 0);
+					return Promise.resolve(2);
+				}]
+			});
+			return instance._insert([0, 1])
+				.then(result=>{
+					assert.deepStrictEqual(result, [0, 1, 2]);
+				});
+		});
+
+		it("should properly expand predicate array result", function() {
+			const instance=_createInstance({
+				params: [()=>{
+					assert.strictEqual(arguments.length, 0);
+					return Promise.resolve([2, 3]);
+				}, {
+					expand: true
+				}]
+			});
+			return instance._insert([0, 1])
+				.then(result=>{
+					assert.deepStrictEqual(result, [0, 1, 2, 3]);
+				});
+		});
+
+		it("should raise exception if predicate does not return a value", function() {
+			const instance=_createInstance({
+				params: [()=>Promise.resolve()]
+			});
+			return instance._insert([0, 1])
+				.then(assert.notCalled)
+				.catch(error=>{
+					assert.strictEqual(error.message, "expecting a value but found undefined");
+				});
+		});
+
+		it("should throw exception if expand=true and params[0] is not an array", async function() {
 			const instance=_createInstance({
 				params: [1, {
 					expand: true
 				}]
 			});
-			assert.throws(()=>{
-				instance._insert([0, 3]);
-			}, error=>error.message==="expecting array but found Number");
+			return instance._insert([0, 3])
+				.then(assert.notCalled)
+				.catch(error=>{
+					assert.strictEqual(error.message, "expecting array but found Number");
+				});
 		});
 	});
 

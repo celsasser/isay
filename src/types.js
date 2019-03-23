@@ -53,7 +53,7 @@
  */
 
 /**
- * @typedef {function(data:*, index:Number):*} ArrayPredicate
+ * @typedef {function(data:*, index:Number):*} MapPredicate
  */
 
 /**
