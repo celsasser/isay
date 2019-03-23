@@ -64,8 +64,19 @@ class ModuleString extends ModuleBase {
 		} else {
 			assertType(blob, "String");
 			const argument=_.get(this.params, "0", {method: "white"});
-			if(argument.constructor.name==="String" || argument.constructor.name==="RegExp") {
+			if(argument.constructor.name==="String") {
 				return blob.split(argument);
+			} else if(argument.constructor.name==="RegExp") {
+				// we consider two possibilities here:
+				// 1. they want to split on regex matches
+				// 2. they want the split to be capture groups
+				// So, if we find capture groups then we assume the latter, otherwise we split on the pattern
+				if(/[^\\]\(.+?[^\\]\)/.test(argument.source)) {
+					const match=blob.match(argument) || [];
+					return match.slice(1);
+				} else {
+					return blob.split(argument);
+				}
 			} else {
 				assertType(argument, "Object");
 				switch(argument.method) {

@@ -138,12 +138,28 @@ describe("lib.ModuleString", function() {
 			assert.deepEqual(blob, ["a", "b", "c", "d"]);
 		});
 
-		it("should split via regex", async function() {
+		it("should split via regex without capture groups", async function() {
 			const instance=_createInstance({
 					params: [/\W/]
 				}),
 				blob=await instance.split("a.b.c.d");
 			assert.deepEqual(blob, ["a", "b", "c", "d"]);
+		});
+
+		it("should return capture groups if regex includes capture groups", async function() {
+			const instance=_createInstance({
+					params: [/(\d+)\w+(\d+)(.+)/]
+				}),
+				blob=await instance.split("1a2--");
+			assert.deepEqual(blob, ["1", "2", "--"]);
+		});
+
+		it("should not split on escaped parenthesis", async function() {
+			const instance=_createInstance({
+					params: [/\(\w+\)/]
+				}),
+				blob=await instance.split("a(1)b");
+			assert.deepEqual(blob, ["a", "b"]);
 		});
 
 		it("should apply default 'delimiter' properly", async function() {
