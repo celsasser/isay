@@ -20,7 +20,7 @@ class ModuleArray extends ModuleBase {
 	 * Appends this.params[0] to blob and returns the results
 	 * @resolves data:DataBlob in this.params[0] - appended data
 	 * @resolves predicate:function():Array<*> in this.params[0]
-	 * @resolves {index:Number=blob.length, expand:boolean=false} in this.params[1]
+	 * @resolves {index:number=blob.length, expand:boolean=false} in this.params[1]
 	 * @param {DataBlob} blob
 	 * @returns {Promise<Array<DataBlob>>}
 	 * @throws {Error}
@@ -100,7 +100,7 @@ class ModuleArray extends ModuleBase {
 	 * Inserts this.params[0] into blob and returns the results
 	 * @resolves data:DataBlob in this.params[0] - inserted data
 	 * @resolves predicate:function():Array<*> in this.params[0]
-	 * @resolves {index:Number=0, expand:boolean=false} in this.params[1]
+	 * @resolves {index:number=0, expand:boolean=false} in this.params[1]
 	 * @param {DataBlob} blob
 	 * @returns {Promise<Array<DataBlob>>}
 	 * @throws {Error}
@@ -134,12 +134,12 @@ class ModuleArray extends ModuleBase {
 	 *
 	 * If there are parameters then we assume the sequence is defined by them. If not then
 	 * the configuration should be in <param>blob</param>
-	 * @resolves stopIndex:Number in (this.params[0]|blob)
-	 * @resolves startIndex:Number in this.params[0]
-	 * @resolves stopIndex:Number in this.params[1]
-	 * @resolves increment:Number in this.params[2]
+	 * @resolves stopIndex:number in (this.params[0]|blob)
+	 * @resolves startIndex:number in this.params[0]
+	 * @resolves stopIndex:number in this.params[1]
+	 * @resolves increment:number in this.params[2]
 	 * @param {DataBlob} blob
-	 * @returns {Promise<Array<Number>>}
+	 * @returns {Promise<Array<number>>}
 	 */
 	async range(blob) {
 		let increment=1,
@@ -170,7 +170,7 @@ class ModuleArray extends ModuleBase {
 
 	/**
 	 * Reduces array down to the little or big guy you make him.
-	 * @resolves predicate:function(result:*, data:*, index:Number):* in this.params[0]
+	 * @resolves predicate:function(result:*, data:*, index:number):* in this.params[0]
 	 * @resolves startingValue: in this.params[1] - defaults to []
 	 * @param {DataBlob} blob
 	 * @returns {Promise<DataBlob>}
@@ -181,8 +181,6 @@ class ModuleArray extends ModuleBase {
 			length=array.length,
 			predicate=assertPredicate(this.params[0]);
 		let result=_.get(this.params, 1, []);
-		// todo: hmmm, I think we may be digging a very deep promise.then(promise.then(promise.then...))) hole.
-		//  Think we will probably want to work a process.nextTick into our async iterations.
 		for(let index=0; index<length; index++) {
 			result= await predicate(result, array[index], index);
 		}
@@ -202,9 +200,9 @@ class ModuleArray extends ModuleBase {
 
 	/**
 	 * Takes a slice of the input array and returns the result
-	 * @resolves startIndex:Number in params[0]
-	 * @resolves stopIndex:Number in params[1]
-	 * @resolves {start:Number, stop:Number, count:Number} in params[0]
+	 * @resolves startIndex:number in params[0]
+	 * @resolves stopIndex:number in params[1]
+	 * @resolves {start:number, stop:number, count:number} in params[0]
 	 * @param {DataBlob} blob
 	 * @returns {Promise<Array<DataBlob>>}
 	 * @throws {Error}
@@ -334,7 +332,7 @@ class ModuleArray extends ModuleBase {
 	 * General purpose append/insert function for use by our public append/insert methods.
 	 * @resolves data:DataBlob in this.params[0] - inserted data
 	 * @resolves predicate:function():Array<*> in this.params[0]
-	 * @resolves {index:Number=blob.length, expand:boolean=false} in this.params[1]
+	 * @resolves {index:number=blob.length, expand:boolean=false} in this.params[1]
 	 * @param {DataBlob} blob
 	 * @param {boolean} tail - whether to default to head or tail as index point
 	 * @returns {Promise<Array<DataBlob>>}

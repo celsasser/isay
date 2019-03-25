@@ -19,7 +19,7 @@ class ModuleObject extends ModuleIO {
 	 * @resolves predicate:MapPredicate in this.params[0]
 	 * @resolves options:{recurse:boolean=false} in this.params[0]
 	 * @param {DataBlob} blob
-	 * @returns {Promise<*>}
+	 * @returns {Promise<DataBlob>}
 	 */
 	async each(blob) {
 		assertType(blob, ["Array", "Object"], {
@@ -174,7 +174,7 @@ class ModuleObject extends ModuleIO {
 	/**
 	 * Maps properties by predicate
 	 * @param {DataBlob} blob
-	 * @param {predicate:MapPredicate} predicate
+	 * @param {MapPredicate} predicate
 	 * @param {boolean} recurse
 	 * @returns {Promise<DataBlob>}
 	 */

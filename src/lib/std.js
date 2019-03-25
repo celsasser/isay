@@ -10,27 +10,34 @@ const util=require("util");
 const {ModuleBase}=require("./_base");
 
 /**
+ * todo: need to think about this guy. I made some assumptions I don't like:
+ * 1. add "\n" to all output
+ * 2. always converting to string?
+ * Do some experimentation and see what the effects are when writing: array, object, number, buffer, null, undefined, etc.
+ */
+
+/**
  * Basic stdio support
  * @typedef {ModuleBase} ModuleStd
  */
 class ModuleStd extends ModuleBase {
 	/**
 	 * Writes output to stderr
-	 * @param {Object} data
+	 * @param {DataBlob} blob
 	 * @returns {Promise<DataBlob>}
 	 */
-	async error(data) {
+	async error(blob) {
 		const writer=util.promisify(process.stderr.write.bind(process.stderr));
-		return writer(`${this._inputToString(data)}\n`)
-			.then(Promise.resolve.bind(Promise, data));
+		return writer(`${this._inputToString(blob)}\n`)
+			.then(Promise.resolve.bind(Promise, blob));
 	}
 
 	/**
-	 * "stdin?" you may be wondering. Well, not exactly. It is simply another way for you to introduce data (most likely in memory) into a chain.
+	 * "stdin?" you may be wondering. Well, not exactly. It is simply another way for you to introduce data into a chain.
 	 * You may think of it a pipe or file redirection in the shell world.
 	 * Note: There probably are not may use cases at the top but it can be useful when you are working with an embedded chain.
-	 * @resolves result:* in this.params[0]
-	 * @returns {Promise<*>}
+	 * @resolves result:DataBlob in this.params[0]
+	 * @returns {Promise<DataBlob>}
 	 */
 	async in() {
 		return this.params[0];
@@ -38,13 +45,13 @@ class ModuleStd extends ModuleBase {
 
 	/**
 	 * Writes output to stdout
-	 * @param {Object} data
+	 * @param {DataBlob} blob
 	 * @returns {Promise<DataBlob>}
 	 */
-	async out(data) {
+	async out(blob) {
 		const writer=util.promisify(process.stdout.write.bind(process.stdout));
-		return writer(`${this._inputToString(data)}\n`)
-			.then(Promise.resolve.bind(Promise, data));
+		return writer(`${this._inputToString(blob)}\n`)
+			.then(Promise.resolve.bind(Promise, blob));
 	}
 
 	/**************** Private Interface ****************/

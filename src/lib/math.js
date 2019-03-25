@@ -15,8 +15,8 @@ const {assertType}=require("./_data");
 class ModuleMath extends ModuleBase {
 	/**
 	 * Adds whatever is in this.params[0], provided it is a number, to the incoming <param>input</param>
-	 * @param {Number|Array<Number>} input
-	 * @returns {Promise<(Number|Array<Number>)>}
+	 * @param {number|Array<number>} input
+	 * @returns {Promise<(number|Array<number>)>}
 	 */
 	async add(input) {
 		return this._applyBinary(input, (a, b)=>a+b);
@@ -24,8 +24,8 @@ class ModuleMath extends ModuleBase {
 
 	/**
 	 * Applies ceiling to the incoming <param>input</param>
-	 * @param {Number|Array<Number>} input
-	 * @returns {Promise<(Number|Array<Number>)>}
+	 * @param {number|Array<number>} input
+	 * @returns {Promise<(number|Array<number>)>}
 	 */
 	async ceiling(input) {
 		return this._applyUnary(input, Math.ceil);
@@ -33,8 +33,8 @@ class ModuleMath extends ModuleBase {
 
 	/**
 	 * Divides incoming <param>input</param> from whatever is in this.params[0] provided it is a number
-	 * @param {Number|Array<Number>} input
-	 * @returns {Promise<(Number|Array<Number>)>}
+	 * @param {number|Array<number>} input
+	 * @returns {Promise<(number|Array<number>)>}
 	 */
 	async divide(input) {
 		return this._applyBinary(input, (a, b)=>a/b);
@@ -42,7 +42,7 @@ class ModuleMath extends ModuleBase {
 
 	/**
 	 * Calculates floor(input/params[0]) and input%params[0]. It incoming <param>input</param> from whatever is in this.params[0] provided it is a number
-	 * @param {Number|Array<Number>} input
+	 * @param {number|Array<number>} input
 	 * @returns {Promise<([div, mod]|Array<[div, mod]>)>}
 	 */
 	async divmod(input) {
@@ -64,8 +64,8 @@ class ModuleMath extends ModuleBase {
 
 	/**
 	 * Applies floor to the incoming <param>input</param>
-	 * @param {Number|Array<Number>} input
-	 * @returns {Promise<(Number|Array<Number>)>}
+	 * @param {number|Array<number>} input
+	 * @returns {Promise<(number|Array<number>)>}
 	 */
 	async floor(input) {
 		return this._applyUnary(input, Math.floor);
@@ -73,8 +73,8 @@ class ModuleMath extends ModuleBase {
 
 	/**
 	 * Returns the largest number in the <param>input</param> sequence
-	 * @param {Array<Number>} input
-	 * @returns {Promise<Number>}
+	 * @param {Array<number>} input
+	 * @returns {Promise<number>}
 	 */
 	async max(input) {
 		assertType(input, "Array");
@@ -83,8 +83,8 @@ class ModuleMath extends ModuleBase {
 
 	/**
 	 * Returns the smallest number in the <param>input</param> sequence
-	 * @param {Array<Number>} input
-	 * @returns {Promise<Number>}
+	 * @param {Array<number>} input
+	 * @returns {Promise<number>}
 	 */
 	async min(input) {
 		assertType(input, "Array");
@@ -93,8 +93,8 @@ class ModuleMath extends ModuleBase {
 
 	/**
 	 * Multiplies incoming <param>input</param> from whatever is in this.params[0] provided it is a number
-	 * @param {Number|Array<Number>} input
-	 * @returns {Promise<(Number|Array<Number>)>}
+	 * @param {number|Array<number>} input
+	 * @returns {Promise<(number|Array<number>)>}
 	 */
 	async multiply(input) {
 		return this._applyBinary(input, (a, b)=>a*b);
@@ -102,8 +102,8 @@ class ModuleMath extends ModuleBase {
 
 	/**
 	 * Rounds the incoming <param>input</param>
-	 * @param {Number|Array<Number>} input
-	 * @returns {Promise<(Number|Array<Number>)>}
+	 * @param {number|Array<number>} input
+	 * @returns {Promise<(number|Array<number>)>}
 	 */
 	async round(input) {
 		return this._applyUnary(input, Math.round);
@@ -111,8 +111,8 @@ class ModuleMath extends ModuleBase {
 
 	/**
 	 * Subtracts whatever is in this.params[0], provided it is a number, from the incoming <param>input</param>
-	 * @param {Number|Array<Number>} input
-	 * @returns {Promise<(Number|Array<Number>)>}
+	 * @param {number|Array<number>} input
+	 * @returns {Promise<(number|Array<number>)>}
 	 */
 	async subtract(input) {
 		return this._applyBinary(input, (a, b)=>a-b);
@@ -121,8 +121,8 @@ class ModuleMath extends ModuleBase {
 	/********************* Private Interface *********************/
 	/**
 	 * Applies operation to either the <param>input</param> and params[0] or to the sequence of <param>input</param>
-	 * @param {Number|Array<Number>} input
-	 * @param {function(a:Number):Number} operation
+	 * @param {number|Array<number>} input
+	 * @param {function(a:number):number} operation
 	 * @return {number}
 	 * @throws {Error}
 	 * @private
@@ -136,8 +136,8 @@ class ModuleMath extends ModuleBase {
 
 	/**
 	 * Applies operator either the <param>input</param> and params[0] or to the sequence of <param>input</param>
-	 * @param {Number|Array<Number>} input
-	 * @param {function(a:Number,b:Number):Number} operator
+	 * @param {number|Array<number>} input
+	 * @param {function(a:number,b:number):number} operator
 	 * @return {number}
 	 * @throws {Error}
 	 * @private
