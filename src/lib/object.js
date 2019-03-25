@@ -35,46 +35,44 @@ class ModuleObject extends ModuleIO {
 	 * Allows one to transform the object in <param>blob</param> via:
 	 * - predicate function: blob may be of any type
 	 * - or array of directions indicating what to take or how to map properties: blob must be object or array
-	 * @resolves (predicate:ActionPredicate|(Array<string>|{from:string,to:string}>)) in this.params[0]
-	 * @resolves options:{flatten:false} in this.params[1]
+	 * @resolves (predicate:function(value:*,key:string):*|(Array<string>|Array<{from:string,to:string}>)) in this.params[0]
+	 * @resolves options:{flatten:false,recurse:false} in this.params[1]
 	 * @param {DataBlob} blob
 	 * @returns {Promise<DataBlob>}
 	 */
 	async map(blob) {
+		assertType(blob, ["Array", "Object"], {
+			allowNull: true,
+			allowUndefined: true
+		});
 		assertType(this.params[0], ["Array", "Function"]);
-		if(typeof(this.params[0])==="function") {
+		assertType(this.params[1], "Object", {
+			allowNull: true,
+			allowUndefined: true
+		});
+		const {
+			flatten=false,
+			recurse=false
+		}=(this.params[1] || {});
+
+		if(typeof (this.params[0])==="function") {
 			const predicate=assertPredicate(this.params[0]);
-			return predicate(blob);
+			return this._mapByPredicate(blob, predicate, recurse);
 		} else {
-			assertType(blob, ["Array", "Object"], {
-				allowNull: true,
-				allowUndefined: true
-			});
-			const flatten=_.get(this.params[1], "flatten", false);
-			// The following is standard but also supports some non-standard "pick" functionality.
-			// It includes support for remapping paths. And it also allows one to flatten arrays.
-			return this.params[0].reduce((result, path)=>{
-				assertType(path, ["String", "Object"]);
-				if(typeof(path)==="string") {
-					const value=_.get(blob, path);
-					if(value!==undefined) {
-						if(flatten) {
-							// take the array indexes out of the path causing the path to be "flat"
-							path=path.replace(/^\d+\.(\d+\.?)*|\.\d+$/g, "")
-								.replace(/\.\d+\.(\d+\.?)*/g, ".");
-						}
-						_.set(result, path, value);
-					}
-				} else {
-					assertProperties(path, ["from", "to"]);
-					const value=_.get(blob, path.from);
-					if(value!==undefined) {
-						_.set(result, path.to, value);
-					}
-				}
-				return result;
-			}, {});
+			return this._mapByPaths(blob, this.params[0], flatten);
 		}
+	}
+
+	/**
+	 * Allows one to transform the object in any way they want to via a predicate: function(*):*
+	 * - or array of directions indicating what to take or how to map properties: blob must be object or array
+	 * @resolves predicate:ActionPredicate in this.params[0]
+	 * @param {DataBlob} blob
+	 * @returns {Promise<DataBlob>}
+	 */
+	async mutate(blob) {
+		const predicate=assertPredicate(this.params[0]);
+		return predicate(blob);
 	}
 
 	/**
@@ -121,6 +119,93 @@ class ModuleObject extends ModuleIO {
 			result.push(await predicate(blob[key], key));
 		}
 		return result;
+	}
+
+	/********************* Private Interface *********************/
+	/**
+	 * Finds and returns all "own" properties in object. If <param>recurse</param> is true then will go from deep to shallow
+	 * @param {*} object
+	 * @param {boolean} recurse
+	 * @param {string} prefix
+	 * @returns {Array<[string,*]>}
+	 * @private
+	 */
+	static _objectToKeyValuePairs(object, recurse=false, prefix="") {
+		let keys=_.keys(object),
+			result=[];
+		for(let index=0; index<keys.length; index++) {
+			let key=keys[index];
+			if(recurse) {
+				result=result.concat(ModuleObject._objectToKeyValuePairs(object[key], recurse, `${prefix}${key}.`));
+			}
+			result.push([`${prefix}${key}`, object[key]]);
+		}
+		return result;
+	}
+
+	/**
+	 * Maps properties by predicate
+	 * @param {DataBlob} blob
+	 * @param {function(value:*,key:string):*} predicate
+	 * @param {boolean} recurse
+	 * @returns {Promise<DataBlob>}
+	 */
+	async _mapByPredicate(blob, predicate, recurse) {
+		let result;
+		const pairs=ModuleObject._objectToKeyValuePairs(blob, recurse);
+		if(recurse===false) {
+			result=new blob.constructor;
+			for(let index=0; index<pairs.length; index++) {
+				let [key, value]=pairs[index];
+				value= await predicate(value, key);
+				_.set(result, key, value);
+			}
+		} else {
+			// he's a special needs child (and not likely to be used much). We cannot assume the same things we
+			// did for shallow cause the deeper properties will be modified before the less shallow properties.
+			result=_.clone(blob);
+			for(let index=0; index<pairs.length; index++) {
+				let [key]=pairs[index],
+					value=await predicate(_.get(result, key), key);
+				_.set(result, key, value);
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Restructures an object by from and to mapping rules
+	 * @resolves (Array<string>|Array<{from:string,to:string}>) in this.params[0]
+	 * @resolves options:{flatten:false,recurse:false} in this.params[1]
+	 * @param {DataBlob} blob
+	 * @param {(Array<string>|Array<{from:string,to:string}>)} paths
+	 * @param {boolean} flatten
+	 * @returns {Promise<DataBlob>}
+	 */
+	async _mapByPaths(blob, paths, flatten) {
+		// The following is standard but also supports some non-standard "pick" functionality.
+		// It includes support for remapping paths. And it also allows one to flatten arrays.
+		return this.params[0].reduce((result, path)=>{
+			assertType(path, ["String", "Object"]);
+			if(typeof (path)==="string") {
+				const value=_.get(blob, path);
+				if(value!==undefined) {
+					if(flatten) {
+						// take the array indexes out of the path causing the path to be "flat"
+						path=path.replace(/^\d+\.(\d+\.?)*|\.\d+$/g, "")
+							.replace(/\.\d+\.(\d+\.?)*/g, ".");
+					}
+					_.set(result, path, value);
+				}
+			} else {
+				assertProperties(path, ["from", "to"]);
+				const value=_.get(blob, path.from);
+				if(value!==undefined) {
+					_.set(result, path.to, value);
+				}
+			}
+			return result;
+		}, {});
 	}
 }
 

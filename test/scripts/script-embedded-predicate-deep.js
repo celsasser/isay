@@ -5,5 +5,5 @@
 array.range(1, 5)
 	.array.map(outter=>{
 		array.range(outter)
-			.object.map(inner=>`range(${outter})=${JSON.stringify(inner)}`)
+			.object.mutate(inner=>`range(${outter})=${JSON.stringify(inner)}`)
 	})

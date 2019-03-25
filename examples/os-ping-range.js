@@ -6,10 +6,10 @@ array.range(1, 255)
 	.array.each(function(ip4) {
 		array.range(1, 255)
 			.array.each(
-				object.map(function(ip3) {
+				object.mutate(function(ip3) {
 					return `220.168.${ip3}.${ip4}`;
 				})
-				.object.map(function(ip) {
+				.object.mutate(function(ip) {
 					os.ping(`-c 1 -t 1 ${ip}`)
 						.std.out(`ping ${ip} succeeded`)
 						.error.catch(std.error(`ping ${ip} failed`))

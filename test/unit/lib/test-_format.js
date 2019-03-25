@@ -94,7 +94,7 @@ describe("lib._format", function() {
 		});
 
 		it("should return empty array if literal mismatches and not throwing errors", function() {
-			assert.deepStrictEqual(unformatMouseSpecification("spec", "encoded", {
+			assert.deepEqual(unformatMouseSpecification("spec", "encoded", {
 				exceptionOnMismatch: false
 			}), []);
 			assert.strictEqual(proxy.log.debug.callCount, 1);
@@ -109,7 +109,7 @@ describe("lib._format", function() {
 			["${04c}", "0040", ["4"]]
 		].forEach(([spec, encoding, expected])=>{
 			it(`should successfully parse single field spec (w/width)=${spec} for ${encoding}`, function() {
-				assert.deepStrictEqual(unformatMouseSpecification(spec, encoding), expected);
+				assert.deepEqual(unformatMouseSpecification(spec, encoding), expected);
 			});
 		});
 
@@ -122,7 +122,7 @@ describe("lib._format", function() {
 			["${0c}", "0040", ["4"]]
 		].forEach(([spec, encoding, expected])=>{
 			it(`should successfully parse single field spec (wo/width)=${spec} for ${encoding}`, function() {
-				assert.deepStrictEqual(unformatMouseSpecification(spec, encoding), expected);
+				assert.deepEqual(unformatMouseSpecification(spec, encoding), expected);
 			});
 		});
 
@@ -149,7 +149,7 @@ describe("lib._format", function() {
 			["${-2l}-${-2r}", "4---5", ["4", "5"]]
 		].forEach(([spec, encoding, expected])=>{
 			it(`should successfully parse complex field spec (w/width)=${spec} for ${encoding}`, function() {
-				assert.deepStrictEqual(unformatMouseSpecification(spec, encoding), expected);
+				assert.deepEqual(unformatMouseSpecification(spec, encoding), expected);
 			});
 		});
 
@@ -166,7 +166,7 @@ describe("lib._format", function() {
 			[" ${l}${-c} ", " 4 -5- ", ["4", "5"]]
 		].forEach(([spec, encoding, expected])=>{
 			it(`should successfully parse complex field spec (wo/width)=${spec} for ${encoding}`, function() {
-				assert.deepStrictEqual(unformatMouseSpecification(spec, encoding), expected);
+				assert.deepEqual(unformatMouseSpecification(spec, encoding), expected);
 			});
 		});
 
@@ -175,7 +175,7 @@ describe("lib._format", function() {
 			["${l}${l}", "44aa", ["44aa", ""]]
 		].forEach(([spec, encoding, expected])=>{
 			it(`should return wonky results due to ambiguity when no width included: spec=${spec} for ${encoding}`, function() {
-				assert.deepStrictEqual(unformatMouseSpecification(spec, encoding), expected);
+				assert.deepEqual(unformatMouseSpecification(spec, encoding), expected);
 			});
 		});
 
@@ -186,7 +186,7 @@ describe("lib._format", function() {
 			["${a.b:2l}${a.c:2l}", "4455", {a: {b: "44", c: "55"}}]
 		].forEach(([spec, encoding, expected])=>{
 			it(`should properly encode result for specs including path variables: spec=${spec}, encoding=${encoding}`, function() {
-				assert.deepStrictEqual(unformatMouseSpecification(spec, encoding), expected);
+				assert.deepEqual(unformatMouseSpecification(spec, encoding), expected);
 			});
 		});
 	});

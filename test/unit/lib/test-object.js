@@ -5,6 +5,7 @@
  * Copyright @2019 by Xraymen Inc.
  */
 
+const _=require("lodash");
 const assert=require("../../support/assert");
 const {ModuleObject}=require("../../../src/lib/object");
 
@@ -22,6 +23,62 @@ describe("lib.ModuleObject", function() {
 			params
 		});
 	}
+
+	describe("_objectToKeyValuePairs", function() {
+		it("should return empty array for null and undefined input", function() {
+			assert.deepEqual(ModuleObject._objectToKeyValuePairs(undefined, false), []);
+			assert.deepEqual(ModuleObject._objectToKeyValuePairs(undefined, true), []);
+			assert.deepEqual(ModuleObject._objectToKeyValuePairs(null, false), []);
+			assert.deepEqual(ModuleObject._objectToKeyValuePairs(null, true), []);
+		});
+
+		it("should only get top level properties of object if not recurse", function() {
+			assert.deepEqual(ModuleObject._objectToKeyValuePairs({
+				a: 1,
+				b: {
+					c: 2
+				}
+			}, false), [
+				["a", 1],
+				["b", {"c": 2}]
+			]);
+		});
+
+		it("should get all properties of object if recursing", function() {
+			assert.deepEqual(ModuleObject._objectToKeyValuePairs({
+				a: 1,
+				b: {
+					c: 2
+				}
+			}, true), [
+				["a", 1],
+				["b.c", 2],
+				["b", {"c": 2}]
+			]);
+		});
+
+		it("should only get top level properties of array if not recurse", function() {
+			assert.deepEqual(ModuleObject._objectToKeyValuePairs([
+				{a: 1},
+				{b: 2}
+			], false), [
+				["0", {"a": 1}],
+				["1", {"b": 2}]
+			]);
+		});
+
+		it("should get all properties of array if recursing", function() {
+			assert.deepEqual(ModuleObject._objectToKeyValuePairs([
+				{a: 1},
+				{b: 2}
+			], true), [
+				["0.a", 1],
+				["0", {"a": 1}],
+				["1.b", 2],
+				["1", {"b": 2}]
+			]);
+		});
+	});
 
 	describe("get", function() {
 		it("should throw exception if data is not JSON", async function() {
@@ -77,17 +134,40 @@ describe("lib.ModuleObject", function() {
 				});
 		});
 
-		it("should return the returned value of the predicate", async function() {
-			const input={a: 1},
+		it("should properly perform shallow map properties by predicate", async function() {
+			const input={a: 1, b: {c: 1}},
 				instance=_createInstance({
-					params: [object=>{
-						assert.deepEqual(object, input);
-						return "result";
+					params: [(value, key)=>{
+						assert.ok(_.includes(["a", "b"], key));
+						return key;
 					}]
 				});
 			return instance.map(input)
 				.then(result=>{
-					assert.strictEqual(result, "result");
+					assert.deepEqual(result, {a: "a", b: "b"});
+				});
+		});
+
+		it("should properly perform deep map properties by predicate", async function() {
+			const input={a: 1, b: {c: 2}},
+				instance=_createInstance({
+					params: [(value, key)=>{
+						assert.ok(_.includes(["a", "b", "c", "b.c"], key));
+						return _.isPlainObject(value)
+							? value
+							: value+1;
+					}, {
+						recurse: true
+					}]
+				});
+			return instance.map(input)
+				.then(result=>{
+					assert.deepEqual(result, {
+						"a": 2,
+						"b": {
+							"c": 3
+						}
+					});
 				});
 		});
 
@@ -124,7 +204,7 @@ describe("lib.ModuleObject", function() {
 				"b": [
 					{
 						"c": "three",
-						"d": [null, 1]
+						"d": [undefined, 1]
 					}
 				]
 			});
@@ -170,6 +250,34 @@ describe("lib.ModuleObject", function() {
 			});
 		});
 	});
+
+	describe("mutate", function() {
+		it("should throw exception if params[0] is not a function", async function() {
+			const instance=_createInstance({
+				params: ["string"]
+			});
+			return instance.mutate()
+				.then(assert.notCalled)
+				.catch(error=>{
+					assert.strictEqual(error.message, "expecting predicate but found String");
+				});
+		});
+
+		it("should return the returned value of the predicate", async function() {
+			const input={a: 1},
+				instance=_createInstance({
+					params: [object=>{
+						assert.deepEqual(object, input);
+						return "result";
+					}]
+				});
+			return instance.mutate(input)
+				.then(result=>{
+					assert.strictEqual(result, "result");
+				});
+		});
+	});
+
 
 	describe("merge", function() {
 		it("should merge json into json", async function() {

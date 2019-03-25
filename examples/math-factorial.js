@@ -6,7 +6,7 @@ array.range(1, 10)
 	.array.map(function(value) {
 		array.range(1, value+1)
 			.math.multiply()
-			.object.map(function(result) {
+			.object.mutate(function(result) {
 				return `${value}! = ${result}`;
 			})
 	})

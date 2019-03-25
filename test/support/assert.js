@@ -47,7 +47,7 @@ exports.deepEqual=function(actual, expected, {
 		}
 		actual=util.objectToData(actual, {sort: true});
 		expected=util.objectToData(expected, {sort: true});
-		assert.deepEqual(actual, expected, message);
+		assert.deepStrictEqual(actual, expected, message);
 	} catch(error) {
 		throw new Error(`assert.deepEqual() failed: actual=\n${JSON.stringify(actual, null, "\t")}`);
 	}

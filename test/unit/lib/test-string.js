@@ -215,7 +215,7 @@ describe("lib.ModuleString", function() {
 					}]
 				}),
 				result=await instance.split(" a b");
-			assert.deepStrictEqual(result, ["a", "b"]);
+			assert.deepEqual(result, ["a", "b"]);
 		});
 	});
 

@@ -7,7 +7,7 @@ array.range(1, 3)
 	.array.each(function(outter) {
 		array.range(1, 3)
 			.array.each(
-				object.map(function(inner) {
+				object.mutate(function(inner) {
 					return `${outter}.${inner}`;
 				})
 				.std.out()

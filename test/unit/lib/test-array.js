@@ -85,7 +85,7 @@ describe("lib.ModuleArray", function() {
 			});
 			return instance._insert([0], true)
 				.then(result=>{
-					assert.deepStrictEqual(result, [0, 1]);
+					assert.deepEqual(result, [0, 1]);
 				});
 		});
 
@@ -95,7 +95,7 @@ describe("lib.ModuleArray", function() {
 			});
 			return instance._insert([0], false)
 				.then(result=>{
-					assert.deepStrictEqual(result, [1, 0]);
+					assert.deepEqual(result, [1, 0]);
 				});
 		});
 
@@ -105,7 +105,7 @@ describe("lib.ModuleArray", function() {
 			});
 			return instance._insert([0], true)
 				.then(result=>{
-					assert.deepStrictEqual(result, [0, 1, 2]);
+					assert.deepEqual(result, [0, 1, 2]);
 				});
 		});
 
@@ -115,7 +115,7 @@ describe("lib.ModuleArray", function() {
 			});
 			return instance._insert([0], false)
 				.then(result=>{
-					assert.deepStrictEqual(result, [1, 2, 0]);
+					assert.deepEqual(result, [1, 2, 0]);
 				});
 		});
 
@@ -125,7 +125,7 @@ describe("lib.ModuleArray", function() {
 			});
 			return instance._insert([0, 2])
 				.then(result=>{
-					assert.deepStrictEqual(result, [0, [1], 2]);
+					assert.deepEqual(result, [0, [1], 2]);
 				});
 		});
 
@@ -141,7 +141,7 @@ describe("lib.ModuleArray", function() {
 				});
 				return instance._insert([0, 2])
 					.then(result=>{
-						assert.deepStrictEqual(result, expected);
+						assert.deepEqual(result, expected);
 					});
 			});
 		});
@@ -161,7 +161,7 @@ describe("lib.ModuleArray", function() {
 				});
 				return instance._insert([0, 3])
 					.then(result=>{
-						assert.deepStrictEqual(result, expected);
+						assert.deepEqual(result, expected);
 					});
 			});
 		});
@@ -175,7 +175,7 @@ describe("lib.ModuleArray", function() {
 			});
 			return instance._insert([0, 1])
 				.then(result=>{
-					assert.deepStrictEqual(result, [0, 1, 2]);
+					assert.deepEqual(result, [0, 1, 2]);
 				});
 		});
 
@@ -190,7 +190,7 @@ describe("lib.ModuleArray", function() {
 			});
 			return instance._insert([0, 1])
 				.then(result=>{
-					assert.deepStrictEqual(result, [0, 1, 2, 3]);
+					assert.deepEqual(result, [0, 1, 2, 3]);
 				});
 		});
 
@@ -247,7 +247,7 @@ describe("lib.ModuleArray", function() {
 			});
 			return instance.append([0])
 				.then(result=>{
-					assert.deepStrictEqual(result, [0, 1]);
+					assert.deepEqual(result, [0, 1]);
 				});
 		});
 	});
@@ -267,7 +267,7 @@ describe("lib.ModuleArray", function() {
 			});
 			return instance.insert([0])
 				.then(result=>{
-					assert.deepStrictEqual(result, [1, 0]);
+					assert.deepEqual(result, [1, 0]);
 				});
 		});
 	});
@@ -461,7 +461,7 @@ describe("lib.ModuleArray", function() {
 			const instance=_createInstance();
 			return instance.slice([1])
 				.then(result=>{
-					assert.deepStrictEqual(result, [1]);
+					assert.deepEqual(result, [1]);
 				});
 		});
 
@@ -484,7 +484,7 @@ describe("lib.ModuleArray", function() {
 				});
 				return instance.slice(input)
 					.then(result=>{
-						assert.deepStrictEqual(result, input.slice(start));
+						assert.deepEqual(result, input.slice(start));
 					});
 			});
 		});
@@ -497,7 +497,7 @@ describe("lib.ModuleArray", function() {
 				});
 				return instance.slice(input)
 					.then(result=>{
-						assert.deepStrictEqual(result, input.slice(0, stop));
+						assert.deepEqual(result, input.slice(0, stop));
 					});
 			});
 		});
@@ -516,7 +516,7 @@ describe("lib.ModuleArray", function() {
 				});
 				return instance.slice(input)
 					.then(result=>{
-						assert.deepStrictEqual(result, expected);
+						assert.deepEqual(result, expected);
 					});
 			});
 		});
@@ -534,7 +534,7 @@ describe("lib.ModuleArray", function() {
 				});
 				return instance.slice(input)
 					.then(result=>{
-						assert.deepStrictEqual(result, expected);
+						assert.deepEqual(result, expected);
 					});
 			});
 		});
@@ -574,7 +574,7 @@ describe("lib.ModuleArray", function() {
 				});
 				return instance.slice(input)
 					.then(result=>{
-						assert.deepStrictEqual(result, expected);
+						assert.deepEqual(result, expected);
 					});
 			});
 		});
