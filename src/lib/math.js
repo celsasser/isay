@@ -123,7 +123,7 @@ class ModuleMath extends ModuleBase {
 	 * Applies operation to either the <param>input</param> and params[0] or to the sequence of <param>input</param>
 	 * @param {Number|Array<Number>} input
 	 * @param {function(a:Number):Number} operation
-	 * @return {Number}
+	 * @return {number}
 	 * @throws {Error}
 	 * @private
 	 */
@@ -138,7 +138,7 @@ class ModuleMath extends ModuleBase {
 	 * Applies operator either the <param>input</param> and params[0] or to the sequence of <param>input</param>
 	 * @param {Number|Array<Number>} input
 	 * @param {function(a:Number,b:Number):Number} operator
-	 * @return {Number}
+	 * @return {number}
 	 * @throws {Error}
 	 * @private
 	 */

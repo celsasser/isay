@@ -144,7 +144,7 @@ class ModuleBase {
 	/**
 	 * Formats data for verbose or debug presentation. It is assumed that <param>data</param> was received as input or param data.
 	 * @param {*} data
-	 * @param {Number} max
+	 * @param {number} max
 	 * @returns {string}
 	 * @private
 	 */
@@ -185,7 +185,7 @@ class ModuleBase {
 	/**
 	 * Debug information. More detail than verbose and includes params.
 	 * @param {DataBlob} data
-	 * @param {Number} max - max length
+	 * @param {number} max - max length
 	 * @returns {{input:string, params:Array<string>}}
 	 * @private
 	 */
@@ -201,7 +201,7 @@ class ModuleBase {
 	/**
 	 * Allows modules to return more detailed info, where appropriate, for detailed logging.
 	 * @param {DataBlob} data
-	 * @param {Number} max - max length
+	 * @param {number} max - max length
 	 * @returns {{input:string}}
 	 * @private
 	 */

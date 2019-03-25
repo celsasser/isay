@@ -14,6 +14,34 @@ const {assertPredicate, assertProperties, assertType}=require("./_data");
  */
 class ModuleObject extends ModuleIO {
 	/**
+	 * Calls predicate for each key/value pair in the object. By default it does not recurse into objects but you may
+	 * override this behavior with the <code>recurse</code> option.
+	 * @resolves predicate:MapPredicate in this.params[0]
+	 * @resolves options:{recurse:boolean=false} in this.params[0]
+	 * @param {DataBlob} blob
+	 * @returns {Promise<*>}
+	 */
+	async each(blob) {
+		assertType(blob, ["Array", "Object"], {
+			allowNull: true,
+			allowUndefined: true
+		});
+		assertType(this.params[1], "Object", {
+			allowNull: true,
+			allowUndefined: true
+		});
+		const predicate=assertPredicate(this.params[0]), {
+				recurse=false
+			}=(this.params[1] || {}),
+			pairs=ModuleObject._objectToKeyValuePairs(blob, recurse);
+		for(let index=0; index<pairs.length; index++) {
+			let [key, value]=pairs[index];
+			await predicate(value, key);
+		}
+		return blob;
+	}
+
+	/**
 	 * Gets value at property path
 	 * @resolves path:(string|undefined) in this.params[0]
 	 * @param {DataBlob} blob
@@ -35,7 +63,7 @@ class ModuleObject extends ModuleIO {
 	 * Allows one to transform the object in <param>blob</param> via:
 	 * - predicate function: blob may be of any type
 	 * - or array of directions indicating what to take or how to map properties: blob must be object or array
-	 * @resolves (predicate:function(value:*,key:string):*|(Array<string>|Array<{from:string,to:string}>)) in this.params[0]
+	 * @resolves (predicate:MapPredicate|Array<string>|Array<{from:string,to:string}>) in this.params[0]
 	 * @resolves options:{flatten:false,recurse:false} in this.params[1]
 	 * @param {DataBlob} blob
 	 * @returns {Promise<DataBlob>}
@@ -146,7 +174,7 @@ class ModuleObject extends ModuleIO {
 	/**
 	 * Maps properties by predicate
 	 * @param {DataBlob} blob
-	 * @param {function(value:*,key:string):*} predicate
+	 * @param {predicate:MapPredicate} predicate
 	 * @param {boolean} recurse
 	 * @returns {Promise<DataBlob>}
 	 */

@@ -6,6 +6,7 @@
  */
 
 const _=require("lodash");
+const sinon=require("sinon");
 const assert=require("../../support/assert");
 const {ModuleObject}=require("../../../src/lib/object");
 
@@ -80,8 +81,84 @@ describe("lib.ModuleObject", function() {
 		});
 	});
 
+	describe("each", function() {
+		it("should throw exception if data is an unsupported type", async function() {
+			const instance=_createInstance({
+				params: [_.noop]
+			});
+			return instance.each("string")
+				.then(assert.notCalled)
+				.catch(error=>{
+					assert.strictEqual(error.message, "expecting Array or Object but found String");
+				});
+		});
+
+		it("should throw exception if params[0] is not a predicate", async function() {
+			const instance=_createInstance({
+				params: ["string"]
+			});
+			return instance.each({})
+				.then(assert.notCalled)
+				.catch(error=>{
+					assert.strictEqual(error.message, "expecting predicate but found String");
+				});
+		});
+
+		it("should throw exception if params[1] is an unsupported type", async function() {
+			const instance=_createInstance({
+				params: [_.noop, "string"]
+			});
+			return instance.each({})
+				.then(assert.notCalled)
+				.catch(error=>{
+					assert.strictEqual(error.message, "expecting Object but found String");
+				});
+		});
+
+		it("should iterate over all shallow properties by default", async function() {
+			const input={
+					a: 1,
+					b: {
+						c: 3
+					}
+				},
+				spy=sinon.spy(),
+				instance=_createInstance({
+					params: [spy]
+				});
+			return instance.each(input)
+				.then(result=>{
+					assert.strictEqual(result, input);
+					assert.deepEqual(spy.getCall(0).args, [input.a, "a"]);
+					assert.deepEqual(spy.getCall(1).args, [input.b, "b"]);
+				});
+		});
+
+		it("should iterate over all shallow properties by default", async function() {
+			const input={
+					a: 1,
+					b: {
+						c: 3
+					}
+				},
+				spy=sinon.spy(),
+				instance=_createInstance({
+					params: [spy, {
+						recurse: true
+					}]
+				});
+			return instance.each(input)
+				.then(result=>{
+					assert.strictEqual(result, input);
+					assert.deepEqual(spy.getCall(0).args, [input.a, "a"]);
+					assert.deepEqual(spy.getCall(1).args, [input.b.c, "b.c"]);
+					assert.deepEqual(spy.getCall(2).args, [input.b, "b"]);
+				});
+		});
+	});
+
 	describe("get", function() {
-		it("should throw exception if data is not JSON", async function() {
+		it("should throw exception if data is an unsupported type", async function() {
 			const instance=_createInstance();
 			return instance.get("string")
 				.then(assert.notCalled)

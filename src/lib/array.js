@@ -292,7 +292,7 @@ class ModuleArray extends ModuleBase {
 	/**
 	 * Works with python style negative indexes. If <param>index</param>=0 then returns index
 	 * @param {Array<*>} array
-	 * @param {Number} index
+	 * @param {number} index
 	 * @param {boolean} isStart - if the index is negative and out range then we set it to high or
 	 *    low depending on how it is being used as a from-start index or from-end reference.
 	 * @returns {number}
