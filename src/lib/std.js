@@ -10,25 +10,36 @@ const util=require("util");
 const {ModuleBase}=require("./_base");
 
 /**
- * todo: need to think about this guy. I made some assumptions I don't like:
- * 1. add "\n" to all output
- * 2. always converting to string?
- * Do some experimentation and see what the effects are when writing: array, object, number, buffer, null, undefined, etc.
- */
-
-/**
- * Basic stdio support
+ * stdio support. NodeJS process.stdout and process.stderr only support text and buffers. So we only ever attempt
+ * to write those two data types.  Within those constraints we support two different flavors of output:
+ * - error|out: convert to a string if the type is not a buffer or string but do nothing more.
+ * - errorln|outln - always converts to a string and always appends a newline.
  * @typedef {ModuleBase} ModuleStd
  */
 class ModuleStd extends ModuleBase {
 	/**
-	 * Writes output to stderr
+	 * Writes to stderr. Only ensures that data is text or a buffer. Assumes compact formatting of objects.
+	 * @resolves output:* in this.params[0]
+	 * @resolves output:* in blob
 	 * @param {DataBlob} blob
 	 * @returns {Promise<DataBlob>}
 	 */
 	async error(blob) {
 		const writer=util.promisify(process.stderr.write.bind(process.stderr));
-		return writer(`${this._inputToString(blob)}\n`)
+		return writer(this._inputToRaw(this._getInput(blob)))
+			.then(Promise.resolve.bind(Promise, blob));
+	}
+
+	/**
+	 * Writes to stderr. Always converts to text and always adds a newline. Assumes spacious formatting of objects.
+	 * @resolves output:* in this.params[0]
+	 * @resolves output:* in blob
+	 * @param {DataBlob} blob
+	 * @returns {Promise<DataBlob>}
+	 */
+	async errorln(blob) {
+		const writer=util.promisify(process.stderr.write.bind(process.stderr));
+		return writer(`${this._inputToString(this._getInput(blob))}\n`)
 			.then(Promise.resolve.bind(Promise, blob));
 	}
 
@@ -44,33 +55,73 @@ class ModuleStd extends ModuleBase {
 	}
 
 	/**
-	 * Writes output to stdout
+	 * Writes output to stdout. Only ensures that data is text or a buffer. Assumes compact formatting of objects.
+	 * @resolves output:* in this.params[0]
+	 * @resolves output:* in blob
 	 * @param {DataBlob} blob
 	 * @returns {Promise<DataBlob>}
 	 */
 	async out(blob) {
 		const writer=util.promisify(process.stdout.write.bind(process.stdout));
-		return writer(`${this._inputToString(blob)}\n`)
+		return writer(this._inputToRaw(this._getInput(blob)))
+			.then(Promise.resolve.bind(Promise, blob));
+	}
+
+	/**
+	 * Writes output to stdout. Always converts to text and always adds a newline. Assumes spacious formatting of objects.
+	 * @resolves output:* in this.params[0]
+	 * @resolves output:* in blob
+	 * @param {DataBlob} blob
+	 * @returns {Promise<DataBlob>}
+	 */
+	async outln(blob) {
+		const writer=util.promisify(process.stdout.write.bind(process.stdout));
+		return writer(`${this._inputToString(this._getInput(blob))}\n`)
 			.then(Promise.resolve.bind(Promise, blob));
 	}
 
 	/**************** Private Interface ****************/
 	/**
-	 * We want to be able to write data coming from params or data received as input. Here we stick to our rules (see readme.md):
-	 * - if the user has specified an argument then we use it. And only assume that there is one.
-	 * - otherwise we use the blob and make sure
-	 * Whichever is chosen - we render it as a string if it is not one already
-	 * @param {DataBlob} data
+	 * We want to be able to write data coming from params as well as input data. But we are not going to
+	 * ever try and figure out how the two should be mixed. So, we always chose one (if we have a choice)
+	 * and we stick to our rules (see readme.md):
+	 * - if the user has specified one or more arguments then we use it/them.
+	 * - otherwise we use the input blob
+	 * @param {DataBlob} blob
+	 * @returns {DataBlob}
+	 * @private
+	 */
+	_getInput(blob) {
+		return (this.params.length===0)
+			? blob
+			: (this.params.length===1)
+				? this.params[0]
+				: this.params;
+	}
+
+	/**
+	 * Make sure it is a buffer or string. If neither then it is converted to a string.
+	 * @param {DataBlob} input
+	 * @param {boolean} compact
+	 * @returns {Buffer|string}
+	 * @private
+	 */
+	_inputToRaw(input, compact=true) {
+		if(Buffer.isBuffer(input)) {
+			return input;
+		} else {
+			return this._inputToString(input, compact);
+		}
+	}
+
+	/**
+	 * Accepts any type and returns a string.
+	 * @param {DataBlob} input
 	 * @param {boolean} compact
 	 * @returns {string}
 	 * @private
 	 */
-	_inputToString(data, compact=false) {
-		const input=(this.params.length===0)
-			? data
-			: (this.params.length===1)
-				? this.params[0]
-				: this.params;
+	_inputToString(input, compact=false) {
 		if(_.isObject(input)) {
 			return (compact)
 				? JSON.stringify(input)
