@@ -10,6 +10,6 @@ array.range(1, 3)
 				object.mutate(function(inner) {
 					return `${outter}.${inner}`;
 				})
-				.std.out()
+				.std.outln()
 			)
 	})

@@ -5,7 +5,7 @@
 
 std.in([1, 2])
 	.array.map(value=>{
-		std.out(value)
+		std.outln(value)
 			.error.throw(`throw+${value}`)
 			.error.catch(value+1)
 	})

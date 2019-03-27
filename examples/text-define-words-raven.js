@@ -26,4 +26,4 @@ file.read("./examples/data/the-raven.txt")
 				{from: "0.shortdef.0", to: "definition"}
 			])
 	})
-	.std.out()
+	.std.outln()

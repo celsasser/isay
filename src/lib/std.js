@@ -10,16 +10,16 @@ const util=require("util");
 const {ModuleBase}=require("./_base");
 
 /**
- * stdio support. NodeJS process.stdout and process.stderr only support text and buffers. So we only ever attempt
+ * stdio support. NodeJS process.stdout and process.stderr support text and buffers. So we only ever attempt
  * to write those two data types.  Within those constraints we support two different flavors of output:
  * - error|out: convert to a string if the type is not a buffer or string but do nothing more.
- * - errorln|outln - always converts to a string and always appends a newline.
+ * - errorln|outln - ALWAYS converts to a string, spacious formatting of objects and always appends a newline.
  * @typedef {ModuleBase} ModuleStd
  */
 class ModuleStd extends ModuleBase {
 	/**
 	 * Writes to stderr. Only ensures that data is text or a buffer. Assumes compact formatting of objects.
-	 * @resolves output:* in this.params[0]
+	 * @resolves output:* in this.params[0..n]
 	 * @resolves output:* in blob
 	 * @param {DataBlob} blob
 	 * @returns {Promise<DataBlob>}
@@ -32,7 +32,8 @@ class ModuleStd extends ModuleBase {
 
 	/**
 	 * Writes to stderr. Always converts to text and always adds a newline. Assumes spacious formatting of objects.
-	 * @resolves output:* in this.params[0]
+	 * Note: I borrowed the naming convention from java. Not crazy about it but want to keep it close to raw's "error"
+	 * @resolves output:* in this.params[0..n]
 	 * @resolves output:* in blob
 	 * @param {DataBlob} blob
 	 * @returns {Promise<DataBlob>}
@@ -56,7 +57,7 @@ class ModuleStd extends ModuleBase {
 
 	/**
 	 * Writes output to stdout. Only ensures that data is text or a buffer. Assumes compact formatting of objects.
-	 * @resolves output:* in this.params[0]
+	 * @resolves output:* in this.params[0..n]
 	 * @resolves output:* in blob
 	 * @param {DataBlob} blob
 	 * @returns {Promise<DataBlob>}
@@ -69,7 +70,8 @@ class ModuleStd extends ModuleBase {
 
 	/**
 	 * Writes output to stdout. Always converts to text and always adds a newline. Assumes spacious formatting of objects.
-	 * @resolves output:* in this.params[0]
+	 * Note: I borrowed the naming convention from java. Not crazy about it but want to keep it close to raw's "out"
+	 * @resolves output:* in this.params[0..n]
 	 * @resolves output:* in blob
 	 * @param {DataBlob} blob
 	 * @returns {Promise<DataBlob>}
@@ -122,7 +124,9 @@ class ModuleStd extends ModuleBase {
 	 * @private
 	 */
 	_inputToString(input, compact=false) {
-		if(_.isObject(input)) {
+		if(Buffer.isBuffer(input)) {
+			return input.toString("utf8");
+		} else if(_.isObject(input)) {
 			return (compact)
 				? JSON.stringify(input)
 				: JSON.stringify(input, null, "\t");

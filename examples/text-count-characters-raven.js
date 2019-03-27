@@ -19,4 +19,4 @@ file.read("./examples/data/the-raven.txt")
 		}
 	})
 	.array.sort(["-count", "character"])
-	.std.out()
+	.std.outln()

@@ -10,4 +10,4 @@ array.range(1, 10)
 				return `${value}! = ${result}`;
 			})
 	})
-	.std.out()
+	.std.outln()

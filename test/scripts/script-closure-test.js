@@ -6,4 +6,4 @@ std.in({name: "George"})
 		std.in({age: 4})
 			object.merge(data)
 	})
-	.std.out();
+	.std.outln();

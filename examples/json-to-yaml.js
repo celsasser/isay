@@ -7,4 +7,4 @@
 
 json.read("./examples/data/pets.json")
 	.yaml.stringify({sort: true})
-	.std.out()
+	.std.outln()

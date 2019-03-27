@@ -9,4 +9,4 @@ json.read("./test/data/data-pets.json")
 				inserted: "data"
 			})
 	})
-	.std.out()
+	.std.outln()

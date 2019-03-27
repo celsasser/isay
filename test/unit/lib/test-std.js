@@ -30,20 +30,68 @@ describe("lib.ModuleStd", function() {
 
 	[
 		[process.stderr, "error"],
-		[process.stdout, "out"],
+		[process.stdout, "out"]
 	].forEach(([stream, method])=>{
 		describe(method, function() {
-			it("should properly write data to stderr and return input data", async function() {
-				const instance=_createInstance();
-				proxy.stub(stream, "write", async function(text, callback) {
-					assert.strictEqual(text, "test\n");
-					process.nextTick(callback);
-				});
-				return instance[method]("test")
-					.then(result=>{
-						assert.strictEqual(result, "test");
-						assert.strictEqual(stream.write.callCount, 1);
+			const buffer=Buffer.from("buffer"),
+				object={a: 1, b: 2};
+			[
+				["string", "string"],
+				[5150, "5150"],
+				[[1, 2, 3], "[1,2,3]"],
+				[buffer, buffer],
+				[object, JSON.stringify(object)]
+			].forEach(([input, expected])=>{
+				it(`should properly write ${input.constructor.name} to stderr and return input data`, async function() {
+					const instance=_createInstance();
+					proxy.stub(stream, "write", async function(output, callback) {
+						try {
+							assert.strictEqual(output, expected);
+							process.nextTick(callback);
+						} catch(error) {
+							process.nextTick(callback, error);
+						}
 					});
+					return instance[method](input)
+						.then(result=>{
+							assert.strictEqual(result, input);
+							assert.strictEqual(stream.write.callCount, 1);
+						});
+				});
+			});
+		});
+	});
+
+	[
+		[process.stderr, "errorln"],
+		[process.stdout, "outln"]
+	].forEach(([stream, method])=>{
+		describe(method, function() {
+			const buffer=Buffer.from("buffer"),
+				object={a: 1, b: 2};
+			[
+				["string", "string\n"],
+				[5150, "5150\n"],
+				[[1, 2], "[\n\t1,\n\t2\n]\n"],
+				[buffer, "buffer\n"],
+				[object, JSON.stringify(object, null, "\t")+"\n"]
+			].forEach(([input, expected])=>{
+				it(`should properly write ${input.constructor.name} to stderr and return input data`, async function() {
+					const instance=_createInstance();
+					proxy.stub(stream, "write", async function(output, callback) {
+						try {
+							assert.strictEqual(output, expected);
+							process.nextTick(callback);
+						} catch(error) {
+							process.nextTick(callback, error);
+						}
+					});
+					return instance[method](input)
+						.then(result=>{
+							assert.strictEqual(result, input);
+							assert.strictEqual(stream.write.callCount, 1);
+						});
+				});
 			});
 		});
 	});

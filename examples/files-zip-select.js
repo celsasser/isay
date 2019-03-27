@@ -10,5 +10,5 @@
 os.find(".")
 	.string.split({method: "newline"})
 	.array.filter(is.startsWith(["./res", "./src", "./test"]))
-	.std.out()
+	.std.outln()
 	.file.zip("./tmp/build")

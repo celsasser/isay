@@ -23,4 +23,4 @@ json.read("./examples/data/pets.json")
 	.array.map(function(element, index) {
 		return {index, ...element}
 	})
-	.std.out()
+	.std.outln()

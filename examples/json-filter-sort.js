@@ -11,4 +11,4 @@ json.read("./examples/data/pets.json")
 		return pet.species==="dog";
 	})
 	.array.sort("name")
-	.std.out()
+	.std.outln()

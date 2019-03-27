@@ -7,4 +7,4 @@
 
 json.read("./examples/data/pets.json")
 	.json.stringify({compact: false})
-	.std.out()
+	.std.outln()

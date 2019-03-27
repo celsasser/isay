@@ -3,4 +3,4 @@
  */
 json.read("./test/data/data-pet.json")
 	.object.set("helen", {type: "cat"})
-	.std.out()
+	.std.outln()

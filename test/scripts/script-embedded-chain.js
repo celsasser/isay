@@ -10,4 +10,4 @@ json.read("./test/data/data-pets.json")
 			link2: "link2"
 		})
 	)
-	.std.out()
+	.std.outln()
