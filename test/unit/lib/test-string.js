@@ -194,10 +194,10 @@ describe("lib.ModuleString", function() {
 			assert.deepEqual(blob, ["'a", "b'"]);
 		});
 
-		it("should raise exception if method='unformat' and format is missing from configuration", async function() {
+		it("should raise exception if method='format' and format is missing from configuration", async function() {
 			const instance=_createInstance({
 				params: [{
-					method: "unformat"
+					method: "format"
 				}]
 			});
 			return instance.split(" a b")
@@ -207,15 +207,38 @@ describe("lib.ModuleString", function() {
 				});
 		});
 
-		it("should forward method='unformat' to unformatMouseSpecification if requirements satisified", async function() {
+		it("should forward method='format' to unformatMouseSpecification if requirements satisified", async function() {
 			const instance=_createInstance({
 					params: [{
 						format: "${2r}${2r}",
-						method: "unformat"
+						method: "format"
 					}]
 				}),
 				result=await instance.split(" a b");
 			assert.deepEqual(result, ["a", "b"]);
+		});
+
+		it("should infer method='format' if not explicitly specified", async function() {
+			const instance=_createInstance({
+					params: [{
+						format: "${2r}${2r}"
+					}]
+				}),
+				result=await instance.split(" a b");
+			assert.deepEqual(result, ["a", "b"]);
+		});
+
+		it("should raise exception if method cannot be divined", async function() {
+			const instance=_createInstance({
+				params: [{
+					unknown: "configuration"
+				}]
+			});
+			return instance.split(" a b")
+				.then(assert.notCalled)
+				.catch(error=>{
+					assert.strictEqual(error.message, 'unsupported configuration {"unknown":"configuration"}');
+				});
 		});
 	});
 

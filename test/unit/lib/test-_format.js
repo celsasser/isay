@@ -189,5 +189,35 @@ describe("lib._format", function() {
 				assert.deepEqual(unformatMouseSpecification(spec, encoding), expected);
 			});
 		});
+
+		it.skip("should properly pick up trailing text", function() {
+			const encoded="curtis            1481  97  3949620 201:24.66 124:35.77 Google Chrome",
+				spec="${16l}${6r}${4r}${9r}${10r}${10r}${100l}",
+				result=unformatMouseSpecification(spec, encoded);
+			assert.deepEqual(result, [
+				"curtis",
+				"1481",
+				"97",
+				"3949620",
+				"201:24.66",
+				"124:35.77",
+				"Google Chrome"
+			]);
+		});
+
+		it.skip("should be smart about interleaved text and fields without width", function() {
+			const encoded="curtis            1481  97  3949620 201:24.66 124:35.77 Google Chrome",
+				spec="${l} ${r} ${r} ${r} ${r} ${r} ${l}",
+				result=unformatMouseSpecification(spec, encoded);
+			assert.deepEqual(result, [
+				"curtis",
+				"1481",
+				"97",
+				"3949620",
+				"201:24.66",
+				"124:35.77",
+				"Google Chrome"
+			]);
+		});
 	});
 });

@@ -82,11 +82,26 @@ class ModuleString extends ModuleBase {
 				}
 			} else {
 				assertType(argument, "Object");
-				switch(argument.method) {
+				const method=(()=>{
+					// some can be uniquely identified by their properties in which case we let the method slip
+					if(argument.method) {
+						return argument.method;
+					} else if(argument.hasOwnProperty("delimiter")) {
+						return "delimiter";
+					} else if(argument.hasOwnProperty("format")) {
+						return "format";
+					}
+					throw new Error(`unsupported configuration ${JSON.stringify(argument)}`);
+				})();
+				switch(method) {
 					case "delimiter": {
 						const delimiter=_.get(argument, "delimiter", "\\s*,\\s*"),
 							regex=new RegExp(delimiter);
 						return blob.split(regex);
+					}
+					case "format": {
+						assertType(argument.format, "String");
+						return unformatMouseSpecification(argument.format, blob);
 					}
 					case "newline": {
 						const result=blob.split(/\s*\n\s*/);
@@ -100,10 +115,6 @@ class ModuleString extends ModuleBase {
 					}
 					case "shell": {
 						return string.shell(blob);
-					}
-					case "unformat": {
-						assertType(argument.format, "String");
-						return unformatMouseSpecification(argument.format, blob);
 					}
 					case "white":
 					default: {
