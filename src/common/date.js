@@ -47,17 +47,3 @@ module.exports.fromObject=function(o=undefined) {
 	log.warn(`date.fromObject: unknown codec '${typeof(o)}'`);
 	return null;
 };
-
-
-/**
- * Allows support for older encodings without millis
- * @param {Date} date
- * @param {boolean} millis true to include them or false or undefined to eliminate them
- * @returns {string}
- */
-module.exports.toISOString=function(date, millis=false) {
-	const result=date.toISOString();
-	return (millis)
-		? result
-		: result.replace(/\.\d+Z$/, "Z");
-};

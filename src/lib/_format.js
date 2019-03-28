@@ -84,7 +84,7 @@ function formatMouseSpecification(format, data) {
 /**
  * Disassembles what could have been put together by formatMouseSpecification. But everything it does is not 100%
  * dissectable without ambiguity. If width is included then all is fine. If not....then there are some potential gray areas.
- * The format spec is as follows: "${[path:][0][width][.precision]<l|r|c>[+]}"
+ * The format spec is as follows: "${[path:][0][width][.precision]<l|r|c>[ifd][+]}"
  * @param {string} format
  * @param {string} encoded
  * @param {boolean} exceptionOnMismatch - can't see value in partial matches but leaving wiggle room.
@@ -100,7 +100,7 @@ function unformatMouseSpecification(format, encoded, {
 	function _getFieldSpecifiers() {
 		let result=[];
 		const matches=[],
-			regex=/(\${([^:]+?:)?([^1-9])?(\d+)?(\.\d+)?([lrc])([+]?)})/g;
+			regex=/(\${([^:]+?:)?([^1-9])?(\d+)?(\.\d+)?([lrc])([dfi]?)([+]?)})/g;
 		for(let match, index=0; (match=regex.exec(format)); index++) {
 			let lastSpecEndIndex=(index>0)
 				? matches[index-1].specEndIndex
@@ -111,7 +111,8 @@ function unformatMouseSpecification(format, encoded, {
 					fieldWidth: (match[4]!==undefined) ? Number(match[4]) : undefined,
 					fieldPrecision: (match[5]!==undefined) ? Number(match[5].substr(1)) : undefined,
 					fieldAlign: match[6],
-					fieldFlag: match[7],
+					fieldType: match[7],
+					fieldFlag: match[8],
 					specEndIndex: regex.lastIndex,
 					specStartIndex: match.index,
 					specPrefix: format.substr(lastSpecEndIndex, match.index-lastSpecEndIndex)
@@ -159,11 +160,41 @@ function unformatMouseSpecification(format, encoded, {
 			fieldFlag,
 			fieldPath,
 			fieldWidth,
+			fieldType,
 			match,
 			specPrefix,
 			specStartIndex,
 			specEndIndex,
 		}=matches[index];
+
+		/**
+		 * Converts the data to the specified type if there is a specified <code>fieldType</code>
+		 * @param {string} data
+		 * @returns {*}
+		 * @throws {Error}
+		 * @private
+		 */
+		function _convert(data) {
+			switch(fieldType) {
+				case "d": {
+					const offset=Date.parse(data);
+					if(Number.isNaN(offset)) {
+						throw new Error(`unknown date encoding "${data}"`);
+					} else {
+						return new Date(offset);
+					}
+				}
+				case "f": {
+					return Number.parseFloat(data);
+				}
+				case "i": {
+					return Number.parseInt(data);
+				}
+				default: {
+					return data;
+				}
+			}
+		}
 
 		/**
 		 * @param {string} data
@@ -262,7 +293,7 @@ function unformatMouseSpecification(format, encoded, {
 		// - whether there is a width
 		// - otherwise it's up to us to "decipher" the field
 		if(fieldFlag==="+") {
-			_.set(result, fieldPath, _trailing());
+			_.set(result, fieldPath, _convert(_trailing()));
 			lastEncodedEndIndex=encoded.length;
 		} else if(fieldWidth!==undefined) {
 			let encodedField=encoded.substr(lastEncodedEndIndex, fieldWidth),
@@ -270,7 +301,7 @@ function unformatMouseSpecification(format, encoded, {
 			if(depadded===undefined) {
 				return _processMismatch(`could not parse "${encodedField}" with "${match[0]}"`);
 			} else {
-				_.set(result, fieldPath, depadded);
+				_.set(result, fieldPath, _convert(depadded));
 				lastEncodedEndIndex+=fieldWidth;
 			}
 		} else {
@@ -278,7 +309,7 @@ function unformatMouseSpecification(format, encoded, {
 			if(deciphered===undefined) {
 				return _processMismatch(`could not match "${match[0]}"`);
 			} else {
-				_.set(result, fieldPath, deciphered.data);
+				_.set(result, fieldPath, _convert(deciphered.data));
 				lastEncodedEndIndex+=deciphered.length;
 			}
 		}

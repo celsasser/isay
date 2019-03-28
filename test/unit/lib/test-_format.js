@@ -34,7 +34,7 @@ describe("lib._format", function() {
 			["${a:l}", null, "data[a] cannot be found"],
 			["${a:l}", {}, "data[a] cannot be found"]
 		].forEach(([spec, data, text])=>{
-			it(`should throw 'cannot be found' exception for spec=${spec} and data=${JSON.stringify(data)}`, function() {
+			it(`should throw 'cannot be found' exception for spec ${spec} and ${JSON.stringify(data)}`, function() {
 				assert.throws(formatMouseSpecification.bind(null, spec, data),
 					error=>error.message===text);
 			});
@@ -51,7 +51,7 @@ describe("lib._format", function() {
 			["${a.b:l}", {a: {b: 5}}, "5"],
 			["${a.b:l}", {a: {b: "five"}}, "five"]
 		].forEach(([spec, data, expected])=>{
-			it(`should properly make basic single substitutions for spec=${spec} and data=${JSON.stringify(data)}`, function() {
+			it(`should properly make basic single substitutions for spec ${spec} and data=${JSON.stringify(data)}`, function() {
 				assert.strictEqual(formatMouseSpecification(spec, data), expected);
 			});
 		});
@@ -70,7 +70,7 @@ describe("lib._format", function() {
 			["${6.2c}", [5.1234], " 5.12 "],
 			["${6.2r}", [5.1234], "  5.12"]
 		].forEach(([spec, data, expected])=>{
-			it(`should properly apply format options for spec=${spec} and data=${JSON.stringify(data)}`, function() {
+			it(`should properly apply format options for spec ${spec} and ${JSON.stringify(data)}`, function() {
 				assert.strictEqual(formatMouseSpecification(spec, data), expected);
 			});
 		});
@@ -124,6 +124,27 @@ describe("lib._format", function() {
 			it(`should successfully parse single field spec (wo/width) ${spec} for "${encoding}"`, function() {
 				assert.deepEqual(unformatMouseSpecification(spec, encoding), expected);
 			});
+		});
+
+		[
+			["${4li}", "4", [4]],
+			["${li}", "4", [4]],
+			["${li}", "4.4", [4]],
+			["${li+}", "4", [4]],
+			["${lf}", "4", [4]],
+			["${lf}", "4.4", [4.4]],
+			["${lf}", "4.4", [4.4]],
+			["${ld}", "2020-01-01T00:00:00.000Z", [new Date("2020-01-01T00:00:00.000Z")]]
+		].forEach(([spec, encoding, expected])=>{
+			it(`should properly make type conversions for spec ${spec} and "${encoding}"`, function() {
+				assert.deepEqual(unformatMouseSpecification(spec, encoding), expected);
+			});
+		});
+
+		it("should raise exception if date cannot be parsed", function() {
+			assert.throws(unformatMouseSpecification.bind(null, "${ld}", "fail"),
+				error=>error.message==='unknown date encoding "fail"'
+			);
 		});
 
 		[
@@ -210,13 +231,13 @@ describe("lib._format", function() {
 
 		it("should be smart about interleaved text and fields without width", function() {
 			const encoded="curtis            1481  97  3949620 201:24.66 124:35.77 Google Chrome   ",
-				spec="${l} ${r} ${r} ${r} ${r} ${r} ${l+}",
+				spec="${l} ${ri} ${ri} ${ri} ${r} ${r} ${l+}",
 				result=unformatMouseSpecification(spec, encoded);
 			assert.deepEqual(result, [
 				"curtis",
-				"1481",
-				"97",
-				"3949620",
+				1481,
+				97,
+				3949620,
 				"201:24.66",
 				"124:35.77",
 				"Google Chrome"
