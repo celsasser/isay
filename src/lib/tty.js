@@ -19,9 +19,13 @@ class ModuleTty extends ModuleBase {
 	 * @throws {Error}
 	 */
 	async clear(blob) {
-		process.stdout.cursorTo(0, 0);
-		process.stdout.clearScreenDown();
-		return blob;
+		if(process.stdout.isTTY) {
+			process.stdout.cursorTo(0, 0);
+			process.stdout.clearScreenDown();
+			return blob;
+		} else {
+			throw new Error("must be run in TTY");
+		}
 	}
 }
 
