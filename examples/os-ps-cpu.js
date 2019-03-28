@@ -12,5 +12,5 @@ loop.forever(
 		string.format("${18l} ${8r} ${10c} ${10r} ${10r} ${10r} ${l}")
 			.std.outln()
 	)
-	.app.sleep(0.1)
+	.app.sleep({millis:500})
 );

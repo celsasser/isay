@@ -89,25 +89,52 @@ describe("lib.ModuleApp", function() {
 	});
 
 	describe("sleep", function() {
-		it("should throw error if params[0] is not a number", async function() {
+		it("should throw error if params[0] is not a number or object", async function() {
 			const instance=_createInstance({
 				params: ["string"]
 			});
 			return instance.sleep()
 				.then(assert.notCalled)
 				.catch(error=>{
-					assert.strictEqual(error.message, "expecting Number but found String");
+					assert.strictEqual(error.message, "expecting Number or Object but found String");
 				});
 		});
 
-		it("should sleep for the number of seconds specified in params[0]", async function() {
+		it("should sleep for the number of seconds specified in params[0] as number", async function() {
 			const instance=_createInstance({
-				params: [10/1000]
+				params: [2]
+			});
+			proxy.stub(global, "setTimeout", (callback, millis)=>{
+				assert.strictEqual(millis, 2000);
+				process.nextTick(callback);
 			});
 			return instance.sleep("input")
 				.then(result=>{
 					assert.strictEqual(result, "input");
 				});
 		});
+
+		[
+			[{millis: 2}, 2],
+			[{seconds: 2}, 2000],
+			[{minutes: 2}, 2000*60],
+			[{hours: 1}, 1000*60*60],
+			[{days: 1}, 1000*60*60*24],
+			[{minutes: 1, seconds: 1, millis: 1}, 1000*60+1000+1]
+		].forEach(([input, expected])=>{
+			it(`should properly convert ${JSON.stringify(input)} to ${expected} millis`, function() {
+				const instance=_createInstance({
+					params: [input]
+				});
+				proxy.stub(global, "setTimeout", (callback, millis)=>{
+					assert.strictEqual(millis, expected);
+					process.nextTick(callback);
+				});
+				return instance.sleep("input")
+					.then(result=>{
+						assert.strictEqual(result, "input");
+					});
+			});
+		})
 	});
 });

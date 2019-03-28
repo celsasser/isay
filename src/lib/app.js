@@ -44,14 +44,31 @@ class ModuleApp extends ModuleIO {
 	/**
 	 * Sleeps for the number of seconds specified in <code>this.params[0]</code> and then returns <param>blob</param>
 	 * @resolves seconds:Number in this.params[0]
+	 * @resolves {millis:Number, seconds:Number, minutes:Number, hours:Number, days:Number} in this.params[0]
 	 * @param {DataBlob} blob
 	 * @return {Promise<void>}
 	 */
 	async sleep(blob) {
-		assertType(this.params[0], "Number");
-		const millis=this.params[0]*1000;
+		let totalMillis;
+		assertType(this.params[0], ["Number", "Object"]);
+		if(this.params[0].constructor.name==="Number") {
+			totalMillis=this.params[0]*1000;
+		} else {
+			const {
+				days=0,
+				hours=0,
+				millis=0,
+				minutes=0,
+				seconds=0
+			}=this.params[0];
+			totalMillis=millis
+				+seconds*1000
+				+minutes*1000*60
+				+hours*1000*60*60
+				+days*1000*60*60*24;
+		}
 		return new Promise((resolve)=>{
-			setTimeout(resolve.bind(null, blob), millis);
+			setTimeout(resolve.bind(null, blob), totalMillis);
 		});
 	}
 }
