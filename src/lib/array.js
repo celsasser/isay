@@ -259,6 +259,8 @@ class ModuleArray extends ModuleBase {
 					? this.params[0]
 					: [this.params[0]];
 			const {directions, properties}=sorts.reduce((result, sort)=>{
+				assertType(sort, ["Number", "String"]);
+				sort=String(sort);
 				if(sort.startsWith("-")) {
 					result.properties.push(sort.substr(1));
 					result.directions.push("desc");

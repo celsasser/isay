@@ -81,46 +81,7 @@ class ModuleString extends ModuleBase {
 					return blob.split(argument);
 				}
 			} else {
-				assertType(argument, "Object");
-				const method=(()=>{
-					// some can be uniquely identified by their properties in which case we let the method slip
-					if(argument.method) {
-						return argument.method;
-					} else if(argument.hasOwnProperty("delimiter")) {
-						return "delimiter";
-					} else if(argument.hasOwnProperty("format")) {
-						return "format";
-					}
-					throw new Error(`unsupported configuration ${JSON.stringify(argument)}`);
-				})();
-				switch(method) {
-					case "delimiter": {
-						const delimiter=_.get(argument, "delimiter", "\\s*,\\s*"),
-							regex=new RegExp(delimiter);
-						return blob.split(regex);
-					}
-					case "format": {
-						assertType(argument.format, "String");
-						return unformatMouseSpecification(argument.format, blob);
-					}
-					case "newline": {
-						const result=blob.split(/\s*\n\s*/);
-						if(_.last(result)==="") {
-							// What are we doing here? It's an executive decision that we may back out of. The reason is because function such as
-							// "ls", "find" all return with a trailing newline which when parsed will result in an empty line. And split
-							// includes an empty trailing line. I think it's safe to assume that we never want it.
-							result.pop();
-						}
-						return result;
-					}
-					case "shell": {
-						return string.shell(blob);
-					}
-					case "white":
-					default: {
-						return blob.split(/\s+/);
-					}
-				}
+				return this._splitByMethod(blob, argument);
 			}
 		}
 	}
@@ -143,6 +104,58 @@ class ModuleString extends ModuleBase {
 	async upper(blob) {
 		assertType(blob, "String");
 		return blob.toUpperCase();
+	}
+
+	/**************** Private Interface ****************/
+	/**
+	 * We are being asked to spit by one of the methods we support. Figure out which one it is and apply it.
+	 * @param {DataBlob} blob
+	 * @param {Object} spec
+	 * @returns {string}
+	 * @throws {Error}
+	 * @private
+	 */
+	_splitByMethod(blob, spec) {
+		assertType(spec, "Object");
+		const method=(()=>{
+			// some can be uniquely identified by their properties in which case we let the method slip
+			if(spec.method) {
+				return spec.method;
+			} else if(spec.hasOwnProperty("delimiter")) {
+				return "delimiter";
+			} else if(spec.hasOwnProperty("format")) {
+				return "format";
+			}
+			throw new Error(`unsupported configuration ${JSON.stringify(spec)}`);
+		})();
+		switch(method) {
+			case "delimiter": {
+				const delimiter=_.get(spec, "delimiter", "\\s*,\\s*"),
+					regex=new RegExp(delimiter);
+				return blob.split(regex);
+			}
+			case "format": {
+				assertType(spec.format, "String");
+				return unformatMouseSpecification(spec.format, blob);
+			}
+			case "newline": {
+				const result=blob.split(/\s*\n\s*/);
+				if(_.last(result)==="") {
+					// What are we doing here? It's an executive decision that we may back out of. The reason is because function such as
+					// "ls", "find" all return with a trailing newline which when parsed will result in an empty line. And split
+					// includes an empty trailing line. I think it's safe to assume that we never want it.
+					result.pop();
+				}
+				return result;
+			}
+			case "shell": {
+				return string.shell(blob);
+			}
+			case "white":
+			default: {
+				return blob.split(/\s+/);
+			}
+		}
 	}
 }
 

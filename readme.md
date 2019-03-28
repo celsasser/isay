@@ -94,7 +94,9 @@ In some cases, you will see variations of the same _function_ below. This is eit
 - range: `[from:number, to:number, inc:number=1] => range() -> Array<number>`
 - reduce: `Array<*> -> reduce(predicate:function) -> Array<*>`
 - reverse: `Array<*> -> reverse(predicate:function) -> Array<*>`
-- sort: `Array<*> -> sort(predicate:function) -> Array<*>`
+- sort: `Array<*> -> sort() -> Array<*>`
+- sort: `Array<*> -> sort(property:(number|string)) -> Array<*>`
+- sort: `Array<*> -> sort(properties:Array<(number|string)>) -> Array<*>`
 - unique: `Array<*> -> unique() -> Array<*>`
 
 #### csv

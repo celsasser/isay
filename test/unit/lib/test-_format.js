@@ -108,7 +108,7 @@ describe("lib._format", function() {
 			["${4c}", " 4  ", ["4"]],
 			["${04c}", "0040", ["4"]]
 		].forEach(([spec, encoding, expected])=>{
-			it(`should successfully parse single field spec (w/width)=${spec} for ${encoding}`, function() {
+			it(`should successfully parse single field spec (w/width) ${spec} for "${encoding}"`, function() {
 				assert.deepEqual(unformatMouseSpecification(spec, encoding), expected);
 			});
 		});
@@ -121,7 +121,25 @@ describe("lib._format", function() {
 			["${c}", " 4  ", ["4"]],
 			["${0c}", "0040", ["4"]]
 		].forEach(([spec, encoding, expected])=>{
-			it(`should successfully parse single field spec (wo/width)=${spec} for ${encoding}`, function() {
+			it(`should successfully parse single field spec (wo/width) ${spec} for "${encoding}"`, function() {
+				assert.deepEqual(unformatMouseSpecification(spec, encoding), expected);
+			});
+		});
+
+		[
+			["${l+}", "4 ", ["4"]],
+			["${l+}", " 4 ", [" 4"]],
+			["${l+}", "4 5", ["4 5"]],
+			["${l+}", "4 5 ", ["4 5"]],
+			["${-l+}", "4 ", ["4 "]],
+			["${-l+}", "4-", ["4"]],
+			["${-l+}", "4-4-", ["4-4"]],
+			["${r+}", " 4", ["4"]],
+			["${r+}", " 4 5 ", ["4 5 "]],
+			["${c+}", " 4 ", ["4"]],
+			["${c+}", " 4 5 ", ["4 5"]]
+		].forEach(([spec, encoding, expected])=>{
+			it(`should successfully parse trailing (+) field spec ${spec} for "${encoding}"`, function() {
 				assert.deepEqual(unformatMouseSpecification(spec, encoding), expected);
 			});
 		});
@@ -131,7 +149,7 @@ describe("lib._format", function() {
 			["${02r}a${02r}", "01b02", "failed to match \"a\" to \"b\""],
 			["${02r}a${02r}b", "01a02c", "failed to match \"b\" to \"c\""]
 		].forEach(([spec, encoding, errorText])=>{
-			it(`should catch literal mismatches around fields for spec=${spec}, encoding=${encoding}`, function() {
+			it(`should catch literal mismatches around field spec ${spec} for ${encoding}`, function() {
 				assert.throws(unformatMouseSpecification.bind(null, spec, encoding),
 					error=>error.message===errorText);
 			});
@@ -148,7 +166,7 @@ describe("lib._format", function() {
 			["${-2l}${-2r}", "4--5", ["4", "5"]],
 			["${-2l}-${-2r}", "4---5", ["4", "5"]]
 		].forEach(([spec, encoding, expected])=>{
-			it(`should successfully parse complex field spec (w/width)=${spec} for ${encoding}`, function() {
+			it(`should successfully parse complex field spec (w/width) ${spec} for "${encoding}"`, function() {
 				assert.deepEqual(unformatMouseSpecification(spec, encoding), expected);
 			});
 		});
@@ -165,7 +183,7 @@ describe("lib._format", function() {
 			["${l}|${-r}", "4   |---5", ["4", "5"]],
 			[" ${l}${-c} ", " 4 -5- ", ["4", "5"]]
 		].forEach(([spec, encoding, expected])=>{
-			it(`should successfully parse complex field spec (wo/width)=${spec} for ${encoding}`, function() {
+			it(`should successfully parse complex field spec (wo/width) ${spec} for "${encoding}"`, function() {
 				assert.deepEqual(unformatMouseSpecification(spec, encoding), expected);
 			});
 		});
@@ -174,7 +192,7 @@ describe("lib._format", function() {
 			["${r}${l}", " 45 ", ["45", ""]],
 			["${l}${l}", "44aa", ["44aa", ""]]
 		].forEach(([spec, encoding, expected])=>{
-			it(`should return wonky results due to ambiguity when no width included: spec=${spec} for ${encoding}`, function() {
+			it(`should return wonky results due to ambiguity when no width included: spec ${spec} for "${encoding}"`, function() {
 				assert.deepEqual(unformatMouseSpecification(spec, encoding), expected);
 			});
 		});
@@ -185,29 +203,14 @@ describe("lib._format", function() {
 			["${0:2l}${a:2l}", "4 c ", {0: "4", a: "c"}],
 			["${a.b:2l}${a.c:2l}", "4455", {a: {b: "44", c: "55"}}]
 		].forEach(([spec, encoding, expected])=>{
-			it(`should properly encode result for specs including path variables: spec=${spec}, encoding=${encoding}`, function() {
+			it(`should properly encode result for specs with path variables: ${spec} for "${encoding}"`, function() {
 				assert.deepEqual(unformatMouseSpecification(spec, encoding), expected);
 			});
 		});
 
-		it.skip("should properly pick up trailing text", function() {
-			const encoded="curtis            1481  97  3949620 201:24.66 124:35.77 Google Chrome",
-				spec="${16l}${6r}${4r}${9r}${10r}${10r}${100l}",
-				result=unformatMouseSpecification(spec, encoded);
-			assert.deepEqual(result, [
-				"curtis",
-				"1481",
-				"97",
-				"3949620",
-				"201:24.66",
-				"124:35.77",
-				"Google Chrome"
-			]);
-		});
-
-		it.skip("should be smart about interleaved text and fields without width", function() {
-			const encoded="curtis            1481  97  3949620 201:24.66 124:35.77 Google Chrome",
-				spec="${l} ${r} ${r} ${r} ${r} ${r} ${l}",
+		it("should be smart about interleaved text and fields without width", function() {
+			const encoded="curtis            1481  97  3949620 201:24.66 124:35.77 Google Chrome   ",
+				spec="${l} ${r} ${r} ${r} ${r} ${r} ${l+}",
 				result=unformatMouseSpecification(spec, encoded);
 			assert.deepEqual(result, [
 				"curtis",

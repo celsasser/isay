@@ -619,6 +619,38 @@ describe("lib.ModuleArray", function() {
 			]);
 		});
 
+		it("should properly sort by positive array index", async function() {
+			const instance=_createInstance({
+				params: [1]
+			});
+			const result=await instance.sort([
+				[0, 2],
+				[1, 1],
+				[2, 0]
+			]);
+			assert.deepEqual(result, [
+				[2, 0],
+				[1, 1],
+				[0, 2]
+			]);
+		});
+
+		it("should properly reverse sort by negative array index", async function() {
+			const instance=_createInstance({
+				params: [-1]
+			});
+			const result=await instance.sort([
+				[2, 0],
+				[1, 1],
+				[0, 2]
+			]);
+			assert.deepEqual(result, [
+				[0, 2],
+				[1, 1],
+				[2, 0]
+			]);
+		});
+
 		it("should properly sort by primary and secondary when in separate params", async function() {
 			const instance=_createInstance({
 				params: ["a", "b"]
@@ -633,6 +665,17 @@ describe("lib.ModuleArray", function() {
 				{"a": 1, "b": 2},
 				{"a": 2, "b": 3}
 			]);
+		});
+
+		it("should raise exception if sort param is an unsupported type", async function() {
+			const instance=_createInstance({
+				params: [{a: 1}]
+			});
+			return instance.sort([])
+				.then(assert.notCalled)
+				.catch(error=>{
+					assert.strictEqual(error.message, "expecting Number or String but found Object");
+				});
 		});
 	});
 });

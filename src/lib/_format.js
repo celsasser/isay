@@ -84,7 +84,7 @@ function formatMouseSpecification(format, data) {
 /**
  * Disassembles what could have been put together by formatMouseSpecification. But everything it does is not 100%
  * dissectable without ambiguity. If width is included then all is fine. If not....then there are some potential gray areas.
- * The format spec is as follows: "${[path:][0][width][.precision]<l|r|c>}"
+ * The format spec is as follows: "${[path:][0][width][.precision]<l|r|c>[+]}"
  * @param {string} format
  * @param {string} encoded
  * @param {boolean} exceptionOnMismatch - can't see value in partial matches but leaving wiggle room.
@@ -100,21 +100,26 @@ function unformatMouseSpecification(format, encoded, {
 	function _getFieldSpecifiers() {
 		let result=[];
 		const matches=[],
-			regex=/(\${([^:]+?:)?([^1-9])?(\d+)?(\.\d+)?([lrc])})/g;
+			regex=/(\${([^:]+?:)?([^1-9])?(\d+)?(\.\d+)?([lrc])([+]?)})/g;
 		for(let match, index=0; (match=regex.exec(format)); index++) {
-			let parsed={
-				specEndIndex: regex.lastIndex,
-				specStartIndex: match.index,
-				path: (match[2]!==undefined) ? match[2].substr(0, match[2].length-1) : index,
-				fill: match[3] || " ",
-				width: (match[4]!==undefined) ? Number(match[4]) : undefined,
-				precision: (match[5]!==undefined) ? Number(match[5].substr(1)) : undefined,
-				align: match[6]
-			};
+			let lastSpecEndIndex=(index>0)
+				? matches[index-1].specEndIndex
+				: 0,
+				parsed={
+					fieldPath: (match[2]!==undefined) ? match[2].substr(0, match[2].length-1) : index,
+					fieldFill: match[3] || " ",
+					fieldWidth: (match[4]!==undefined) ? Number(match[4]) : undefined,
+					fieldPrecision: (match[5]!==undefined) ? Number(match[5].substr(1)) : undefined,
+					fieldAlign: match[6],
+					fieldFlag: match[7],
+					specEndIndex: regex.lastIndex,
+					specStartIndex: match.index,
+					specPrefix: format.substr(lastSpecEndIndex, match.index-lastSpecEndIndex)
+				};
 			matches.push(parsed);
 			// here we make adjustments to the result type. If any of the params are non-integers then we assume
 			// that they want to resulting type to be an object
-			if(/^\d+$/.test(parsed.path)===false) {
+			if(/^\d+$/.test(parsed.fieldPath)===false) {
 				result={};
 			}
 		}
@@ -148,22 +153,32 @@ function unformatMouseSpecification(format, encoded, {
 		lastSpecEndIndex=0;
 	const {matches, result}=_getFieldSpecifiers();
 	for(let index=0; index<matches.length; index++) {
-		let {align, fill, match, path, specStartIndex, specEndIndex, width}=matches[index];
+		let {
+			fieldAlign,
+			fieldFill,
+			fieldFlag,
+			fieldPath,
+			fieldWidth,
+			match,
+			specPrefix,
+			specStartIndex,
+			specEndIndex,
+		}=matches[index];
 
 		/**
 		 * @param {string} data
 		 * @return {string|undefined}
 		 */
 		function _depad(data) {
-			switch(align) {
+			switch(fieldAlign) {
 				case "l": {
-					const regex=new RegExp(`^[^${fill}]*`),
+					const regex=new RegExp(`^[^${fieldFill}]*`),
 						match=regex.exec(data);
 					return _.get(match, "0");
 				}
 				case "r":
 				case "c": {
-					const regex=new RegExp(`^${fill}*([^${fill}]*)`),
+					const regex=new RegExp(`^${fieldFill}*([^${fieldFill}]*)`),
 						match=regex.exec(data);
 					return _.get(match, "1");
 				}
@@ -178,20 +193,21 @@ function unformatMouseSpecification(format, encoded, {
 		function _decipher() {
 			// all we know is that our data is somewhere between now and the end of time
 			const data=encoded.substring(lastEncodedEndIndex);
-			switch(align) {
+			switch(fieldAlign) {
 				case "l": {
-					const regex=new RegExp(`^([^${fill}]*)${fill}*`),
+					const suffix=_.get(matches[index+1], "specPrefix", ""),
+						regex=new RegExp(`^(([^${fieldFill}]*)${fieldFill}*)${suffix}`),
 						match=regex.exec(data);
 					return (match===null)
 						? null
 						: {
-							data: match[1],
-							length: match[0].length
+							data: match[2],
+							length: match[1].length
 						};
 				}
 				case "r": {
-					const trailingFill=_.get(matches[index+1], "fill", fill),
-						regex=new RegExp(`^${fill}*([^${trailingFill}]*)`),
+					const trailingFill=_.get(matches[index+1], "fieldFill", fieldFill),
+						regex=new RegExp(`^${fieldFill}*([^${trailingFill}]*)`),
 						match=regex.exec(data);
 					return (match===null)
 						? null
@@ -201,42 +217,68 @@ function unformatMouseSpecification(format, encoded, {
 						};
 				}
 				case "c": {
-					const regex=new RegExp(`^${fill}*([^${fill}]*)${fill}*`),
+					const suffix=_.get(matches[index+1], "specPrefix", ""),
+						regex=new RegExp(`^(${fieldFill}*([^${fieldFill}]*)${fieldFill}*)${suffix}`),
 						match=regex.exec(data);
 					return (match===null)
 						? null
 						: {
-							data: match[1],
-							length: match[0].length
+							data: match[2],
+							length: match[1].length
 						};
 				}
 			}
 		}
 
+		/**
+		 * Gets the remaining meaningful bits of a line. We will still strip off padding but only in keeping with <code>fieldAlign</code>.
+		 * @returns {string}
+		 */
+		function _trailing() {
+			const result=encoded.substring(lastEncodedEndIndex);
+			switch(fieldAlign) {
+				case "l": {
+					return _.trimEnd(result, fieldFill);
+				}
+				case "r": {
+					return _.trimStart(result);
+				}
+				case "c": {
+					return _.trim(result);
+				}
+			}
+		}
+
 		// 1. make sure the junk between the end of the last field specifier and this field specifier are identical
-		let specGap=format.substr(lastSpecEndIndex, specStartIndex-lastSpecEndIndex),
-			encodedGap=encoded.substr(lastEncodedEndIndex, specStartIndex-lastSpecEndIndex);
-		if(specGap!==encodedGap) {
-			return _processMismatch(`failed to match "${specGap}" to "${encodedGap}"`);
+		let encodedPrefix=encoded.substr(lastEncodedEndIndex, specPrefix.length);
+		if(specPrefix!==encodedPrefix) {
+			return _processMismatch(`failed to match "${specPrefix}" to "${encodedPrefix}"`);
 		} else {
 			lastEncodedEndIndex+=specStartIndex-lastSpecEndIndex;
 		}
-		// 2. match the field specifier to the encoded text. The algorithm differs depending on whether there is a width or not.
-		if(width!==undefined) {
-			let encodedField=encoded.substr(lastEncodedEndIndex, width),
-				data=_depad(encodedField);
-			if(data===undefined) {
+
+		// 2. match the field specifier to the encoded text. The algorithm differs depending on whether:
+		// - we are getting the rest of a line
+		// - whether there is a width
+		// - otherwise it's up to us to "decipher" the field
+		if(fieldFlag==="+") {
+			_.set(result, fieldPath, _trailing());
+			lastEncodedEndIndex=encoded.length;
+		} else if(fieldWidth!==undefined) {
+			let encodedField=encoded.substr(lastEncodedEndIndex, fieldWidth),
+				depadded=_depad(encodedField);
+			if(depadded===undefined) {
 				return _processMismatch(`could not parse "${encodedField}" with "${match[0]}"`);
 			} else {
-				_.set(result, path, data);
-				lastEncodedEndIndex+=width;
+				_.set(result, fieldPath, depadded);
+				lastEncodedEndIndex+=fieldWidth;
 			}
 		} else {
 			let deciphered=_decipher();
 			if(deciphered===undefined) {
 				return _processMismatch(`could not match "${match[0]}"`);
 			} else {
-				_.set(result, path, deciphered.data);
+				_.set(result, fieldPath, deciphered.data);
 				lastEncodedEndIndex+=deciphered.length;
 			}
 		}
