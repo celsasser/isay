@@ -9,10 +9,10 @@
  * printf "./readme.md" | ./mouse.js run -s "./examples/text-count-characters-input.js"
 */
 
-app.assert(is.type("String"))
+app.assert(is.type("String"), "input file is missing")
 	.file.read()
 	.string.lower()
-	.string.replace(/\s+/g, "")
+	.string.replace(/(\s|[^a-zA-Z])+/g, "")
 	.string.split("")
 	.array.reduce(function(result, character) {
 		result[character]=result[character]

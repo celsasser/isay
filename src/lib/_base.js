@@ -51,8 +51,8 @@ class ModuleBase {
 		 * Logs the action with input and params info
 		 * @return {Promise}
 		 */
-		const _logDebug=()=>{
-			const {input, params}=this._formatDebugActionDetails(blob),
+		const _logDebug=(max=512)=>{
+			const {input, params}=this._formatDebugActionDetails(blob, max),
 				inputText=(data!==undefined)
 					? `\n   input = ${input}`
 					: "",
@@ -78,7 +78,10 @@ class ModuleBase {
 		try {
 			blob=this._preprocessChunk(data);
 			if(configuration.options.debug) {
-				await _logDebug();
+				// let's allow them to dump without limits if they have also specified "verbose"
+				await _logDebug(log.level.isLog("verbose") 
+					? Number.MAX_SAFE_INTEGER
+					: 512);
 			} else if(log.level.isLog("verbose")) {
 				await _logVerbose();
 			}
@@ -189,7 +192,7 @@ class ModuleBase {
 	 * @returns {{input:string, params:Array<string>}}
 	 * @private
 	 */
-	_formatDebugActionDetails(data, max=256) {
+	_formatDebugActionDetails(data, max=512) {
 		// Our default max is a somewhat arbitrary number. We want to log as much as reasonable.
 		// But the input could be enormous and at some point is just interference.
 		return {

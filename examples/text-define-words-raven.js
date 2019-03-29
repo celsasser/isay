@@ -21,9 +21,7 @@ file.read("./examples/data/the-raven.txt")
 	.array.map(function(word) {
 		os.curl("--get", `https://www.dictionaryapi.com/api/v3/references/collegiate/json/${word}?key=58001a89-66f9-4249-8d04-8464711ce694`)
 			.json.parse()
-			.object.map([
-				{from: "0.meta.id", to: "word"},
-				{from: "0.shortdef.0", to: "definition"}
-			])
+			.object.map([{from: "0.shortdef.0", to: "definition"}])
+			.object.merge({word})
 	})
 	.std.outln()

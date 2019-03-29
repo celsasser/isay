@@ -4,7 +4,7 @@
 
 file.read("./examples/data/the-raven.txt")
 	.string.lower()
-	.string.replace(/\s+/g, "")
+	.string.replace(/(\s|[^a-zA-Z])+/g, "")
 	.string.split("")
 	.array.reduce(function(result, character) {
 		result[character]=result[character]
