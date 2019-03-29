@@ -26,7 +26,7 @@ class ModuleApp extends ModuleIO {
 	}
 
 	/**
-	 * Asserts that the condition in params[0] predicate are true. It is designed to be used with <code>is</code> and <code>note</code>
+	 * Asserts that the condition in params[0] predicate is true. It is designed to be used with <code>is</code> and <code>not</code>
 	 * This guy is one of the few exceptions to the input/output rule. He looks at the input returned by the predicate but returns
 	 * <param>blob</param>
 	 * @param {DataBlob} blob

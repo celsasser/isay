@@ -2,7 +2,7 @@ loop.forever(
 	os.ps(["-A", "-c", "-o", "user=,pid=,pri=,vsz=,time=,utime=,command="])
 	.string.split({method: "newline"})
 	.array.map(string.split({
-		format: "${l} ${r} ${r} ${r} ${r} ${r} ${l+}"
+		format: "${l} ${ri} ${ri} ${ri} ${r} ${r} ${l+}"
 	}))
 	.array.sort(-3)
 	.array.slice({count: 25})

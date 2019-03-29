@@ -19,12 +19,34 @@ class ModuleTty extends ModuleBase {
 	 * @throws {Error}
 	 */
 	async clear(blob) {
-		if(process.stdout.isTTY) {
-			process.stdout.cursorTo(0, 0);
-			process.stdout.clearScreenDown();
-			return blob;
-		} else {
-			throw new Error("must be run in TTY");
+		this._assertTty();
+		process.stdout.cursorTo(0, 0);
+		process.stdout.clearScreenDown();
+		return blob;
+	}
+
+	/**
+	 * Returns the number of columns in the terminal
+	 * @return {Promise<Number>}
+	 */
+	async height() {
+		this._assertTty();
+		return process.stdout.columns;
+	}
+
+	/**
+	 * Returns the number of rows in the terminal
+	 * @return {Promise<Number>}
+	 */
+	async width() {
+		this._assertTty();
+		return process.stdout.rows;
+	}
+
+	/********************* Private Interface *********************/
+	_assertTty() {
+		if(!process.stdout.isTTY) {
+			throw new Error("must be in a terminal (TTY)");
 		}
 	}
 }
