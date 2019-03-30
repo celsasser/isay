@@ -7,7 +7,7 @@
 
 const _=require("lodash");
 const {ModuleBase}=require("./_base");
-const {assertPredicate, assertType, assertTypesEqual, isPredicate}=require("./_data");
+const {assertPredicate, assertType, assertTypesEqual}=require("./_data");
 
 /**
  * Base class for tests so that we can support the positive and negative tests with one set of functionality
@@ -153,7 +153,7 @@ class ModuleTest extends ModuleBase {
 	 */
 	async test(blob) {
 		if(this.params.length>0) {
-			if(isPredicate(this.params[0])) {
+			if(_.isFunction(this.params[0])) {
 				const predicate=assertPredicate(this.params[0]);
 				return predicate(blob)
 					.then(result=>this._processTestResult(blob, Boolean(result)));
@@ -219,7 +219,7 @@ class ModuleTest extends ModuleBase {
 	_processIfFlow(blob) {
 		if(this.params.length===0) {
 			return Promise.resolve(blob);
-		} else if(isPredicate(this.params[0])) {
+		} else if(_.isFunction(this.params[0])) {
 			const predicate=assertPredicate(this.params[0]);
 			return predicate(blob);
 		} else {

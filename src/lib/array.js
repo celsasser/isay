@@ -7,7 +7,7 @@
 
 const _=require("lodash");
 const {ModuleBase}=require("./_base");
-const {assertPredicate, assertType, isPredicate}=require("./_data");
+const {assertPredicate, assertType}=require("./_data");
 const util=require("../common/util");
 
 /**
@@ -353,7 +353,7 @@ class ModuleArray extends ModuleBase {
 		}=(this.params[1] || {});
 
 		index=ModuleArray._normalizeIndex(array, index);
-		if(isPredicate(this.params[0])) {
+		if(_.isFunction(this.params[0])) {
 			concat= await assertPredicate(this.params[0])();
 		} else {
 			concat=this.params[0];

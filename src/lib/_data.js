@@ -53,13 +53,11 @@ function assertPredicate(predicate) {
  * @param {string|"*"|Array<string>} allowed - "*" will allow any type
  * @param {boolean} allowNull
  * @param {boolean} allowUndefined
- * @param {boolean} strict - if strict then will use value.constructor.name otherwise will use typedef(value)
  * @throws {Error}
  */
 function assertType(value, allowed, {
 	allowNull=false,
-	allowUndefined=false,
-	strict=true
+	allowUndefined=false
 }={}) {
 	function _formatAllowed() {
 		return _.isArray(allowed)
@@ -78,9 +76,7 @@ function assertType(value, allowed, {
 			throw new Error(`expecting ${_formatAllowed()} but found ${util.name(value)}`);
 		}
 	} else {
-		const type=(strict)
-			? _getConstructorName(value)
-			: typeof(value);
+		const type=_getConstructorName(value);
 		if(_.isArray(allowed)) {
 			if(_.includes(allowed, type)===false) {
 				throw new Error(`expecting ${_formatAllowed()} but found ${util.name(value)}`);
@@ -126,13 +122,33 @@ function ensureJson(data) {
 }
 
 /**
- * A "predicate" is a function that takes 1 or more arguments and returns a single value. This
- * guy determines whether <param>value</param> is qualified to be one
- * @param {Function} value
- * @returns {boolean}
+ * This guy brings together assertType and retrieval. So what? His value comes from dealing with predicates.
+ * It always allows for <param>value</param> to be a predicate that takes a blob as input. Hence the <param>blob</param>.
+ * Follows are two examples illustrating a literal param and a predicate param:
+ * - literal: array.first(10)
+ * - predicate: array.first(tty.height())
+ * The predicate in this case doesn't care about the <param>blob</param> but it's there should it.
+ * @param {DataBlob} blob
+ * @param {*} value
+ * @param {string|"*"|Array<string>} allowed - "*" will allow any type
+ * @param {boolean} allowNull
+ * @param {boolean} allowUndefined
+ * @throws {Error}
  */
-function isPredicate(value) {
-	return _.isFunction(value);
+async function getType(blob, value, allowed, {
+	allowNull=false,
+	allowUndefined=false
+}={}) {
+	if(_.isFunction(value)) {
+		const predicate=assertPredicate(value);
+		value=await predicate(blob);
+		// we have no rules against a predicate returning a predicate. So we'll support it.
+		if(_.isFunction(value)) {
+			return getType(blob, value, allowed, {allowNull, allowUndefined});
+		}
+	}
+	assertType(value, allowed, {allowNull, allowUndefined});
+	return value;
 }
 
 /********************* Private Interface *********************/
@@ -163,5 +179,5 @@ module.exports={
 	assertType,
 	assertTypesEqual,
 	ensureJson,
-	isPredicate
+	getType
 };

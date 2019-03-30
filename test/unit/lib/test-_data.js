@@ -7,11 +7,15 @@
 
 const assert=require("../../support/assert");
 const {
+	resolveNextTick,
+}=require("../../../src/common/promise");
+const {
 	assertPredicate,
 	assertProperties,
 	assertType,
 	assertTypesEqual,
-	ensureJson
+	ensureJson,
+	getType
 }=require("../../../src/lib/_data");
 
 describe("lib.ModuleArray", function() {
@@ -142,6 +146,60 @@ describe("lib.ModuleArray", function() {
 			it(`should convert ${input} encoding`, function() {
 				assert.deepEqual(ensureJson(input), JSON.parse(input));
 			});
+		});
+	});
+
+	describe("getType", function() {
+		it("should raise exception if value is of an unsupported type", async function() {
+			return getType("blob", "string", "Number")
+				.then(assert.notCalled)
+				.catch(error=>{
+					assert.strictEqual(error.message, "expecting Number but found String");
+				});
+		});
+
+		it("should return a supported type", async function() {
+			return getType("blob", "value", "String")
+				.then(value=>{
+					assert.strictEqual(value, "value");
+				});
+		});
+
+		it("should raise exception if predicate returns an unsupported type", async function() {
+			const predicate=(input)=>{
+				assert.strictEqual(input, "blob");
+				return resolveNextTick("value");
+			};
+			return getType("blob", predicate, "Number")
+				.then(assert.notCalled)
+				.catch(error=>{
+					assert.strictEqual(error.message, "expecting Number but found String");
+				});
+		});
+
+		it("should return predicate result if it is a supported type", async function() {
+			const predicate=(input)=>{
+				assert.strictEqual(input, "blob");
+				return resolveNextTick("value");
+			};
+			return getType("blob", predicate, "String")
+				.then(value=>{
+					assert.strictEqual(value, "value");
+				});
+		});
+
+		it("should support a predicate in a predicate...", async function() {
+			const predicate=(input)=>{
+				assert.strictEqual(input, "blob");
+				return (input)=>{
+					assert.strictEqual(input, "blob");
+					return "output";
+				};
+			};
+			return getType("blob", predicate, "String")
+				.then(value=>{
+					assert.strictEqual(value, "output");
+				});
 		});
 	});
 });
