@@ -51,11 +51,14 @@ function assertPredicate(predicate) {
  * Asserts that <param>value</param> is one of the <param>allowed</param> types
  * @param {*} value
  * @param {string|"*"|Array<string>} allowed - "*" will allow any type
+ * @param {boolean} allowAll - shorthand for allowNull and allowUndefined
  * @param {boolean} allowNull
  * @param {boolean} allowUndefined
+ * @returns {*} returns <param>value</param> if all is good
  * @throws {Error}
  */
 function assertType(value, allowed, {
+	allowAll=false,
 	allowNull=false,
 	allowUndefined=false
 }={}) {
@@ -67,6 +70,9 @@ function assertType(value, allowed, {
 				? "a value"
 				: allowed;
 	}
+	if(allowAll) {
+		allowNull=allowUndefined=true;
+	}
 	if(value===undefined) {
 		if(!allowUndefined) {
 			throw new Error(`expecting ${_formatAllowed()} but found ${util.name(value)}`);
@@ -76,7 +82,7 @@ function assertType(value, allowed, {
 			throw new Error(`expecting ${_formatAllowed()} but found ${util.name(value)}`);
 		}
 	} else {
-		const type=_getConstructorName(value);
+		const type=getType(value);
 		if(_.isArray(allowed)) {
 			if(_.includes(allowed, type)===false) {
 				throw new Error(`expecting ${_formatAllowed()} but found ${util.name(value)}`);
@@ -89,6 +95,7 @@ function assertType(value, allowed, {
 			}
 		}
 	}
+	return value;
 }
 
 /**
@@ -98,10 +105,31 @@ function assertType(value, allowed, {
  * @throws {Error}
  */
 function assertTypesEqual(value1, value2) {
-	const type1=_getConstructorName(value1),
-		type2=_getConstructorName(value2);
+	const type1=getType(value1),
+		type2=getType(value2);
 	if(type1!==type2) {
 		throw new Error(`expecting same type but found ${type1} and ${type2}`);
+	}
+}
+
+/**
+ * Gets the constructor name of the specified value if not null or undefined otherwise returns
+ * "null" or "undefined"
+ * @param {*} value
+ * @returns {string}
+ * @private
+ */
+function getType(value) {
+	if(value===undefined) {
+		return "undefined";
+	} else if(value===null) {
+		return "null";
+	} else {
+		const type=value.constructor.name;
+		// we don't go any farther than expecting a function to be a "Function"
+		return (type==="AsyncFunction")
+			? "Function"
+			: type;
 	}
 }
 
@@ -131,11 +159,13 @@ function ensureJson(data) {
  * @param {DataBlob} blob
  * @param {*} value
  * @param {string|"*"|Array<string>} allowed - "*" will allow any type
+ * @param {boolean} allowAll - shorthand for allowNull and allowUndefined
  * @param {boolean} allowNull
  * @param {boolean} allowUndefined
  * @throws {Error}
  */
-async function getType(blob, value, allowed, {
+async function resolveType(blob, value, allowed, {
+	allowAll=false,
 	allowNull=false,
 	allowUndefined=false
 }={}) {
@@ -144,40 +174,19 @@ async function getType(blob, value, allowed, {
 		value=await predicate(blob);
 		// we have no rules against a predicate returning a predicate. So we'll support it.
 		if(_.isFunction(value)) {
-			return getType(blob, value, allowed, {allowNull, allowUndefined});
+			return resolveType(blob, value, allowed, {allowAll, allowNull, allowUndefined});
 		}
 	}
-	assertType(value, allowed, {allowNull, allowUndefined});
-	return value;
+	return assertType(value, allowed, {allowAll, allowNull, allowUndefined});
 }
 
 /********************* Private Interface *********************/
-/**
- * Gets the constructor name of the specified value if not null or undefined otherwise returns
- * "null" or "undefined"
- * @param {*} value
- * @returns {string}
- * @private
- */
-function _getConstructorName(value) {
-	if(value===undefined) {
-		return "undefined";
-	} else if(value===null) {
-		return "null";
-	} else {
-		const type=value.constructor.name;
-		// we don't go any farther than expecting a function to be a "Function"
-		return (type==="AsyncFunction")
-			? "Function"
-			: type;
-	}
-}
-
 module.exports={
 	assertPredicate,
 	assertProperties,
 	assertType,
 	assertTypesEqual,
 	ensureJson,
-	getType
+	getType,
+	resolveType
 };

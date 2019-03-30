@@ -49,7 +49,7 @@ class ModuleCsv extends ModuleIO {
 	 * @throws {Error}
 	 */
 	async read(data) {
-		const path=this._getReadPath(data);
+		const path=await this._getReadPath(data);
 		return fs.readFile(path, {encoding: "utf8"})
 			.then(data=>this.parse(data));
 	}
@@ -63,7 +63,7 @@ class ModuleCsv extends ModuleIO {
 	 * @throws {Error}
 	 */
 	async write(data) {
-		const path=this._getWritePath(),
+		const path=await this._getWritePath(data),
 			options=ensureJson(this.params[1]);
 		return new Promise((resolve, reject)=>{
 			stringify(data, {

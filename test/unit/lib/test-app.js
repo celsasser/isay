@@ -41,14 +41,22 @@ describe("lib.ModuleApp", function() {
 	});
 
 	describe("assert", function() {
-		it("should raise exception if params[0] is not a predicate", async function() {
-			const instance=_createInstance({
-				params: ["string"]
-			});
+		it("should raise exception if no params are included", async function() {
+			const instance=_createInstance();
 			return instance.assert()
 				.then(assert.notCalled)
 				.catch(error=>{
-					assert.strictEqual(error.message, "expecting predicate but found String");
+					assert.strictEqual(error.message, "expecting a value but found undefined");
+				});
+		});
+
+		it("should return input if params[0] is truthy", async function() {
+			const instance=_createInstance({
+				params: [true]
+			});
+			return instance.assert("input")
+				.then(result=>{
+					assert.strictEqual(result, "input");
 				});
 		});
 
@@ -65,6 +73,17 @@ describe("lib.ModuleApp", function() {
 				});
 		});
 
+		it("should raise default error if params[0] is falsey", async function() {
+			const instance=_createInstance({
+				params: [false]
+			});
+			return instance.assert(false)
+				.then(assert.notCalled)
+				.catch(error=>{
+					assert.strictEqual(error.message, "assertion failed");
+				});
+		});
+
 		it("should raise default error if predicate returns false", async function() {
 			const instance=_createInstance({
 				params: [input=>input]
@@ -76,7 +95,7 @@ describe("lib.ModuleApp", function() {
 				});
 		});
 
-		it("should raise specified error if predicate returns false", async function() {
+		it("should raise specified error with params[1] text if predicate returns false", async function() {
 			const instance=_createInstance({
 				params: [input=>input, "error message"]
 			});

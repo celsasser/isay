@@ -36,7 +36,7 @@ class ModuleMidi extends ModuleIO {
 	 * @throws {Error}
 	 */
 	async read(data) {
-		const path=this._getReadPath(data);
+		const path=await this._getReadPath(data);
 		return midi.parseMidiFile(path);
 	}
 
@@ -47,7 +47,7 @@ class ModuleMidi extends ModuleIO {
 	 * @throws {Error}
 	 */
 	async write(data) {
-		const uri=this._getWritePath();
+		const uri=await this._getWritePath(data);
 		assertType(data, "Object");
 		return fs.ensureDir(path.parse(uri).dir)
 			.then(()=>{

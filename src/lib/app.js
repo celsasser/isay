@@ -8,7 +8,7 @@
 const _=require("lodash");
 const constant=require("../common/constant");
 const {ModuleIO}=require("./_io");
-const {assertPredicate, assertType}=require("./_data");
+const {resolveType}=require("./_data");
 
 /**
  * A body of functionality that affects application execution
@@ -33,8 +33,9 @@ class ModuleApp extends ModuleIO {
 	 * @return {Promise<*>}
 	 */
 	async assert(blob) {
-		const predicate=assertPredicate(this.params[0]),
-			result=await predicate(blob);
+		const result=await resolveType(blob, this.params[0], "*", {
+			allowNull: true
+		});
 		if(Boolean(result)===false) {
 			throw new Error(_.get(this.params, 1, "assertion failed"));
 		}
@@ -50,9 +51,9 @@ class ModuleApp extends ModuleIO {
 	 */
 	async sleep(blob) {
 		let totalMillis;
-		assertType(this.params[0], ["Number", "Object"]);
-		if(this.params[0].constructor.name==="Number") {
-			totalMillis=this.params[0]*1000;
+		const param=await resolveType(blob, this.params[0], ["Number", "Object"]);
+		if(param.constructor.name==="Number") {
+			totalMillis=param*1000;
 		} else {
 			const {
 				days=0,
@@ -60,7 +61,7 @@ class ModuleApp extends ModuleIO {
 				millis=0,
 				minutes=0,
 				seconds=0
-			}=this.params[0];
+			}=param;
 			totalMillis=millis
 				+seconds*1000
 				+minutes*1000*60

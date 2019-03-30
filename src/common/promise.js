@@ -41,7 +41,7 @@ function series(series=[], initialParameter=undefined) {
 		}
 	}
 	return series.reduce((current, next)=>current.then(next), Promise.resolve(initialParameter));
-};
+}
 
 module.exports={
 	parallel: Promise.all,

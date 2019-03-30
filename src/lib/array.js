@@ -7,7 +7,7 @@
 
 const _=require("lodash");
 const {ModuleBase}=require("./_base");
-const {assertPredicate, assertType}=require("./_data");
+const {assertPredicate, assertType, getType, resolveType}=require("./_data");
 const util=require("../common/util");
 
 /**
@@ -58,42 +58,78 @@ class ModuleArray extends ModuleBase {
 	}
 
 	/**
-	 * Filters array selecting truthy returns by predicate
+	 * Filters array selecting truthy returns by either predicate or value
 	 * @resolves predicate:MapPredicate in this.params[0]
+	 * @resolves value:* in this.params[0]
 	 * @param {DataBlob} blob
 	 * @returns {Promise<Array<DataBlob>>}
 	 * @throws {Error}
 	 */
 	async filter(blob) {
-		const array=this._assertArray(blob),
-			length=array.length,
-			predicate=assertPredicate(this.params[0]),
-			result=[];
-		for(let index=0; index<length; index++) {
-			if(await predicate(array[index], index)) {
-				result.push(array[index]);
+		const array=this._assertArray(blob);
+		if(_.isFunction(this.params[0])) {
+			const length=array.length,
+				predicate=assertPredicate(this.params[0]),
+				result=[];
+			for(let index=0; index<length; index++) {
+				if(await predicate(array[index], index)) {
+					result.push(array[index]);
+				}
+			}
+			return result;
+		} else {
+			const value=await resolveType(blob, this.params[0], "*", {allowAll: true}),
+				type=getType(value);
+			// lodash's filter is not designed for value types. Probably because its not likely to be used.
+			// Nonetheless one could argue on behalf of them so if they are searching by value then we intervene.
+			if(type==="Array" || type==="Object") {
+				return _.filter(array, value);
+			} else {
+				return _.filter(array, _.isEqual.bind(_, value));
 			}
 		}
-		return result;
 	}
 
 	/**
 	 * Finds first element using predicate
 	 * @resolves predicate:MapPredicate in this.params[0]
+	 * @resolves value:* in this.params[0]
 	 * @param {DataBlob} blob
 	 * @returns {Promise<Array<DataBlob>>}
 	 * @throws {Error}
 	 */
 	async find(blob) {
-		const array=this._assertArray(blob),
-			length=array.length,
-			predicate=assertPredicate(this.params[0]);
-		for(let index=0; index<length; index++) {
-			if(await predicate(array[index], index)) {
-				return array[index];
+		const array=this._assertArray(blob);
+		if(_.isFunction(this.params[0])) {
+			const length=array.length,
+				predicate=assertPredicate(this.params[0]);
+			for(let index=0; index<length; index++) {
+				if(await predicate(array[index], index)) {
+					return array[index];
+				}
 			}
+			return null;
+		} else {
+			const value=await resolveType(blob, this.params[0], "*", {allowAll: true});
+			return _.find(array, value);
 		}
-		return null;
+	}
+
+	/**
+	 * Returns the first element or the first n elements of the input array
+	 * @resolves count:number in params[0]
+	 * @param {DataBlob} blob
+	 * @returns {Promise<(DataBlob|Array<DataBlob>)>}
+	 * @throws {Error}
+	 */
+	async first(blob) {
+		const array=this._assertArray(blob);
+		if(this.params.length===0) {
+			return array[0];
+		} else {
+			const count=await resolveType(blob, this.params[0], "Number");
+			return array.slice(0, count);
+		}
 	}
 
 	/**
@@ -107,6 +143,25 @@ class ModuleArray extends ModuleBase {
 	 */
 	async insert(blob) {
 		return this._insert(blob, false);
+	}
+
+	/**
+	 * Returns the last element or last n elements of the input array
+	 * @resolves count:number in params[0]
+	 * @param {DataBlob} blob
+	 * @returns {Promise<(DataBlob|Array<DataBlob>)>}
+	 * @throws {Error}
+	 */
+	async last(blob) {
+		const array=this._assertArray(blob);
+		if(this.params.length===0) {
+			return (array.length>0)
+				? array[array.length-1]
+				: undefined;
+		} else {
+			const count=await resolveType(blob, this.params[0], "Number");
+			return array.slice(array.length-count);
+		}
 	}
 
 	/**
@@ -150,16 +205,14 @@ class ModuleArray extends ModuleBase {
 		const params=(this.params.length===0)
 			? _.isArray(blob) ? blob : [blob]
 			: this.params;
-		assertType(params[0], "Number");
+		let param=await resolveType(blob, params[0], "Number");
 		if(params.length===1) {
 			stopIndex=params[0];
 		} else {
-			assertType(params[1], "Number");
-			startIndex=params[0];
-			stopIndex=params[1];
+			startIndex=param;
+			stopIndex=await resolveType(blob, params[1], "Number");
 			if(params.length>=3) {
-				assertType(params[2], "Number");
-				increment=params[2];
+				increment=await resolveType(blob, params[2], "Number");
 			}
 		}
 		for(startIndex; startIndex<stopIndex; startIndex+=increment) {
@@ -212,9 +265,15 @@ class ModuleArray extends ModuleBase {
 		let startIndex=0,
 			stopIndex=array.length;
 		if(this.params.length>0) {
-			assertType(this.params[0], ["Number", "Object"]);
-			if(this.params[0].constructor.name==="Object") {
-				const {count, start, stop}=this.params[0];
+			let param=await resolveType(blob, this.params[0], ["Number", "Object"]);
+			if(param.constructor.name==="Number") {
+				startIndex=ModuleArray._normalizeIndex(blob, param, true);
+				if(this.params.length>1) {
+					param=await resolveType(blob, this.params[1], "Number");
+					stopIndex=ModuleArray._normalizeIndex(blob, param, false);
+				}
+			} else {
+				const {count, start, stop}=param;
 				if(start!==undefined) {
 					startIndex=ModuleArray._normalizeIndex(blob, start, true);
 				}
@@ -224,17 +283,12 @@ class ModuleArray extends ModuleBase {
 				if(count!==undefined) {
 					if(stop!==undefined) {
 						if(start!==undefined) {
-							throw new Error(`invalid slice configuration - ${JSON.stringify(this.params[0])}`);
+							throw new Error(`invalid slice configuration - ${JSON.stringify(param)}`);
 						}
 						startIndex=stopIndex-count;
 					} else {
 						stopIndex=startIndex+count;
 					}
-				}
-			} else {
-				startIndex=ModuleArray._normalizeIndex(blob, this.params[0], true);
-				if(this.params.length>1) {
-					stopIndex=ModuleArray._normalizeIndex(blob, this.params[1], false);
 				}
 			}
 		}
@@ -257,22 +311,19 @@ class ModuleArray extends ModuleBase {
 				? this.params
 				: (this.params[0].constructor.name==="Array")
 					? this.params[0]
-					: [this.params[0]];
-			const {directions, properties}=sorts.reduce((result, sort)=>{
-				assertType(sort, ["Number", "String"]);
-				sort=String(sort);
+					: [this.params[0]],
+				directions=[],
+				properties=[];
+			for(let index=0; index<sorts.length; index++) {
+				let sort=String(await resolveType(blob, sorts[index], ["Number", "String"]));
 				if(sort.startsWith("-")) {
-					result.properties.push(sort.substr(1));
-					result.directions.push("desc");
+					properties.push(sort.substr(1));
+					directions.push("desc");
 				} else {
-					result.properties.push(sort);
-					result.directions.push("asc");
+					properties.push(sort);
+					directions.push("asc");
 				}
-				return result;
-			}, {
-				directions: [],
-				properties: []
-			});
+			}
 			return _.orderBy(blob, properties, directions);
 		}
 	}
@@ -336,7 +387,7 @@ class ModuleArray extends ModuleBase {
 	 * @resolves predicate:function():Array<*> in this.params[0]
 	 * @resolves {index:number=blob.length, expand:boolean=false} in this.params[1]
 	 * @param {DataBlob} blob
-	 * @param {boolean} tail - whether to default to head or tail as index point
+	 * @param {boolean} tail - whether to use head or tail as a default insert point
 	 * @returns {Promise<Array<DataBlob>>}
 	 * @throws {Error}
 	 * @private
@@ -347,17 +398,13 @@ class ModuleArray extends ModuleBase {
 			allowUndefined: true
 		});
 
-		let concat, {
-			index=(tail) ? array.length : 0,
-			expand=false
-		}=(this.params[1] || {});
-
+		let concat=await resolveType(blob, this.params[0], "*"),
+			{
+				index=(tail) ? array.length : 0,
+				expand=false
+			}=(this.params[1] || {});
 		index=ModuleArray._normalizeIndex(array, index);
-		if(_.isFunction(this.params[0])) {
-			concat= await assertPredicate(this.params[0])();
-		} else {
-			concat=this.params[0];
-		}
+
 		if(expand) {
 			concat=this._assertArray(concat);
 			return array.slice(0, index)

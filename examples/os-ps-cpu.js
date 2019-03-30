@@ -5,7 +5,7 @@ loop.forever(
 		format: "${l} ${ri} ${ri} ${ri} ${r} ${r} ${l+}"
 	}))
 	.array.sort(-3)
-	.array.slice({count: 25})
+	.array.first({count: 25})
 	.array.insert(["USER", "PID", "PRIORITY", "SIZE KB", "U+S TIME", "U TIME", "COMMAND"])
 	.tty.clear()
 	.array.each(

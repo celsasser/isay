@@ -34,7 +34,7 @@ class ModuleYaml extends ModuleIO {
 	 * @throws {Error}
 	 */
 	async read(data) {
-		const path=this._getReadPath(data);
+		const path=await this._getReadPath(data);
 		return fs.readFile(path, {encoding: "utf8"})
 			.then(jsyaml.load.bind(jsyaml));
 	}
@@ -63,7 +63,7 @@ class ModuleYaml extends ModuleIO {
 	 * @throws {Error} if path cannot be found
 	 */
 	async write(data) {
-		const path=this._getWritePath(),
+		const path=await this._getWritePath(data),
 			encoded=(typeof (data)==="string")
 				? data
 				: jsyaml.dump(data);

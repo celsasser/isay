@@ -252,26 +252,6 @@ describe("lib.ModuleArray", function() {
 		});
 	});
 
-	// we test _insert thoroughly. Here we just do some sanity checking
-	describe("insert", function() {
-		it("should throw exception if input not an array", async function() {
-			const instance=_createInstance();
-			return instance.insert("string")
-				.then(assert.notCalled)
-				.catch(error=>error.message==="expecting array but found String");
-		});
-
-		it("should properly append", async function() {
-			const instance=_createInstance({
-				params: [1]
-			});
-			return instance.insert([0])
-				.then(result=>{
-					assert.deepEqual(result, [1, 0]);
-				});
-		});
-	});
-
 	describe("each", function() {
 		it("should call synchronous predicate for every element in the array", async function() {
 			const sequence=[],
@@ -326,10 +306,35 @@ describe("lib.ModuleArray", function() {
 			const result=await instance.filter([1, 2, 3]);
 			assert.deepEqual(result, []);
 		});
+
+		it("should filter elements by value", async function() {
+			const instance=_createInstance({
+				params: [2]
+			});
+			const result=await instance.filter([1, 2, 3, 2, 1]);
+			assert.deepEqual(result, [2, 2]);
+		});
+
+		it("should find element by partial match", async function() {
+			const instance=_createInstance({
+				params: [{a: 2}]
+			});
+			const result=await instance.filter([
+				{a: 1, b: 1},
+				{a: 2, b: 2},
+				{a: 3, b: 3},
+				{a: 2, b: 4},
+				{a: 1, b: 5}
+			]);
+			assert.deepEqual(result, [
+				{a: 2, b: 2},
+				{a: 2, b: 4}
+			]);
+		});
 	});
 
 	describe("find", function() {
-		it("should find the first result and return element", async function() {
+		it("should find the first result by predicate and return element", async function() {
 			const instance=_createInstance({
 				params: [value=>value===3]
 			});
@@ -337,12 +342,160 @@ describe("lib.ModuleArray", function() {
 			assert.deepEqual(result, 3);
 		});
 
-		it("should return null if predicate doesn't find his man", async function() {
+		it("should return null if predicate doesn't find his man by predicate", async function() {
 			const instance=_createInstance({
 				params: [()=>false]
 			});
 			const result=await instance.find([1, 2, 3]);
 			assert.strictEqual(result, null);
+		});
+
+		it("should find element by value", async function() {
+			const instance=_createInstance({
+				params: [2]
+			});
+			const result=await instance.find([1, 2, 3]);
+			assert.strictEqual(result, result);
+		});
+
+		it("should find element by partial match", async function() {
+			const instance=_createInstance({
+				params: [{a: 2}]
+			});
+			const result=await instance.find([
+				{a: 1, b: 1},
+				{a: 2, b: 2},
+				{a: 3, b: 3}
+			]);
+			assert.deepEqual(result, {a: 2, b: 2});
+		});
+	});
+
+	describe("first", function() {
+		it("should throw exception if input not an array", async function() {
+			const instance=_createInstance();
+			return instance.first("string")
+				.then(assert.notCalled)
+				.catch(error=>{
+					assert.strictEqual(error.message, "expecting array but found String");
+				});
+		});
+
+		it("should throw exception if param is not supported", async function() {
+			const instance=_createInstance({
+				params: ["string"]
+			});
+			return instance.first([])
+				.then(assert.notCalled)
+				.catch(error=>{
+					assert.strictEqual(error.message, "expecting Number but found String");
+				});
+		});
+
+		it("should return first element if no params are specified", async function() {
+			const instance=_createInstance();
+			return instance.first([1, 2])
+				.then(result=>assert.strictEqual(result, 1));
+		});
+
+		it("should return undefined if no elements and no params", async function() {
+			const instance=_createInstance();
+			return instance.first([])
+				.then(result=>assert.strictEqual(result, undefined));
+		});
+
+		it("should return the first n number of elements if params[0] is number", async function() {
+			const instance=_createInstance({
+				params: [2]
+			});
+			return instance.first([0, 1, 2])
+				.then(result=>assert.deepEqual(result, [0, 1]));
+		});
+
+		it("should return the first n number of elements as specified by predicate in params[0]", async function() {
+			const input=[0, 1, 2],
+				instance=_createInstance({
+					params: [_input=>{
+						assert.strictEqual(_input, _input);
+						return 2;
+					}]
+				});
+			return instance.first(input)
+				.then(result=>assert.deepEqual(result, [0, 1]));
+		});
+	});
+
+	// we test _insert thoroughly. Here we just do some sanity checking
+	describe("insert", function() {
+		it("should throw exception if input not an array", async function() {
+			const instance=_createInstance();
+			return instance.insert("string")
+				.then(assert.notCalled)
+				.catch(error=>error.message==="expecting array but found String");
+		});
+
+		it("should properly append", async function() {
+			const instance=_createInstance({
+				params: [1]
+			});
+			return instance.insert([0])
+				.then(result=>{
+					assert.deepEqual(result, [1, 0]);
+				});
+		});
+	});
+
+	describe("last", function() {
+		it("should throw exception if input not an array", async function() {
+			const instance=_createInstance();
+			return instance.last("string")
+				.then(assert.notCalled)
+				.catch(error=>{
+					assert.strictEqual(error.message, "expecting array but found String");
+				});
+		});
+
+		it("should throw exception if param is not supported", async function() {
+			const instance=_createInstance({
+				params: ["string"]
+			});
+			return instance.last([])
+				.then(assert.notCalled)
+				.catch(error=>{
+					assert.strictEqual(error.message, "expecting Number but found String");
+				});
+		});
+
+		it("should return last element if no params are specified", async function() {
+			const instance=_createInstance();
+			return instance.last([1, 2])
+				.then(result=>assert.strictEqual(result, 2));
+		});
+
+		it("should return undefined if no elements and no params", async function() {
+			const instance=_createInstance();
+			return instance.last([])
+				.then(result=>assert.strictEqual(result, undefined));
+		});
+
+		it("should return the last n number of elements if params[0] is number", async function() {
+			const instance=_createInstance({
+				params: [2]
+			});
+			return instance.last([0, 1, 2])
+				.then(result=>assert.deepEqual(result, [1, 2]));
+		});
+
+		it("should return the last n number of elements as specified by predicate in params[0]", async function() {
+			const input=[0, 1, 2],
+				instance=_createInstance({
+					params: [_input=>{
+						assert.strictEqual(_input, _input);
+						return 2;
+					}]
+				});
+			return instance.last(input)
+				.then(result=>assert.deepEqual(result, [1, 2]));
 		});
 	});
 

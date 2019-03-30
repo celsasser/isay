@@ -24,93 +24,103 @@ describe("lib.ModuleIO", function() {
 	}
 
 	describe("_getReadPath", function() {
-		it("should throw exception if path cannot be found", function() {
+		it("should throw exception if path cannot be found", async function() {
 			const instance=_createInstance();
-			assert.throws(()=>instance._getReadPath(),
-				error=>error.message==="expecting string as file-path but found undefined");
+			return instance._getReadPath()
+				.then(assert.notCalled)
+				.catch(error=>assert.strictEqual(error.message, "expecting String but found undefined"));
 		});
 
-		it("should use input data as path if specified", function() {
+		it("should use input data as path if specified", async function() {
 			const instance=_createInstance();
-			assert.strictEqual(instance._getReadPath("path"), "path");
+			return instance._getReadPath("path")
+				.then(value=>assert.strictEqual(value, "path"));
 		});
 
-		it("should use params[0] as path if specified", function() {
+		it("should use params[0] as path if specified", async function() {
 			const instance=_createInstance({
 				params: ["path"]
 			});
-			assert.strictEqual(instance._getReadPath(), "path");
+			return instance._getReadPath("path")
+				.then(value=>assert.strictEqual(value, "path"));
 		});
 	});
 
 	describe("_getReadPathAndOptions", function() {
 		it("should throw exception if path cannot be found", function() {
 			const instance=_createInstance();
-			assert.throws(()=>instance._getReadPathAndOptions(),
-				error=>error.message==="expecting string as file-path but found undefined");
+			return instance._getReadPathAndOptions()
+				.then(assert.notCalled)
+				.catch(error=>assert.strictEqual(error.message, "expecting String but found undefined"));
 		});
 
 		it("should use input data as path if specified", function() {
 			const instance=_createInstance();
-			assert.deepEqual(instance._getReadPathAndOptions("path"), {
-				"encoding": "utf8",
-				"path": "path"
-			});
+			return instance._getReadPathAndOptions("path")
+				.then(result=>assert.deepEqual(result, {
+					"encoding": "utf8",
+					"path": "path"
+				}));
 		});
 
-		it("should use params[0] as path if specified", function() {
+		it("should use params[0] as path if specified", async function() {
 			const instance=_createInstance({
 				params: ["path"]
 			});
-			assert.deepEqual(instance._getReadPathAndOptions(), {
-				"encoding": "utf8",
-				"path": "path"
-			});
+			return instance._getReadPathAndOptions()
+				.then(result=>assert.deepEqual(result, {
+					"encoding": "utf8",
+					"path": "path"
+				}));
 		});
 	});
 
 	describe("_getWritePath", function() {
-		it("should throw exception if path cannot be found", function() {
+		it("should throw exception if path cannot be found", async function() {
 			const instance=_createInstance();
-			assert.throws(()=>instance._getWritePath(),
-				error=>error.message==="expecting string as file-path but found undefined");
+			return instance._getWritePath()
+				.then(assert.notCalled)
+				.catch(error=>error.message==="expecting string as file-path but found undefined");
 		});
 
-		it("should use params[0] as path", function() {
+		it("should use params[0] as path", async function() {
 			const instance=_createInstance({
 				params: ["path"]
 			});
-			assert.strictEqual(instance._getWritePath(), "path");
+			return instance._getWritePath()
+				.then(result=>assert.strictEqual(result, "path"));
 		});
 	});
 
 	describe("_getWritePathAndOptions", function() {
-		it("should throw exception if path cannot be found", function() {
+		it("should throw exception if path cannot be found", async function() {
 			const instance=_createInstance();
-			assert.throws(()=>instance._getWritePathAndOptions(),
-				error=>error.message==="expecting string as file-path but found undefined");
+			return instance._getWritePathAndOptions()
+				.catch(error=>error.message==="expecting string as file-path but found undefined");
 		});
 
-		it("should use params[0] as path and default encoding", function() {
+		it("should use params[0] as path and default encoding", async function() {
 			const instance=_createInstance({
 				params: ["path"]
 			});
-			assert.deepEqual(instance._getWritePathAndOptions(), {
-				"encoding": "utf8",
-				"path": "path"
-			});
+			return instance._getWritePathAndOptions()
+				.then(result=>assert.deepEqual(result, {
+					"encoding": "utf8",
+					"path": "path"
+				}));
 		});
 
-		it("should use params[0] as path and params[1] for encoding", function() {
+		it("should use params[0] as path and params[1] for encoding", async function() {
 			const instance=_createInstance({
 				params: ["path", {
-					encoding: "utf8"
+					encoding: "ascii"
 				}]
 			});
-			assert.deepEqual(instance._getWritePathAndOptions(), {
-				"encoding": "utf8",
-				"path": "path"
-			});
+			return instance._getWritePathAndOptions()
+				.then(result=>assert.deepEqual(result, {
+					"encoding": "ascii",
+					"path": "path"
+				}));
 		});
 	});
 });

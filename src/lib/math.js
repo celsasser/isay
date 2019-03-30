@@ -6,7 +6,7 @@
  */
 
 const {ModuleBase}=require("./_base");
-const {assertType}=require("./_data");
+const {assertType, resolveType}=require("./_data");
 
 /**
  * Support for basic arithmetic
@@ -46,20 +46,13 @@ class ModuleMath extends ModuleBase {
 	 * @returns {Promise<([div, mod]|Array<[div, mod]>)>}
 	 */
 	async divmod(input) {
-		assertType(input, ["Array", "Number"]);
-		assertType(this.params[0], "Number");
-		const _calculate=(value)=>{
-			const div=Math.floor(value/this.params[0]),
-				mod=(value-div*this.params[0]);
+		return this._applyBinary(input, (a, b)=>{
+			const div=Math.floor(a/b),
+				mod=(a-div*b);
 			// We can represent this as an array or object. Being in the math domain I am going to keep everything arrays
 			// to keep our interface consistent.
 			return [div, mod];
-		};
-		if(input.constructor.name==="Array") {
-			return input.map(_calculate);
-		} else {
-			return _calculate(input);
-		}
+		});
 	}
 
 	/**
@@ -136,24 +129,53 @@ class ModuleMath extends ModuleBase {
 
 	/**
 	 * Applies operator either the <param>input</param> and params[0] or to the sequence of <param>input</param>
+	 * There are three different types of operations this function supports:
+	 * 1. input=value-type: how we treat this depends on the <param>input</param>
+	 *    a. params.length=0: this is an error condition
+	 *    b. params[0]=value-type: return value-type calculated as follows - <code>operator(input, params[0])</code>
+	 *    c. params[0]=array: return array result as follows - <code>operator(input, params[0][n])</code>
+	 * 2. input=array: how we treat this depends on the <param>input</param>
+	 *    a. params.length=0: no param then we reduce and apply the operation in succession to <param>input</param>
+	 *    b. params[0]=value-type: then we return an array <code>operator(input, param[n])</code>
+	 *    c. params[0]=array: we process each element as follows - <code>operator(input[n], param[n])</code>
+	 *       if the array lengths differ then error is thrown
 	 * @param {number|Array<number>} input
-	 * @param {function(a:number,b:number):number} operator
+	 * @param {function(a:number,b:number):number} operation
 	 * @return {number}
 	 * @throws {Error}
 	 * @private
 	 */
-	_applyBinary(input, operator) {
+	async _applyBinary(input, operation) {
 		assertType(input, ["Array", "Number"]);
 		if(input.constructor.name==="Number") {
-			assertType(this.params[0], "Number");
-			return operator(input, this.params[0]);
-		} else if(typeof(this.params[0])==="number") {
-			// here we assume that the user wants to apply this.params[0] to each element: operator(input[n], this.params[0])
-			return input.map(value=>operator(value, this.params[0]));
+			const param=await resolveType(input, this.params[0], ["Array", "Number"]);
+			if(param.constructor.name==="Number") {
+				// this is the 1.b condition described in the documentation header
+				return operation(input, param);
+			} else {
+				// this is the 1.c condition described in the documentation header
+				return param.map(operation.bind(null, input));
+			}
 		} else {
-			// here we assume that the user wants to reduce and calculate a single result
-			return input.slice(1)
-				.reduce(operator, input[0]);
+			// input is an Array<number>
+			if(this.params.length===0) {
+				// this is the 2.a condition in the documentation header
+				return input.slice(1)
+					.reduce(operation, input[0]);
+			} else {
+				const param=await resolveType(input, this.params[0], ["Array", "Number"]);
+				if(param.constructor.name==="Number") {
+					// this is the 2.b condition in the documentation header
+					return input.map(value=>operation(value, param));
+				} else {
+					// this is the 2.c condition in the documentation header
+					if(input.length!==param.length) {
+						throw new Error(`input array (${input.length}) and param (${param.length}) differ in length`);
+					} else {
+						return input.map((value, index)=>operation(value, param[index]));
+					}
+				}
+			}
 		}
 	}
 }

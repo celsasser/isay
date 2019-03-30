@@ -34,7 +34,7 @@ class ModuleJson extends ModuleIO {
 	 * @throws {Error}
 	 */
 	async read(data) {
-		const path=this._getReadPath(data);
+		const path=await this._getReadPath(data);
 		return fs.readJSON(path, {encoding: "utf8"});
 	}
 
@@ -64,7 +64,7 @@ class ModuleJson extends ModuleIO {
 	 * @throws {Error} if path cannot be found
 	 */
 	async write(data) {
-		const path=this._getWritePath();
+		const path=await this._getWritePath(data);
 		await file.writeJSON({
 			async: true,
 			data: data,

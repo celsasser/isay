@@ -49,6 +49,7 @@ class ModuleBase {
 
 		/**
 		 * Logs the action with input and params info
+		 * @param {Number} max
 		 * @return {Promise}
 		 */
 		const _logDebug=(max=512)=>{
@@ -79,7 +80,7 @@ class ModuleBase {
 			blob=this._preprocessChunk(data);
 			if(configuration.options.debug) {
 				// let's allow them to dump without limits if they have also specified "verbose"
-				await _logDebug(log.level.isLog("verbose") 
+				await _logDebug(log.level.isLog("verbose")
 					? Number.MAX_SAFE_INTEGER
 					: 512);
 			} else if(log.level.isLog("verbose")) {

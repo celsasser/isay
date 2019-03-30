@@ -36,8 +36,8 @@ function formatMouseSpecification(format, data) {
 				} else if(data===null) {
 					return "null";
 				} else if(precision!==undefined) {
-					assertType(data, "Number");
-					return data.toFixed(precision);
+					return assertType(data, "Number")
+						.toFixed(precision);
 				}
 				return String(data);
 			}

@@ -7,7 +7,11 @@
 
 const _=require("lodash");
 const {ModuleBase}=require("./_base");
-const {assertPredicate, assertType, assertTypesEqual}=require("./_data");
+const {
+	assertType,
+	assertTypesEqual,
+	resolveType
+}=require("./_data");
 
 /**
  * Base class for tests so that we can support the positive and negative tests with one set of functionality
@@ -57,12 +61,12 @@ class ModuleTest extends ModuleBase {
 	 */
 	async endsWith(blob) {
 		assertType(blob, "String");
-		assertType(this.params[0], ["Array", "String"]);
-		const searchEndings=_.isArray(this.params[0])
-			? this.params[0]
-			: [this.params[0]];
-		for(let search of searchEndings) {
-			if(blob.endsWith(search)) {
+		let values=await resolveType(blob, this.params[0], ["Array", "String"]);
+		if(values.constructor.name!=="Array") {
+			values=[values];
+		}
+		for(let value of values) {
+			if(blob.endsWith(value)) {
 				return this._processTestResult(blob, true);
 			}
 		}
@@ -78,7 +82,11 @@ class ModuleTest extends ModuleBase {
 	 * @attribute flow
 	 */
 	async else(blob) {
-		return this._processIfFlow(blob);
+		if(this.params.length===0) {
+			return Promise.resolve(blob);
+		} else  {
+			return resolveType(blob, this.params[0], "*", {allowAll: true});
+		}
 	}
 
 	/**
@@ -87,7 +95,8 @@ class ModuleTest extends ModuleBase {
 	 * @returns {Promise<boolean>}
 	 */
 	async equal(blob) {
-		const result=_.isEqual(blob, this.params[0]);
+		const value=await resolveType(blob, this.params[0], "*", {allowAll: true}),
+			result=_.isEqual(blob, value);
 		return this._processTestResult(blob, result);
 	}
 
@@ -116,8 +125,8 @@ class ModuleTest extends ModuleBase {
 	 * @returns {Promise<boolean>}
 	 */
 	async oneOf(blob) {
-		assertType(this.params[0], "Array");
-		for(let value of this.params[0]) {
+		const values=await resolveType(blob, this.params[0], "Array");
+		for(let value of values) {
 			if(_.isEqual(blob, value)) {
 				return this._processTestResult(blob, true);
 			}
@@ -132,12 +141,12 @@ class ModuleTest extends ModuleBase {
 	 */
 	async startsWith(blob) {
 		assertType(blob, "String");
-		assertType(this.params[0], ["Array", "String"]);
-		const searchEndings=_.isArray(this.params[0])
-			? this.params[0]
-			: [this.params[0]];
-		for(let search of searchEndings) {
-			if(blob.startsWith(search)) {
+		let values=await resolveType(blob, this.params[0], ["Array", "String"]);
+		if(values.constructor.name!=="Array") {
+			values=[values];
+		}
+		for(let value of values) {
+			if(blob.startsWith(value)) {
 				return this._processTestResult(blob, true);
 			}
 		}
@@ -153,13 +162,8 @@ class ModuleTest extends ModuleBase {
 	 */
 	async test(blob) {
 		if(this.params.length>0) {
-			if(_.isFunction(this.params[0])) {
-				const predicate=assertPredicate(this.params[0]);
-				return predicate(blob)
-					.then(result=>this._processTestResult(blob, Boolean(result)));
-			} else {
-				return this._processTestResult(blob, Boolean(this.params[0]));
-			}
+			const value=await resolveType(blob, this.params[0], "*", {allowAll: true});
+			return this._processTestResult(blob, Boolean(value));
 		} else {
 			return this._processTestResult(blob, Boolean(blob));
 		}
@@ -174,7 +178,11 @@ class ModuleTest extends ModuleBase {
 	 * @attribute flow
 	 */
 	async then(blob) {
-		return this._processIfFlow(blob);
+		if(this.params.length===0) {
+			return Promise.resolve(blob);
+		} else  {
+			return resolveType(blob, this.params[0], "*", {allowAll: true});
+		}
 	}
 
 	/**
@@ -184,9 +192,9 @@ class ModuleTest extends ModuleBase {
 	 * @returns {Promise<boolean>}
 	 */
 	async type(blob) {
-		assertType(this.params[0], ["Array", "String"]);
+		const types=await resolveType(blob, this.params[0], ["Array", "String"]);
 		try {
-			assertType(blob, this.params[0]);
+			assertType(blob, types);
 			return this._processTestResult(blob, true);
 		} catch(error) {
 			return this._processTestResult(blob, false);
@@ -197,34 +205,17 @@ class ModuleTest extends ModuleBase {
 	/**
 	 * Performs the <param>test</param> on <param>blob</param> and this.params[0] and forwards the result
 	 * to <code>this._processTestResult</code>
-	 * @param {DataBlob} blob
-	 * @param {function(v1:*, v2:*):boolean} test
+	 * @param {DataBlob} blob - input to the calling operation
+	 * @param {function(v1:*, v2:*):boolean|Date|Number|String} test
 	 * @returns {Promise<DataBlob>}
 	 * @private
 	 */
-	_processBinaryTest(blob, test) {
+	async _processBinaryTest(blob, test) {
 		assertType(blob, ["Date", "Number", "String"]);
-		assertType(this.params[0], ["Date", "Number", "String"]);
-		assertTypesEqual(blob, this.params[0]);
-		const result=test(blob, this.params[0]);
+		const value=await resolveType(blob, this.params[0], ["Date", "Number", "String"]);
+		assertTypesEqual(blob, value);
+		const result=test(blob, value);
 		return this._processTestResult(blob, result);
-	}
-
-	/**
-	 * Processes then/else action
-	 * @param {DataBlob} blob
-	 * @returns {Promise<*>}
-	 * @private
-	 */
-	_processIfFlow(blob) {
-		if(this.params.length===0) {
-			return Promise.resolve(blob);
-		} else if(_.isFunction(this.params[0])) {
-			const predicate=assertPredicate(this.params[0]);
-			return predicate(blob);
-		} else {
-			return Promise.resolve(this.params[0]);
-		}
 	}
 
 	/**

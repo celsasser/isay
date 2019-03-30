@@ -22,14 +22,8 @@ class ModuleObject extends ModuleIO {
 	 * @returns {Promise<DataBlob>}
 	 */
 	async each(blob) {
-		assertType(blob, ["Array", "Object"], {
-			allowNull: true,
-			allowUndefined: true
-		});
-		assertType(this.params[1], "Object", {
-			allowNull: true,
-			allowUndefined: true
-		});
+		assertType(blob, ["Array", "Object"], {allowAll: true});
+		assertType(this.params[1], "Object", {allowAll: true});
 		const predicate=assertPredicate(this.params[0]), {
 				recurse=false
 			}=(this.params[1] || {}),
@@ -50,10 +44,7 @@ class ModuleObject extends ModuleIO {
 	 */
 	async get(blob) {
 		// why do we allow arrays? Because a user may describe a path in terms of indexes: _.get("0.name", [{name: "George"}]
-		assertType(blob, ["Array", "Object"], {
-			allowNull: true,
-			allowUndefined: true
-		});
+		assertType(blob, ["Array", "Object"], {allowAll: true});
 		return (this.params.length>0)
 			? _.get(blob, this.params[0])
 			: blob;
@@ -69,15 +60,9 @@ class ModuleObject extends ModuleIO {
 	 * @returns {Promise<DataBlob>}
 	 */
 	async map(blob) {
-		assertType(blob, ["Array", "Object"], {
-			allowNull: true,
-			allowUndefined: true
-		});
+		assertType(blob, ["Array", "Object"], {allowAll: true});
 		assertType(this.params[0], ["Array", "Function"]);
-		assertType(this.params[1], "Object", {
-			allowNull: true,
-			allowUndefined: true
-		});
+		assertType(this.params[1], "Object", {allowAll: true});
 		const {
 			flatten=false,
 			recurse=false
@@ -139,10 +124,7 @@ class ModuleObject extends ModuleIO {
 	async toArray(blob) {
 		const result=[],
 			predicate=assertPredicate(_.get(this.params, 0, object=>object));
-		assertType(blob, "Object", {
-			allowNull: true,
-			allowUndefined: true
-		});
+		assertType(blob, "Object", {allowAll: true});
 		for(let key in blob) {
 			result.push(await predicate(blob[key], key));
 		}

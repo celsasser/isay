@@ -9,7 +9,7 @@ const _=require("lodash");
 const fs=require("fs-extra");
 const path=require("path");
 const {ModuleIO}=require("./_io");
-const {assertType}=require("./_data");
+const {assertType, resolveType}=require("./_data");
 const spawn=require("../common/spawn");
 
 /**
@@ -29,16 +29,14 @@ class ModuleFile extends ModuleIO {
 	async copy(data) {
 		let source, target, options;
 		if(data) {
-			source=data;
-			target=this.params[0];
+			source=assertType(data, "String");
+			target=await resolveType(data, this.params[0], "String");
 			options=_.get(this.params, 1, {});
 		} else {
-			source=this.params[0];
-			target=this.params[1];
+			source=await resolveType(data, this.params[0], "String");
+			target=await resolveType(data, this.params[1], "String");
 			options=_.get(this.params, 2, {});
 		}
-		this._assetPath(source);
-		this._assetPath(target);
 		// Keeping with mouse's rule of creating hierarchy that does not exists, we are going to
 		// ensure that as much of the target that can be known to be directories exists
 		await this._ensureDirectoryHierarchy(target);
@@ -78,7 +76,7 @@ class ModuleFile extends ModuleIO {
 	 * @throws {Error}
 	 */
 	async create(data) {
-		const {path, type}=this._getReadPathAndOptions(data),
+		const {path, type}=await this._getReadPathAndOptions(data),
 			directory=_.includes(["dir", "directory"], (type||"").toLocaleLowerCase());
 		return fs.pathExists(path)
 			.then(exists=>{
@@ -102,7 +100,7 @@ class ModuleFile extends ModuleIO {
 	 * @throws {Error}
 	 */
 	async delete(data) {
-		const path=this._getReadPath(data);
+		const path=await this._getReadPath(data);
 		return fs.remove(path)
 			.then(Promise.resolve.bind(Promise, data));
 	}
@@ -111,13 +109,13 @@ class ModuleFile extends ModuleIO {
 	 * Ensures that the file or directory pointed to by "path" exists.
 	 * It looks for the path as follows:
 	 * @resolves path:string in data|this.params[0]
-	 * @resolves options:Object in this.params[0]|this.params[2]
+	 * @resolves options:Object in this.params[0]|this.params[1]
 	 * @param {string|undefined} data
 	 * @return {Promise<void>}
 	 * @throws {Error}
 	 */
 	async ensure(data) {
-		const {path, type}=this._getReadPathAndOptions(data),
+		const {path, type}=await this._getReadPathAndOptions(data),
 			directory=_.includes(["dir", "directory"], (type||"").toLocaleLowerCase());
 		return fs.pathExists(path)
 			.then(exists=>{
@@ -164,7 +162,7 @@ class ModuleFile extends ModuleIO {
 	 * @throws {Error}
 	 */
 	async read(data) {
-		const {path, encoding}=this._getReadPathAndOptions(data);
+		const {path, encoding}=await this._getReadPathAndOptions(data);
 		return fs.readFile(path, {encoding});
 	}
 
@@ -177,7 +175,7 @@ class ModuleFile extends ModuleIO {
 	 * @throws {Error}
 	 */
 	async write(data) {
-		const {append, encoding, path}=this._getWritePathAndOptions({
+		const {append, encoding, path}=await this._getWritePathAndOptions(data, {
 			append: false,
 			encoding: "utf8"
 		});

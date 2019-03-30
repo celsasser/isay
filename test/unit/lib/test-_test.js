@@ -6,6 +6,7 @@
  */
 
 const assert=require("../../support/assert");
+const {resolveNextTick}=require("../../../src/common/promise");
 const {ModuleTest}=require("../../../src/lib/_test");
 
 describe("lib.ModuleTest", function() {
@@ -149,7 +150,7 @@ describe("lib.ModuleTest", function() {
 				const instance=_createInstance({
 					params: [input=>{
 						assert.strictEqual(input, "input");
-						return "output";
+						return resolveNextTick("output");
 					}]
 				});
 				return instance[action]("input")
@@ -358,7 +359,7 @@ describe("lib.ModuleTest", function() {
 			const instance=_createInstance({
 				params: [input=>{
 					assert.strictEqual(input, "input");
-					return true;
+					return resolveNextTick(true);
 				}]
 			});
 			return instance.test("input")
@@ -371,7 +372,7 @@ describe("lib.ModuleTest", function() {
 			const instance=_createInstance({
 				params: [input=>{
 					assert.strictEqual(input, "input");
-					return "true";
+					return resolveNextTick("true");
 				}]
 			});
 			return instance.test("input")
