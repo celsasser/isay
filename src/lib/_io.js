@@ -3,6 +3,8 @@
  * Date: 2019-02-10
  * Time: 00:21
  * Copyright @2019 by Xraymen Inc.
+ *
+ * Base class for all domains that interact with files
  */
 
 const _=require("lodash");
@@ -17,8 +19,8 @@ const {assertType, getType, resolveType}=require("./_data");
 class ModuleIO extends ModuleBase {
 	/**
 	 * Finds the path as per the following rules
-	 *  - if <code>params[0]</code> is not empty then it will be used as the path
-	 *  - if <code>params[0]</code> is empty then <code>data</data> will be used as the path
+	 *  - if <code>params[0]</code> then it will be used as the path
+	 *  - else <code>data</data> will be used as the path
 	 * @resolves path:string in data|this.params[0]
 	 * @param {string|undefined} blob
 	 * @returns {Promise<string>}
@@ -47,11 +49,12 @@ class ModuleIO extends ModuleBase {
 		encoding: "utf8"
 	}) {
 		// we are going to assume it is in param[0] and adjust course if we need to.
-		const param0=await resolveType(blob, this.params[0], ["Object", "String"], {allowAll: true});
+		const param0=await resolveType(blob, this.params[0], ["Object", "String"], {allowNullish: true});
 		if(getType(param0)==="String") {
+			const param1=await resolveType(blob, this.params[1], "Object", {allowNullish: true});
 			return Object.assign({
 				path: param0
-			}, defaults, this.params[1]);
+			}, defaults, param1);
 		} else {
 			return Object.assign({
 				path: assertType(blob, "String")
@@ -81,9 +84,11 @@ class ModuleIO extends ModuleBase {
 	async _getWritePathAndOptions(blob, defaults={
 		encoding: "utf8"
 	}) {
+		const path=await resolveType(blob, this.params[0], "String"),
+			options=await resolveType(blob, this.params[1], "Object", {allowNullish: true});
 		return Object.assign({
-			path: await resolveType(blob, this.params[0], "String")
-		}, defaults, this.params[1]);
+			path
+		}, defaults, options);
 	}
 }
 

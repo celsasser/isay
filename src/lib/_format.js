@@ -3,6 +3,8 @@
  * Date: 2019-03-20
  * Time: 22:40
  * Copyright @2019 by Xraymen Inc.
+ *
+ * Methods designed to format data and parse formatted data
  */
 
 const _=require("lodash");

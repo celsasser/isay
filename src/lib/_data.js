@@ -3,6 +3,9 @@
  * Date: 2019-03-12
  * Time: 23:06
  * Copyright @2019 by Xraymen Inc.
+ *
+ * A suite of functions and methods designed to assist us in dealing with data. This includes
+ * operations such as comparing, validating and resolving data.
  */
 
 const _=require("lodash");
@@ -51,14 +54,14 @@ function assertPredicate(predicate) {
  * Asserts that <param>value</param> is one of the <param>allowed</param> types
  * @param {*} value
  * @param {string|"*"|Array<string>} allowed - "*" will allow any type
- * @param {boolean} allowAll - shorthand for allowNull and allowUndefined
+ * @param {boolean} allowNullish - shorthand for allowNull and allowUndefined
  * @param {boolean} allowNull
  * @param {boolean} allowUndefined
  * @returns {*} returns <param>value</param> if all is good
  * @throws {Error}
  */
 function assertType(value, allowed, {
-	allowAll=false,
+	allowNullish=false,
 	allowNull=false,
 	allowUndefined=false
 }={}) {
@@ -70,7 +73,7 @@ function assertType(value, allowed, {
 				? "a value"
 				: allowed;
 	}
-	if(allowAll) {
+	if(allowNullish) {
 		allowNull=allowUndefined=true;
 	}
 	if(value===undefined) {
@@ -159,14 +162,14 @@ function ensureJson(data) {
  * @param {DataBlob} blob
  * @param {*} value
  * @param {string|"*"|Array<string>} allowed - "*" will allow any type
- * @param {boolean} allowAll - shorthand for allowNull and allowUndefined
  * @param {boolean} allowNull
+ * @param {boolean} allowNullish - shorthand for allowNull and allowUndefined
  * @param {boolean} allowUndefined
  * @throws {Error}
  */
 async function resolveType(blob, value, allowed, {
-	allowAll=false,
 	allowNull=false,
+	allowNullish=false,
 	allowUndefined=false
 }={}) {
 	if(_.isFunction(value)) {
@@ -174,10 +177,10 @@ async function resolveType(blob, value, allowed, {
 		value=await predicate(blob);
 		// we have no rules against a predicate returning a predicate. So we'll support it.
 		if(_.isFunction(value)) {
-			return resolveType(blob, value, allowed, {allowAll, allowNull, allowUndefined});
+			return resolveType(blob, value, allowed, {allowNullish, allowNull, allowUndefined});
 		}
 	}
-	return assertType(value, allowed, {allowAll, allowNull, allowUndefined});
+	return assertType(value, allowed, {allowNullish, allowNull, allowUndefined});
 }
 
 /********************* Private Interface *********************/

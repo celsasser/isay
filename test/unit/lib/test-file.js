@@ -233,7 +233,7 @@ describe("lib.ModuleFile", function() {
 			return instance.read()
 				.then(assert.notCalled)
 				.catch(error=>{
-					assert.strictEqual(error.message, "expecting string as file-path but found undefined");
+					assert.strictEqual(error.message, "expecting String but found undefined");
 				});
 		});
 
@@ -266,7 +266,7 @@ describe("lib.ModuleFile", function() {
 			return instance.write()
 				.then(assert.notCalled)
 				.catch(error=>{
-					assert.ok(error.message.startsWith("expecting string"));
+					assert.strictEqual(error.message, "expecting String but found undefined");
 				});
 		});
 

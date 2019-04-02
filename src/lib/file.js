@@ -9,7 +9,7 @@ const _=require("lodash");
 const fs=require("fs-extra");
 const path=require("path");
 const {ModuleIO}=require("./_io");
-const {assertType, resolveType}=require("./_data");
+const {assertType, getType, resolveType}=require("./_data");
 const spawn=require("../common/spawn");
 
 /**
@@ -20,47 +20,15 @@ class ModuleFile extends ModuleIO {
 	/**
 	 * It copies the source file or directory to the target path.  The rules for finding the source and target
 	 * path treat the params as a sequence: [source, target]. And it looks for them in the following order:
-	 * @resolves source:string in data|this.params[0]
+	 * @resolves source:string in this.params[0]|data
 	 * @resolves target:string in this.params[0]|this.params[1]
+	 * @resolves options:Object in this.params[1]|this.params[2]
 	 * @param {DataBlob} data
-	 * @return {Promise<void>}
+	 * @return {Promise<DataBlob>}
 	 * @throws {Error}
 	 */
 	async copy(data) {
-		let source, target, options;
-		if(data) {
-			source=assertType(data, "String");
-			target=await resolveType(data, this.params[0], "String");
-			options=_.get(this.params, 1, {});
-		} else {
-			source=await resolveType(data, this.params[0], "String");
-			target=await resolveType(data, this.params[1], "String");
-			options=_.get(this.params, 2, {});
-		}
-		// Keeping with mouse's rule of creating hierarchy that does not exists, we are going to
-		// ensure that as much of the target that can be known to be directories exists
-		await this._ensureDirectoryHierarchy(target);
-		if(options.rebuild) {
-			// in this case they are asking that we rebuild the hierarchy of the source. We assume
-			// that the target they gave to us is a path. All we need to do is append the target to it.
-			target=path.join(target, source);
-		} else {
-			// copy assumes that the target points to the file that you want to copy to. We want to behave
-			// more like the shell: if the source is a file and the target is a directory then we will
-			// append the source name and extension to the target.
-			const targetExists=fs.pathExistsSync(target);
-			if(targetExists) {
-				const sourceStats=fs.lstatSync(source);
-				if(sourceStats.isFile()) {
-					const targetStats=fs.lstatSync(target);
-					if(targetStats.isDirectory()) {
-						const parsed=path.parse(source);
-						target=path.join(target, `${parsed.name}${parsed.ext}`);
-					}
-				}
-			}
-		}
-		return fs.copy(source, target)
+		return this._copy(data)
 			.then(Promise.resolve.bind(Promise, data));
 	}
 
@@ -72,7 +40,7 @@ class ModuleFile extends ModuleIO {
 	 * @resolves path:string in data|this.params[0]
 	 * @resolves options:Object in this.params[0]|this.params[2]
 	 * @param {string|undefined} data
-	 * @return {Promise<void>}
+	 * @return {Promise<DataBlob>}
 	 * @throws {Error}
 	 */
 	async create(data) {
@@ -111,7 +79,7 @@ class ModuleFile extends ModuleIO {
 	 * @resolves path:string in data|this.params[0]
 	 * @resolves options:Object in this.params[0]|this.params[1]
 	 * @param {string|undefined} data
-	 * @return {Promise<void>}
+	 * @return {Promise<DataBlob>}
 	 * @throws {Error}
 	 */
 	async ensure(data) {
@@ -145,12 +113,13 @@ class ModuleFile extends ModuleIO {
 	 * @resolves source:string in data|this.params[0]
 	 * @resolves target:string in this.params[0]|this.params[1]
 	 * @param {DataBlob} data
-	 * @return {Promise<void>}
+	 * @return {Promise<DataBlob>}
 	 * @throws {Error}
 	 */
 	async move(data) {
-		return this.copy(data)
-			.then(this.delete.bind(this));
+		return this._copy(data)
+			.then(({source})=>fs.remove(source))
+			.then(Promise.resolve.bind(Promise, data));
 	}
 
 	/**
@@ -225,6 +194,59 @@ class ModuleFile extends ModuleIO {
 	}
 
 	/**************** Private Interface ****************/
+	/**
+	 * Copies the source file or directory to the target path.  The rules for finding the source and target
+	 * path treat the params as a sequence: [source, target]. And it looks for them in the following order:
+	 * @resolves source:string in this.params[0]|data
+	 * @resolves target:string in this.params[0]|this.params[1]
+	 * @resolves options:Object in this.params[1]|this.params[2]
+	 * @param {DataBlob} data
+	 * @return {Promise<{source:string, target:string}>}
+	 * @throws {Error}
+	 */
+	async _copy(data) {
+		let source, target, options;
+		// param0 must be a string.
+		const param0=await resolveType(data, this.params[0], "String");
+		// param1 may be a string, object or undefined.
+		const param1=await resolveType(data, this.params[1], ["Object", "String"], {allowNullish: true});
+		if(getType(param1)==="String") {
+			source=param0;
+			target=param1;
+			options=await resolveType(data, this.params[2], "Object", {allowNullish: true});
+		} else {
+			source=assertType(data, "String");
+			target=param0;
+			options=param1;
+		}
+		options=options || {};
+		// Keeping with mouse's rule of creating hierarchy that does not exists, we are going to
+		// ensure that as much of the target that can be known to be directories exists
+		await this._ensureDirectoryHierarchy(target);
+		if(options.rebuild) {
+			// in this case they are asking that we rebuild the hierarchy of the source. We assume
+			// that the target they gave to us is a path. All we need to do is append the target to it.
+			target=path.join(target, source);
+		} else {
+			// copy assumes that the target points to the file that you want to copy to. We want to behave
+			// more like the shell: if the source is a file and the target is a directory then we will
+			// append the source name and extension to the target.
+			const targetExists=fs.pathExistsSync(target);
+			if(targetExists) {
+				const sourceStats=fs.lstatSync(source);
+				if(sourceStats.isFile()) {
+					const targetStats=fs.lstatSync(target);
+					if(targetStats.isDirectory()) {
+						const parsed=path.parse(source);
+						target=path.join(target, `${parsed.name}${parsed.ext}`);
+					}
+				}
+			}
+		}
+		return fs.copy(source, target)
+			.then(()=>Promise.resolve({source, target}));
+	}
+
 	/**
 	 * Ensures that as much of the path that can be determined to be directory hierarchy exists.
 	 * If it doesn't it is created.

@@ -39,7 +39,7 @@ describe("lib.ModuleJson", function() {
 			return instance.read()
 				.then(assert.notCalled)
 				.catch(error=>{
-					assert.ok(error.message.startsWith("expecting string"));
+					assert.strictEqual(error.message, "expecting String but found undefined");
 				});
 		});
 
@@ -105,7 +105,7 @@ describe("lib.ModuleJson", function() {
 			return instance.write()
 				.then(assert.notCalled)
 				.catch(error=>{
-					assert.ok(error.message.startsWith("expecting string"));
+					assert.strictEqual(error.message, "expecting String but found undefined");
 				});
 		});
 

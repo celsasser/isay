@@ -85,7 +85,7 @@ class ModuleTest extends ModuleBase {
 		if(this.params.length===0) {
 			return Promise.resolve(blob);
 		} else  {
-			return resolveType(blob, this.params[0], "*", {allowAll: true});
+			return resolveType(blob, this.params[0], "*", {allowNullish: true});
 		}
 	}
 
@@ -95,7 +95,7 @@ class ModuleTest extends ModuleBase {
 	 * @returns {Promise<boolean>}
 	 */
 	async equal(blob) {
-		const value=await resolveType(blob, this.params[0], "*", {allowAll: true}),
+		const value=await resolveType(blob, this.params[0], "*", {allowNullish: true}),
 			result=_.isEqual(blob, value);
 		return this._processTestResult(blob, result);
 	}
@@ -162,7 +162,7 @@ class ModuleTest extends ModuleBase {
 	 */
 	async test(blob) {
 		if(this.params.length>0) {
-			const value=await resolveType(blob, this.params[0], "*", {allowAll: true});
+			const value=await resolveType(blob, this.params[0], "*", {allowNullish: true});
 			return this._processTestResult(blob, Boolean(value));
 		} else {
 			return this._processTestResult(blob, Boolean(blob));
@@ -181,7 +181,7 @@ class ModuleTest extends ModuleBase {
 		if(this.params.length===0) {
 			return Promise.resolve(blob);
 		} else  {
-			return resolveType(blob, this.params[0], "*", {allowAll: true});
+			return resolveType(blob, this.params[0], "*", {allowNullish: true});
 		}
 	}
 

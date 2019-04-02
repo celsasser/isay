@@ -78,7 +78,7 @@ class ModuleArray extends ModuleBase {
 			}
 			return result;
 		} else {
-			const value=await resolveType(blob, this.params[0], "*", {allowAll: true}),
+			const value=await resolveType(blob, this.params[0], "*", {allowNullish: true}),
 				type=getType(value);
 			// lodash's filter is not designed for value types. Probably because its not likely to be used.
 			// Nonetheless one could argue on behalf of them so if they are searching by value then we intervene.
@@ -110,7 +110,7 @@ class ModuleArray extends ModuleBase {
 			}
 			return null;
 		} else {
-			const value=await resolveType(blob, this.params[0], "*", {allowAll: true});
+			const value=await resolveType(blob, this.params[0], "*", {allowNullish: true});
 			return _.find(array, value);
 		}
 	}
