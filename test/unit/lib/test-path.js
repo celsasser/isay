@@ -6,6 +6,7 @@
  */
 
 const assert=require("../../support/assert");
+const {resolveNextTick}=require("../../../src/common/promise");
 const {ModulePath}=require("../../../src/lib/path");
 
 describe("lib.ModulePath", function() {
@@ -43,11 +44,21 @@ describe("lib.ModulePath", function() {
 
 		it("should properly return relative path to specified from directory when included", async function() {
 			const instance=_createInstance({
-				params: ["/"]
+				params: ["/abs"]
 			});
 			return instance.absolute("test")
 				.then(result=>{
-					assert.strictEqual(result, "/test");
+					assert.strictEqual(result, "/abs/test");
+				});
+		});
+
+		it("should properly return relative path to result of predicate", async function() {
+			const instance=_createInstance({
+				params: [resolveNextTick.bind(null, "/abs")]
+			});
+			return instance.absolute("test")
+				.then(result=>{
+					assert.strictEqual(result, "/abs/test");
 				});
 		});
 	});

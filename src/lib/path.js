@@ -8,7 +8,7 @@
 const _=require("lodash");
 const node_path=require("path");
 const {ModuleBase}=require("./_base");
-const {assertType}=require("./_data");
+const {assertType, resolveType}=require("./_data");
 
 /**
  * Basic set of path manipulation functions
@@ -23,8 +23,9 @@ class ModulePath extends ModuleBase {
 	 * @returns {Promise<string>}
 	 */
 	async absolute(path) {
-		const from=_.get(this.params, 0, process.cwd());
-		assertType(from, "String");
+		const from=await resolveType(path, this.params[0], "String", {
+			defaultUndefined: process.cwd()
+		});
 		assertType(path, "String");
 		return node_path.resolve(from, path);
 	}
@@ -37,8 +38,9 @@ class ModulePath extends ModuleBase {
 	 * @returns {Promise<string>}
 	 */
 	async relative(path) {
-		const from=_.get(this.params, 0, process.cwd());
-		assertType(from, "String");
+		const from=await resolveType(path, this.params[0], "String", {
+			defaultUndefined: process.cwd()
+		});
 		assertType(path, "String");
 		return node_path.relative(from, path);
 	}

@@ -171,6 +171,49 @@ describe("lib.ModuleTest", function() {
 		});
 	});
 
+	describe("false", function() {
+		it("should return true if no params and input is falsey", async function() {
+			const instance=_createInstance();
+			assert.strictEqual(await instance.false(false), true);
+			assert.strictEqual(await instance.false(), true);
+			assert.strictEqual(await instance.false(0), true);
+		});
+
+		it("should return false if no params and input is truthy", async function() {
+			const instance=_createInstance();
+			assert.strictEqual(await instance.false(true), false);
+			assert.strictEqual(await instance.false({}), false);
+			assert.strictEqual(await instance.false(1), false);
+		});
+
+		[
+			[true, false],
+			[1, false],
+			["", false],
+			[resolveNextTick.bind(null, true), false],
+			[false, true],
+			[0, true],
+			[undefined, true],
+			[null, true],
+			[resolveNextTick.bind(null, false), true]
+		].forEach(([param, expected])=>{
+			it(`should return ${expected} if params[0]=${param}`, async function() {
+				const instance=_createInstance({
+					params: [param]
+				});
+				return instance.false("input")
+					.then(result=>{
+						assert.strictEqual(result, expected);
+					});
+			});
+		});
+
+		it("should return opposite if tests are negated", async function() {
+			const instance=_createInstance({positive: false});
+			assert.strictEqual(await instance.false(true), true);
+		});
+	});
+
 	[
 		["greaterThan", 1],
 		["lessThan", -1]
@@ -321,71 +364,46 @@ describe("lib.ModuleTest", function() {
 		});
 	});
 
-	describe("test", function() {
-		it("should return true if there is no predicate and input is truthy", async function() {
+	describe("true", function() {
+		it("should return true if no params and input is truthy", async function() {
 			const instance=_createInstance();
-			assert.strictEqual(await instance.test(true), true);
-			assert.strictEqual(await instance.test({}), true);
-			assert.strictEqual(await instance.test(1), true);
+			assert.strictEqual(await instance.true(true), true);
+			assert.strictEqual(await instance.true({}), true);
+			assert.strictEqual(await instance.true(1), true);
 		});
 
-		it("should return false if there is no predicate and input is falsey", async function() {
+		it("should return false no params and input is falsey", async function() {
 			const instance=_createInstance();
-			assert.strictEqual(await instance.test(false), false);
-			assert.strictEqual(await instance.test(), false);
-			assert.strictEqual(await instance.test(0), false);
+			assert.strictEqual(await instance.true(false), false);
+			assert.strictEqual(await instance.true(), false);
+			assert.strictEqual(await instance.true(0), false);
 		});
 
 		[
 			[true, true],
 			[1, true],
-			["true", true],
+			["", true],
+			[resolveNextTick.bind(null, true), true],
 			[false, false],
 			[0, false],
-			["", false]
+			[undefined, false],
+			[null, false],
+			[resolveNextTick.bind(null, false), false]
 		].forEach(([param, expected])=>{
 			it(`should return ${expected} if params[0]=${param}`, async function() {
 				const instance=_createInstance({
 					params: [param]
 				});
-				return instance.test("input")
+				return instance.true("input")
 					.then(result=>{
 						assert.strictEqual(result, expected);
 					});
 			});
 		});
 
-		it("should properly return result of params[0] if it is a predicate", async function() {
-			const instance=_createInstance({
-				params: [input=>{
-					assert.strictEqual(input, "input");
-					return resolveNextTick(true);
-				}]
-			});
-			return instance.test("input")
-				.then(result=>{
-					assert.strictEqual(result, true);
-				});
-		});
-
-		it("should force result to be of boolean type", async function() {
-			const instance=_createInstance({
-				params: [input=>{
-					assert.strictEqual(input, "input");
-					return resolveNextTick("true");
-				}]
-			});
-			return instance.test("input")
-				.then(result=>{
-					assert.strictEqual(result, true);
-				});
-		});
-
 		it("should return opposite if tests are negated", async function() {
-			const instance=_createInstance({
-				positive: false
-			});
-			assert.strictEqual(await instance.test(true), false);
+			const instance=_createInstance({positive: false});
+			assert.strictEqual(await instance.true(true), false);
 		});
 	});
 

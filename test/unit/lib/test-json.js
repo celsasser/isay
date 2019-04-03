@@ -7,6 +7,9 @@
 
 const fs=require("fs-extra");
 const assert=require("../../support/assert");
+const proxy=require("../../support/proxy");
+const file=require("../../../src/common/file");
+const {resolveNextTick}=require("../../../src/common/promise");
 const {ModuleJson}=require("../../../src/lib/json");
 
 describe("lib.ModuleJson", function() {
@@ -64,6 +67,23 @@ describe("lib.ModuleJson", function() {
 					assert.deepEqual(data, fs.readJSONSync(path, "utf8"));
 				});
 		});
+
+		it("should resolve path and options via predicate", function() {
+			const path="./test/data/data-pet.json",
+				instance=_createInstance({
+					params: [
+						resolveNextTick.bind(null, path),
+						resolveNextTick.bind(null, {encoding: "binary"})
+					]
+				});
+			proxy.stub(fs, "readJSON", (_path, _options)=>{
+				assert.strictEqual(_path, path);
+				assert.deepEqual(_options, {encoding: "binary"});
+				return Promise.resolve("success");
+			});
+			return instance.read()
+				.then(data=>assert.strictEqual(data, "success"));
+		});
 	});
 
 	describe("stringify", function() {
@@ -72,7 +92,7 @@ describe("lib.ModuleJson", function() {
 				data={a: 1};
 			return instance.stringify(data)
 				.then(result=>{
-					assert.strictEqual(result, '{"a":1}');
+					assert.strictEqual(result, "{\"a\":1}");
 				});
 		});
 
@@ -83,7 +103,7 @@ describe("lib.ModuleJson", function() {
 				data={a: 1};
 			return instance.stringify(data)
 				.then(result=>{
-					assert.strictEqual(result, '{"a":1}');
+					assert.strictEqual(result, "{\"a\":1}");
 				});
 		});
 
@@ -94,7 +114,18 @@ describe("lib.ModuleJson", function() {
 				data={a: 1};
 			return instance.stringify(data)
 				.then(result=>{
-					assert.strictEqual(result, '{\n\t"a": 1\n}');
+					assert.strictEqual(result, "{\n\t\"a\": 1\n}");
+				});
+		});
+
+		it("should resolve options via predicate", function() {
+			const instance=_createInstance({
+					params: [resolveNextTick.bind(null, {compact: false})]
+				}),
+				data={a: 1};
+			return instance.stringify(data)
+				.then(result=>{
+					assert.strictEqual(result, "{\n\t\"a\": 1\n}");
 				});
 		});
 	});
@@ -116,8 +147,8 @@ describe("lib.ModuleJson", function() {
 					params: [path]
 				});
 			return instance.write(data)
-				.then(_data=>{
-					assert.strictEqual(_data, data);
+				.then(result=>{
+					assert.strictEqual(result, data);
 					assert.deepEqual(fs.readJSONSync(path, "utf8"), data);
 					fs.removeSync(path);
 				});
@@ -130,11 +161,34 @@ describe("lib.ModuleJson", function() {
 					params: [path]
 				});
 			return instance.write(data)
-				.then(_data=>{
-					assert.strictEqual(_data, data);
+				.then(result=>{
+					assert.strictEqual(result, data);
 					assert.deepEqual(fs.readJSONSync(path, "utf8"), data);
 					fs.removeSync("./test/data/output/new");
 				});
 		});
+
+		it("should get path and options from predicate", async function() {
+			const data={"george": "cat"},
+				path="./test/data/output/file-save.json",
+				instance=_createInstance({
+					params: [
+						resolveNextTick.bind(null, path),
+						resolveNextTick.bind(null, {encoding: "binary"})
+					]
+				});
+			proxy.stub(file, "writeJSON", (options)=>{
+				assert.deepEqual(options, {
+					"async": true,
+					"data": data,
+					"encoding": "binary",
+					"uri": path
+				});
+				return Promise.resolve();
+			});
+			return instance.write(data)
+				.then(result=>assert.strictEqual(result, data));
+		});
+
 	});
 });

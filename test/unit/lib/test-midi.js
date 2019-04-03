@@ -73,7 +73,7 @@ describe("lib.ModuleMidi", function() {
 	describe("write", function() {
 		it("should throw exception if path cannot be found", async function() {
 			const instance=_createInstance();
-			return instance.write()
+			return instance.write({})
 				.then(assert.notCalled)
 				.catch(error=>{
 					assert.strictEqual(error.message, "expecting String but found undefined");

@@ -10,7 +10,7 @@ const stringify=require("csv-stringify");
 const parse=require("csv-parse");
 const fs=require("fs-extra");
 const {ModuleIO}=require("./_io");
-const {ensureJson}=require("./_data");
+const {assertType, resolveType}=require("./_data");
 
 /**
  * Some read and write support for CSV files
@@ -20,14 +20,15 @@ class ModuleCsv extends ModuleIO {
 	/**
 	 * Parses input and returns csv. Overrides may exist in params[0] or params[1] depending on
 	 * where the input path is specified.
+	 * @resolves data:string in data
+	 * @resolves options:Object in params[0]
 	 * @param {string} data
 	 * @returns {Promise<CsvDoc>}
 	 * @throws {Error}
 	 */
 	async parse(data) {
-		const options=(data)
-			? ensureJson(this.params[0])
-			: ensureJson(this.params[1]);
+		assertType(data, "String");
+		const options=await resolveType(data, this.params[0], "Object", {allowNullish: true});
 		return new Promise((resolve, reject)=>{
 			parse(data, {
 				delimiter: _.get(options, "delimiter", ",")
@@ -42,37 +43,37 @@ class ModuleCsv extends ModuleIO {
 	}
 
 	/**
-	 * Reads and parses specified csv file. The path may either be specified as input data or param data:
-	 * @resolves path:string in data|this.params[0]
+	 * Reads and parses specified csv file. See resolution rules at <link>_getReadPathAndOptions</link>
 	 * @param {string|undefined} data
 	 * @returns {Promise<CsvDoc>}
 	 * @throws {Error}
 	 */
 	async read(data) {
-		const path=await this._getReadPath(data);
-		return fs.readFile(path, {encoding: "utf8"})
+		const {path, encoding}=await this._getReadPathAndOptions(data);
+		return fs.readFile(path, {encoding})
 			.then(data=>this.parse(data));
 	}
 
 	/**
-	 * Writes data to path
-	 * @resolves path:string in this.params[0]
-	 * @resolves options:(undefined|Object) in this.params[1]
+	 * Writes data to path. See resolution rules at <link>_getWritePathAndOptions</link>
 	 * @param {CsvDoc} data
 	 * @returns {Promise<CsvDoc>}
 	 * @throws {Error}
 	 */
 	async write(data) {
-		const path=await this._getWritePath(data),
-			options=ensureJson(this.params[1]);
+		const {
+			delimiter,
+			encoding,
+			path
+		}=await this._getWritePathAndOptions(data, {delimiter: ","});
 		return new Promise((resolve, reject)=>{
 			stringify(data, {
-				delimiter: _.get(options, "delimiter", ",")
+				delimiter
 			}, (error, text)=>{
 				if(error) {
 					reject(error);
 				} else {
-					fs.outputFile(path, text, {encoding: "utf8"})
+					fs.outputFile(path, text, {encoding})
 						.then(resolve.bind(null, data))
 						.catch(reject);
 				}

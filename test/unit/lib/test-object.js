@@ -8,6 +8,7 @@
 const _=require("lodash");
 const sinon=require("sinon");
 const assert=require("../../support/assert");
+const {resolveNextTick}=require("../../../src/common/promise");
 const {ModuleObject}=require("../../../src/lib/object");
 
 describe("lib.ModuleObject", function() {
@@ -134,7 +135,7 @@ describe("lib.ModuleObject", function() {
 				});
 		});
 
-		it("should iterate over all shallow properties by default", async function() {
+		it("should iterate over all deep properties if told to do so", async function() {
 			const input={
 					a: 1,
 					b: {
@@ -180,10 +181,19 @@ describe("lib.ModuleObject", function() {
 			const instance=_createInstance({
 					params: ["property"]
 				}),
-				data={
+				result=await instance.get({
 					property: "value"
-				},
-				result=await instance.get(data);
+				});
+			assert.strictEqual(result, "value");
+		});
+
+		it("should get property via predicate", async function() {
+			const instance=_createInstance({
+					params: [resolveNextTick.bind(null, "property")]
+				}),
+				result=await instance.get({
+					property: "value"
+				});
 			assert.strictEqual(result, "value");
 		});
 	});
@@ -395,6 +405,19 @@ describe("lib.ModuleObject", function() {
 				"set": {
 					"path": "data"
 				}
+			});
+		});
+
+		it("should properly set as per predicate results", async function() {
+			const instance=_createInstance({
+					params: [
+						resolveNextTick.bind(null, "path"),
+						resolveNextTick.bind(null, "value")
+					]
+				}),
+				result=await instance.set({});
+			assert.deepEqual(result, {
+				"path": "value"
 			});
 		});
 	});

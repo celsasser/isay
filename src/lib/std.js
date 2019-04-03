@@ -8,6 +8,7 @@
 const _=require("lodash");
 const util=require("util");
 const {ModuleBase}=require("./_base");
+const {resolveType}=require("./_data");
 
 /**
  * stdio support. NodeJS process.stdout and process.stderr support text and buffers. So we only ever attempt
@@ -25,8 +26,9 @@ class ModuleStd extends ModuleBase {
 	 * @returns {Promise<DataBlob>}
 	 */
 	async error(blob) {
-		const writer=util.promisify(process.stderr.write.bind(process.stderr));
-		return writer(this._inputToRaw(this._getInput(blob)))
+		const writer=util.promisify(process.stderr.write.bind(process.stderr)),
+			input=await this._getInput(blob);
+		return writer(this._inputToRaw(input))
 			.then(Promise.resolve.bind(Promise, blob));
 	}
 
@@ -39,8 +41,9 @@ class ModuleStd extends ModuleBase {
 	 * @returns {Promise<DataBlob>}
 	 */
 	async errorln(blob) {
-		const writer=util.promisify(process.stderr.write.bind(process.stderr));
-		return writer(`${this._inputToString(this._getInput(blob))}\n`)
+		const writer=util.promisify(process.stderr.write.bind(process.stderr)),
+			input=await this._getInput(blob);
+		return writer(`${this._inputToString(input)}\n`)
 			.then(Promise.resolve.bind(Promise, blob));
 	}
 
@@ -49,10 +52,11 @@ class ModuleStd extends ModuleBase {
 	 * You may think of it a pipe or file redirection in the shell world.
 	 * Note: There probably are not may use cases at the top but it can be useful when you are working with an embedded chain.
 	 * @resolves result:DataBlob in this.params[0]
+	 * @param {DataBlob} blob
 	 * @returns {Promise<DataBlob>}
 	 */
-	async in() {
-		return this.params[0];
+	async in(blob) {
+		return resolveType(blob, this.params[0], "*", {allowNullish: true});
 	}
 
 	/**
@@ -63,8 +67,9 @@ class ModuleStd extends ModuleBase {
 	 * @returns {Promise<DataBlob>}
 	 */
 	async out(blob) {
-		const writer=util.promisify(process.stdout.write.bind(process.stdout));
-		return writer(this._inputToRaw(this._getInput(blob)))
+		const writer=util.promisify(process.stdout.write.bind(process.stdout)),
+			input=await this._getInput(blob);
+		return writer(this._inputToRaw(input))
 			.then(Promise.resolve.bind(Promise, blob));
 	}
 
@@ -77,8 +82,9 @@ class ModuleStd extends ModuleBase {
 	 * @returns {Promise<DataBlob>}
 	 */
 	async outln(blob) {
-		const writer=util.promisify(process.stdout.write.bind(process.stdout));
-		return writer(`${this._inputToString(this._getInput(blob))}\n`)
+		const writer=util.promisify(process.stdout.write.bind(process.stdout)),
+			input=await this._getInput(blob);
+		return writer(`${this._inputToString(input)}\n`)
 			.then(Promise.resolve.bind(Promise, blob));
 	}
 
@@ -93,12 +99,14 @@ class ModuleStd extends ModuleBase {
 	 * @returns {DataBlob}
 	 * @private
 	 */
-	_getInput(blob) {
-		return (this.params.length===0)
-			? blob
-			: (this.params.length===1)
-				? this.params[0]
-				: this.params;
+	async _getInput(blob) {
+		if(this.params.length===0) {
+			return blob;
+		} else if(this.params.length===1) {
+			return resolveType(blob, this.params[0], "*", {allowNullish: true});
+		} else {
+			return this.params;
+		}
 	}
 
 	/**

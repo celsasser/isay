@@ -14,9 +14,11 @@ const {assertPredicate, assertType}=require("./_data");
  */
 class ModuleError extends ModuleBase {
 	/**
-	 * Allows for a user to insert error handlers. There are two possible outcomes:
-	 * - they throw an error in which case it goes to the next handler or we exit
-	 * - whatever the return becomes input for whatever follows this action
+	 * Exception handling. Processing rules are as follows:
+	 * - no params: <param>blob</param> is returned
+	 * - params[0] is a predicate: predicate(blob) called and its result is returned
+	 * - params[0] is not a predicate: params[0] is returned
+	 * Note: which exception handler is called follows after and nearest rules. See <link>ModuleBase.process</link> for more info.
 	 * @resolves predicate:CatchPredicate in this.params[0]
 	 * @resolves result:(*) in this.params[0]
 	 * @param {Error} error
@@ -36,9 +38,10 @@ class ModuleError extends ModuleBase {
 	}
 
 	/**
-	 * I thought this guy over and concluded that it should exist for two reasons:
+	 * I thought this guy over and concluded that it should exist for three reasons:
 	 * 1. where there is a catch there should be a throw
 	 * 2. a user may want to catch and rethrow an error.
+	 * 3. a user may want to use exceptions as a means of flow control
 	 * @resolves predicate:ActionPredicate in this.params[0]
 	 * @resolves text:(string|Error} in this.params[0]
 	 * @param {DataBlob} blob

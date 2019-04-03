@@ -9,6 +9,7 @@
  */
 
 const _=require("lodash");
+const assert=require("assert");
 const util=require("../common/util");
 
 /**
@@ -57,13 +58,15 @@ function assertPredicate(predicate) {
  * @param {boolean} allowNullish - shorthand for allowNull and allowUndefined
  * @param {boolean} allowNull
  * @param {boolean} allowUndefined
+ * @param {*} defaultUndefined - a default that should be used if resolution=undefined.
  * @returns {*} returns <param>value</param> if all is good
  * @throws {Error}
  */
 function assertType(value, allowed, {
 	allowNullish=false,
 	allowNull=false,
-	allowUndefined=false
+	allowUndefined=false,
+	defaultUndefined=undefined
 }={}) {
 	function _formatAllowed() {
 		return _.isArray(allowed)
@@ -77,7 +80,9 @@ function assertType(value, allowed, {
 		allowNull=allowUndefined=true;
 	}
 	if(value===undefined) {
-		if(!allowUndefined) {
+		if(defaultUndefined!==undefined) {
+			value=defaultUndefined;
+		} else if(!allowUndefined) {
 			throw new Error(`expecting ${_formatAllowed()} but found ${util.name(value)}`);
 		}
 	} else if(value===null) {
@@ -113,6 +118,20 @@ function assertTypesEqual(value1, value2) {
 	if(type1!==type2) {
 		throw new Error(`expecting same type but found ${type1} and ${type2}`);
 	}
+}
+
+/**
+ * Casts value to <code>boolean</code> type.
+ * For the most part we will follow javascript rules...except for the goofy stuff
+ * @param {*} value
+ * @returns {boolean}
+ * @private
+ */
+function boolean(value) {
+	if(value==="") {
+		return true;
+	}
+	return Boolean(value);
 }
 
 /**
@@ -165,22 +184,26 @@ function ensureJson(data) {
  * @param {boolean} allowNull
  * @param {boolean} allowNullish - shorthand for allowNull and allowUndefined
  * @param {boolean} allowUndefined
+ * @param {*} defaultUndefined - a default that should be used if resolution=undefined.
  * @throws {Error}
  */
 async function resolveType(blob, value, allowed, {
 	allowNull=false,
 	allowNullish=false,
-	allowUndefined=false
+	allowUndefined=false,
+	defaultUndefined=undefined
 }={}) {
+	assert.ok(!_.includes((allowed.constructor.name==="Array") ? allowed : [allowed], "Function"),
+		"Not designed to resolve functions. See assertType");
 	if(_.isFunction(value)) {
 		const predicate=assertPredicate(value);
 		value=await predicate(blob);
 		// we have no rules against a predicate returning a predicate. So we'll support it.
 		if(_.isFunction(value)) {
-			return resolveType(blob, value, allowed, {allowNullish, allowNull, allowUndefined});
+			return resolveType(blob, value, allowed, {allowNullish, allowNull, allowUndefined, defaultUndefined});
 		}
 	}
-	return assertType(value, allowed, {allowNullish, allowNull, allowUndefined});
+	return assertType(value, allowed, {allowNullish, allowNull, allowUndefined, defaultUndefined});
 }
 
 /********************* Private Interface *********************/
@@ -189,6 +212,7 @@ module.exports={
 	assertProperties,
 	assertType,
 	assertTypesEqual,
+	boolean,
 	ensureJson,
 	getType,
 	resolveType

@@ -7,8 +7,9 @@
 
 const assert=require("../../support/assert");
 const proxy=require("../../support/proxy");
-const {ModuleOs}=require("../../../src/lib/os");
+const {resolveNextTick}=require("../../../src/common/promise");
 const spawn=require("../../../src/common/spawn");
+const {ModuleOs}=require("../../../src/lib/os");
 
 describe("lib.ModuleOs", function() {
 	function _createInstance({
@@ -44,25 +45,36 @@ describe("lib.ModuleOs", function() {
 	});
 
 	describe("_paramsToArguments", function() {
-		it("should return params if length is 0", function() {
+		it("should return params if length is 0", async function() {
 			const instance=_createInstance({
 				params: []
 			});
-			assert.deepEqual(instance._paramsToArguments(), []);
+			return instance._paramsToArguments()
+				.then(result=>assert.deepEqual(result, []));
 		});
 
-		it("should return params if length is greater than 1", function() {
+		it("should return params if length is greater than 1", async function() {
 			const instance=_createInstance({
 				params: ["1", "2"]
 			});
-			assert.deepEqual(instance._paramsToArguments(), ["1", "2"]);
+			return instance._paramsToArguments()
+				.then(result=>assert.deepEqual(result, ["1", "2"]));
 		});
 
-		it("should parse params if length is 1", function() {
+		it("should parse params if length is 1", async function() {
 			const instance=_createInstance({
 				params: ["1 2"]
 			});
-			assert.deepEqual(instance._paramsToArguments(), ["1", "2"]);
+			return instance._paramsToArguments()
+				.then(result=>assert.deepEqual(result, ["1", "2"]));
+		});
+
+		it("should allow params to be supplied by predicate in params[0]", async function() {
+			const instance=_createInstance({
+				params: [resolveNextTick.bind(null, "a b")]
+			});
+			return instance._paramsToArguments()
+				.then(result=>assert.deepEqual(result, ["a", "b"]));
 		});
 	});
 });

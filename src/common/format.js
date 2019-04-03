@@ -16,7 +16,7 @@ const util=require("./util");
  * @param {Error|string} error
  * @param {string} details - whether to dig the details out of the error or not?
  * @param {string} instance - whether to dig the instance out of the error or not?
- * @param {Boolean} stack - whether to include stack or not if <param>message</param> is an Error
+ * @param {boolean} stack - whether to include stack or not if <param>message</param> is an Error
  * @returns {string}
  */
 function errorToString(error, {
@@ -54,7 +54,7 @@ function errorToString(error, {
  * for which we want lazy processing. The message may be the various things we know of that can be converted to text.
  * @param {undefined|string|Error|function():string} message
  * @param {string} dfault - if message is null or undefined
- * @param {Boolean} stack - whether to include stack or not if <param>message</param> is an Error
+ * @param {boolean} stack - whether to include stack or not if <param>message</param> is an Error
  * @returns {string}
  */
 function messageToString(message, {

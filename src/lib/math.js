@@ -43,7 +43,7 @@ class ModuleMath extends ModuleBase {
 	/**
 	 * Calculates floor(input/params[0]) and input%params[0]. It incoming <param>input</param> from whatever is in this.params[0] provided it is a number
 	 * @param {number|Array<number>} input
-	 * @returns {Promise<([div, mod]|Array<[div, mod]>)>}
+	 * @returns {Promise<([number:div, number:mod]|Array<[number:div, number:mod]>)>}
 	 */
 	async divmod(input) {
 		return this._applyBinary(input, (a, b)=>{

@@ -40,25 +40,29 @@ class ModuleIO extends ModuleBase {
 	 * @resolves path:string in data|this.params[0]
 	 * @resolves options:(Object|undefined) in this.params[0]|this.params[1]
 	 * @param {string|undefined} blob
-	 * @param {Object} defaults
-	 * @returns {{path:string, encoding:string}} - will include whatever other options are discovered
+	 * @param {Encoding} encoding
+	 * @param {Object} options
+	 * @returns {{path:string, encoding:string, ...options}} - will include whatever other options are discovered
 	 * @throws {Error}
 	 * @protected
 	 */
-	async _getReadPathAndOptions(blob, defaults={
-		encoding: "utf8"
-	}) {
+	async _getReadPathAndOptions(blob, {
+		encoding="utf8",
+		...options
+	}={}) {
 		// we are going to assume it is in param[0] and adjust course if we need to.
 		const param0=await resolveType(blob, this.params[0], ["Object", "String"], {allowNullish: true});
 		if(getType(param0)==="String") {
 			const param1=await resolveType(blob, this.params[1], "Object", {allowNullish: true});
 			return Object.assign({
+				encoding,
 				path: param0
-			}, defaults, param1);
+			}, options, param1);
 		} else {
 			return Object.assign({
+				encoding,
 				path: assertType(blob, "String")
-			}, defaults, param0);
+			}, options, param0);
 		}
 	}
 
@@ -77,18 +81,21 @@ class ModuleIO extends ModuleBase {
 	 * Writes data to path that should be in <code>this.params[0]</code>.
 	 * Write options may optionally be in <code>this.params[1]</code>
 	 * @param {DataBlob} blob
-	 * @param {Object} defaults
+	 * @param {Encoding} encoding
+	 * @param {Object} options
 	 * @returns {{path:string, encoding:string, ...options}}
 	 * @throws {Error}
 	 */
-	async _getWritePathAndOptions(blob, defaults={
-		encoding: "utf8"
-	}) {
+	async _getWritePathAndOptions(blob, {
+		encoding="utf8",
+		...options
+	}={}) {
 		const path=await resolveType(blob, this.params[0], "String"),
-			options=await resolveType(blob, this.params[1], "Object", {allowNullish: true});
+			overrides=await resolveType(blob, this.params[1], "Object", {allowNullish: true});
 		return Object.assign({
+			encoding,
 			path
-		}, defaults, options);
+		}, options, overrides);
 	}
 }
 

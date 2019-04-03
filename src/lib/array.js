@@ -58,7 +58,7 @@ class ModuleArray extends ModuleBase {
 	}
 
 	/**
-	 * Filters array selecting truthy returns by either predicate or value
+	 * Filters array selecting elements that evaluate to true
 	 * @resolves predicate:MapPredicate in this.params[0]
 	 * @resolves value:* in this.params[0]
 	 * @param {DataBlob} blob
@@ -235,7 +235,7 @@ class ModuleArray extends ModuleBase {
 			predicate=assertPredicate(this.params[0]);
 		let result=_.get(this.params, 1, []);
 		for(let index=0; index<length; index++) {
-			result= await predicate(result, array[index], index);
+			result=await predicate(result, array[index], index);
 		}
 		return result;
 	}
@@ -393,29 +393,25 @@ class ModuleArray extends ModuleBase {
 	 * @private
 	 */
 	async _insert(blob, tail=true) {
-		let array=this._assertArray(blob);
-		assertType(this.params[1], "Object", {
-			allowUndefined: true
-		});
-
-		let concat=await resolveType(blob, this.params[0], "*"),
+		let array=this._assertArray(blob),
+			item=await resolveType(blob, this.params[0], "*"),
+			options=await resolveType(blob, this.params[1], "Object", {allowUndefined: true}),
 			{
 				index=(tail) ? array.length : 0,
 				expand=false
-			}=(this.params[1] || {});
+			}=(options || {});
 		index=ModuleArray._normalizeIndex(array, index);
-
 		if(expand) {
-			concat=this._assertArray(concat);
+			item=this._assertArray(item);
 			return array.slice(0, index)
-				.concat(concat)
+				.concat(item)
 				.concat(array.slice(index));
 		} else {
-			assertType(concat, "*", {
+			assertType(item, "*", {
 				allowNull: true
 			});
 			array=array.slice();	// honor immutability rules
-			array.splice(index, 0, concat);
+			array.splice(index, 0, item);
 			return array;
 		}
 	}

@@ -18,11 +18,10 @@ class ModuleDebug extends ModuleIO {
 	 * @return {Promise<DataBlob>}
 	 */
 	async dump(blob) {
-		const data={
-				input: blob,
-				params: this.params
-			},
-			text=JSON.stringify(data, null, "\t");
+		const text=JSON.stringify({
+			input: blob,
+			params: this.params
+		}, null, "\t");
 		return new Promise(resolve=>{
 			process.stdout.write(`${text}\n`, ()=>{
 				resolve(blob);

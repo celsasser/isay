@@ -84,6 +84,10 @@ describe("lib.ModuleArray", function() {
 			}, error=>error.message==="expecting String but found undefined");
 		});
 
+		it("should substitute default for undefined if included among options", function() {
+			assert.strictEqual(assertType(undefined, "String", {defaultUndefined: "default"}), "default");
+		});
+
 		it("should test and pass single type properly", function() {
 			assertType("value", "String");
 		});

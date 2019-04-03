@@ -7,7 +7,7 @@
 
 const _=require("lodash");
 const {ModuleIO}=require("./_io");
-const {assertPredicate, assertProperties, assertType}=require("./_data");
+const {assertPredicate, assertProperties, assertType, resolveType}=require("./_data");
 
 /**
  * @typedef {ModuleIO} ModuleObject
@@ -23,11 +23,9 @@ class ModuleObject extends ModuleIO {
 	 */
 	async each(blob) {
 		assertType(blob, ["Array", "Object"], {allowNullish: true});
-		assertType(this.params[1], "Object", {allowNullish: true});
-		const predicate=assertPredicate(this.params[0]), {
-				recurse=false
-			}=(this.params[1] || {}),
-			pairs=ModuleObject._objectToKeyValuePairs(blob, recurse);
+		const predicate=assertPredicate(this.params[0]),
+			options=await resolveType(blob, this.params[1], "Object", {defaultUndefined: {}}),
+			pairs=ModuleObject._objectToKeyValuePairs(blob, _.get(options, "recurse", false));
 		for(let index=0; index<pairs.length; index++) {
 			let [key, value]=pairs[index];
 			await predicate(value, key);
@@ -45,9 +43,12 @@ class ModuleObject extends ModuleIO {
 	async get(blob) {
 		// why do we allow arrays? Because a user may describe a path in terms of indexes: _.get("0.name", [{name: "George"}]
 		assertType(blob, ["Array", "Object"], {allowNullish: true});
-		return (this.params.length>0)
-			? _.get(blob, this.params[0])
-			: blob;
+		if(this.params.length===0) {
+			return blob;
+		} else {
+			const path=await resolveType(blob, this.params[0], "String");
+			return _.get(blob, path);
+		}
 	}
 
 	/**
@@ -61,18 +62,16 @@ class ModuleObject extends ModuleIO {
 	 */
 	async map(blob) {
 		assertType(blob, ["Array", "Object"], {allowNullish: true});
-		assertType(this.params[0], ["Array", "Function"]);
-		assertType(this.params[1], "Object", {allowNullish: true});
+		const param0=assertType(this.params[0], ["Array", "Function"]);
 		const {
 			flatten=false,
 			recurse=false
-		}=(this.params[1] || {});
+		}=await resolveType(blob, this.params[1], "Object", {defaultUndefined: {}});
 
-		if(typeof (this.params[0])==="function") {
-			const predicate=assertPredicate(this.params[0]);
-			return this._mapByPredicate(blob, predicate, recurse);
+		if(typeof(param0)==="function") {
+			return this._mapByPredicate(blob, assertPredicate(param0), recurse);
 		} else {
-			return this._mapByPaths(blob, this.params[0], flatten);
+			return this._mapByPaths(blob, param0, flatten);
 		}
 	}
 
@@ -106,17 +105,14 @@ class ModuleObject extends ModuleIO {
 	 * @returns {Promise<DataBlob>}
 	 */
 	async set(blob) {
-		const path=this.params[0],
-			value=this.params[1];
+		const path=await resolveType(blob, this.params[0], "String"),
+			value=await resolveType(blob, this.params[1], "*", {allowNullish: true});
 		return _.set(blob, path, value);
 	}
 
 	/**
 	 * It transforms the top level of properties into an array. One may alter the default results by specifying a
-	 * a predicate function that returns the per array element object.
-	 * Why is he here? Because occasionally databases are keyed by arrays. But it happens that one wants to to treat as arrays
-	 * so that they may iterate over them. Our <code>array</code> domain is rich with iteration functionality. Here, we are
-	 * isolating any and all iteration to this one function.
+	 * a predicate function that returns the per array element value.
 	 * @resolves predicate:function(object:Object, key:string):Object in this.params[0]
 	 * @param {Object} blob
 	 * @returns {Promise<void>}
@@ -197,7 +193,7 @@ class ModuleObject extends ModuleIO {
 		// It includes support for remapping paths. And it also allows one to flatten arrays.
 		return this.params[0].reduce((result, path)=>{
 			assertType(path, ["String", "Object"]);
-			if(typeof (path)==="string") {
+			if(path.constructor.name==="String") {
 				const value=_.get(blob, path);
 				if(value!==undefined) {
 					if(flatten) {

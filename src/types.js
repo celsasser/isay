@@ -17,6 +17,9 @@
  *     EmitterEventName
  */
 
+/**
+ * @typedef {"ascii", "binary", "utf8", "unicode"} Encoding
+ */
 
 /********************* Complex Types *********************/
 /**

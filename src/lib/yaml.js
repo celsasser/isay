@@ -28,7 +28,6 @@ class ModuleYaml extends ModuleIO {
 
 	/**
 	 * Reads and parses specified yaml encoded file. The path may either be specified as input data or param data:
-	 * @resolves path:string in data|this.params[0]
 	 * @param {string|undefined} data
 	 * @returns {Promise<DataBlob>}
 	 * @throws {Error}
@@ -54,10 +53,8 @@ class ModuleYaml extends ModuleIO {
 	}
 
 	/**
-	 * Writes data to file in YAML format.
+	 * Writes data to file in YAML format. See resolution rules at <link>_getWritePath</link>
 	 * Note: the data should either be YAML encoded as a string or be anything but a string.
-	 * @resolves data:Object in data
-	 * @resolves path:string in this.params[0]
 	 * @param {*} data - whatever this guy is it will attempt to be YAML'ified if it is not a string.
 	 * @returns {Promise<DataBlob>}
 	 * @throws {Error} if path cannot be found

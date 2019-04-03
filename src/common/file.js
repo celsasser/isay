@@ -81,8 +81,8 @@ function readToJSONSync(uri, {
 /**
  * @param {string} uri
  * @param {*} data
- * @param {Boolean} async
- * @param {Boolean} createPath
+ * @param {boolean} async
+ * @param {boolean} createPath
  * @param {string} encoding
  * @param {string} flag
  * @param {number} mode
@@ -109,8 +109,8 @@ async function writeJSON({
  * Chances are you are better off using these guys directly
  * @param {string} uri
  * @param {*} data
- * @param {Boolean} async
- * @param {Boolean} createPath
+ * @param {boolean} async
+ * @param {boolean} createPath
  * @param {string} encoding
  * @param {string} flag
  * @param {number} mode

@@ -29,8 +29,7 @@ class ModuleMidi extends ModuleIO {
 	}
 
 	/**
-	 * Reads and parses specified midi file. The path may either be specified as input data or param data:
-	 * @resolves path:string in data|this.params[0]
+	 * Reads and parses specified midi file. See resolution rules at <link>_getReadPath</link>
 	 * @param {string|undefined} data
 	 * @returns {Promise<MidiIoSong>}
 	 * @throws {Error}
@@ -41,14 +40,14 @@ class ModuleMidi extends ModuleIO {
 	}
 
 	/**
-	 * Writes data to path that should be in <code>this.params[0]</code>
+	 * Writes data to path that should be in <code>this.params[0]</code>. See resolution rules at <link>_getWritePath</link>
 	 * @param {MidiIoSong} data
 	 * @returns {Promise<MidiIoSong>}
 	 * @throws {Error}
 	 */
 	async write(data) {
-		const uri=await this._getWritePath(data);
 		assertType(data, "Object");
+		const uri=await this._getWritePath(data);
 		return fs.ensureDir(path.parse(uri).dir)
 			.then(()=>{
 				midi.writeMidiToFile(data, uri);

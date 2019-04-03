@@ -169,7 +169,7 @@ exports.dateAddDays=function(date, days) {
  * compares two strings
  * @param {string} s1
  * @param {string} s2
- * @param {Boolean} ignoreCase
+ * @param {boolean} ignoreCase
  * @returns {number} -1, 0, 1
  */
 module.exports.compareStrings=function(s1, s2, {
@@ -274,7 +274,7 @@ module.exports.ensure=function(object, path, value) {
  * @param {number} options.depth
  * @param {Set} options.shallow optional object constructor types that we don't descend into
  * @param {number} options.breakLength - forwarded to node.util.inspect
- * @param {Boolean} options.colors - forwarded to node.util.inspect
+ * @param {boolean} options.colors - forwarded to node.util.inspect
  * @returns {String}
  */
 exports.inspect=function(object, options=undefined) {

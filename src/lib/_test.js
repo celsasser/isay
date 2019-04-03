@@ -10,8 +10,10 @@ const {ModuleBase}=require("./_base");
 const {
 	assertType,
 	assertTypesEqual,
+	boolean,
 	resolveType
 }=require("./_data");
+
 
 /**
  * Base class for tests so that we can support the positive and negative tests with one set of functionality
@@ -26,6 +28,7 @@ class ModuleTest extends ModuleBase {
 	 * @param {string} method
 	 * @param {ModuleBase} nextModule
 	 * @param {Array<*>} params
+	 * @param {boolean} positive - what state should evaluate to true
 	 * @param {ModuleBase} thenModule - if module if there is one
 	 */
 	constructor({
@@ -101,6 +104,22 @@ class ModuleTest extends ModuleBase {
 	}
 
 	/**
+	 * Simple fella that evaluates whether the input is false as evaluated by <code>boolean(value)</code>
+	 * @resolves predicate:ActionPredicate in this.params[0]
+	 * @resolves state:* in this.params[0]
+	 * @param {DataBlob} blob
+	 * @returns {Promise<boolean>}
+	 */
+	async false(blob) {
+		if(this.params.length>0) {
+			const value=await resolveType(blob, this.params[0], "*", {allowNullish: true});
+			return this._processTestResult(blob, boolean(value)===false);
+		} else {
+			return this._processTestResult(blob, boolean(blob)===false);
+		}
+	}
+
+	/**
 	 * Tests for <param>blob</param> > this.params[0]
 	 * @param {DataBlob} blob
 	 * @return {Promise<DataBlob>}
@@ -154,22 +173,6 @@ class ModuleTest extends ModuleBase {
 	}
 
 	/**
-	 * Intended to allow predicates to get in the testing business but defers to casting if there is no predicate.
-	 * @resolves predicate:ActionPredicate in this.params[0]
-	 * @resolves state:* in this.params[0] - probably want to use <code>equal</code> but this guy supports it
-	 * @param {DataBlob} blob
-	 * @returns {Promise<boolean>}
-	 */
-	async test(blob) {
-		if(this.params.length>0) {
-			const value=await resolveType(blob, this.params[0], "*", {allowNullish: true});
-			return this._processTestResult(blob, Boolean(value));
-		} else {
-			return this._processTestResult(blob, Boolean(blob));
-		}
-	}
-
-	/**
 	 * Is a flow handler much like else and catch. May be used to flow to via a non-flow <code>ModuleTest</code> action
 	 * @resolves predicate:ActionPredicate in this.params[0]
 	 * @resolves result:* in this.params[0]
@@ -182,6 +185,22 @@ class ModuleTest extends ModuleBase {
 			return Promise.resolve(blob);
 		} else  {
 			return resolveType(blob, this.params[0], "*", {allowNullish: true});
+		}
+	}
+
+	/**
+	 * Simple fella that evaluates whether the input is true as evaluated by <code>boolean(value)</code>
+	 * @resolves predicate:ActionPredicate in this.params[0]
+	 * @resolves state:* in this.params[0]
+	 * @param {DataBlob} blob
+	 * @returns {Promise<boolean>}
+	 */
+	async true(blob) {
+		if(this.params.length>0) {
+			const value=await resolveType(blob, this.params[0], "*", {allowNullish: true});
+			return this._processTestResult(blob, boolean(value));
+		} else {
+			return this._processTestResult(blob, boolean(blob));
 		}
 	}
 

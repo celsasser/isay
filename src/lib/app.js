@@ -8,7 +8,7 @@
 const _=require("lodash");
 const constant=require("../common/constant");
 const {ModuleIO}=require("./_io");
-const {resolveType}=require("./_data");
+const {boolean, resolveType}=require("./_data");
 
 /**
  * A body of functionality that affects application execution
@@ -26,17 +26,15 @@ class ModuleApp extends ModuleIO {
 	}
 
 	/**
-	 * Asserts that the condition in params[0] predicate is true. It is designed to be used with <code>is</code> and <code>not</code>
-	 * This guy is one of the few exceptions to the input/output rule. He looks at the input returned by the predicate but returns
-	 * <param>blob</param>
+	 * Asserts that the condition in params[0]. It probably will most often be used with
+	 * domains <code>is</code> and <code>not</code>, but we don't enforce anything.
 	 * @param {DataBlob} blob
-	 * @return {Promise<*>}
+	 * @return {Promise<DataBlob>} - returns input
+	 * @throws {Error}
 	 */
 	async assert(blob) {
-		const result=await resolveType(blob, this.params[0], "*", {
-			allowNull: true
-		});
-		if(Boolean(result)===false) {
+		const result=await resolveType(blob, this.params[0], "*", {allowNull: true});
+		if(boolean(result)===false) {
 			throw new Error(_.get(this.params, 1, "assertion failed"));
 		}
 		return blob;

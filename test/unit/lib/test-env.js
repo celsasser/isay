@@ -48,12 +48,45 @@ describe("lib.ModuleEnv", function() {
 	});
 
 	describe("get", function() {
-		it("should get the whole enchilada", async function() {
+		function _set(variable, value) {
+			const instance=_createInstance({
+				params: [variable]
+			});
+			return instance.set(value);
+		}
+
+		it("should get the whole enchilada with no params", async function() {
 			const instance=_createInstance();
 			return instance.get()
 				.then(result=>{
 					assert.deepEqual(result, process.env);
 				});
+		});
+
+		it("should raise exception if single param is not a string", async function() {
+			const instance=_createInstance({
+				params: [1]
+			});
+			return instance.get()
+				.then(assert.notCalled)
+				.catch(error=>assert.strictEqual(error.message, "expecting String but found Number"));
+		});
+
+		it("should get variable if params[0] is a string", async function() {
+			const instance=_createInstance({
+				params: ["MOUSE"]
+			});
+			return _set("MOUSE", "eek")
+				.then(()=>instance.get())
+				.then(value=>assert.strictEqual(value, "eek"));
+		});
+
+		it("should properly default variable if not set in env", async function() {
+			const instance=_createInstance({
+				params: ["__MOUSE_NOT_SET__", "default"]
+			});
+			return instance.get()
+				.then(value=>assert.strictEqual(value, "default"));
 		});
 	});
 

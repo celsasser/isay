@@ -65,7 +65,7 @@ exports.isValidValue=function(enumObject, value) {
 };
 
 /**
- * @type {function(value:string):Boolean}
+ * @type {function(value:string):boolean}
  */
 exports.isValidSeverity=exports.isValidValue.bind(null, exports.severity);
 

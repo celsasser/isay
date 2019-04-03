@@ -2,5 +2,5 @@
  * Should return result of test
  */
 
-is.test(false)
+is.true(false)
 	.is.then("then")
