@@ -7,7 +7,10 @@
 
 const _=require("lodash");
 const {ModuleBase}=require("./_base");
-const {assertType}=require("./_data");
+const {
+	assertType,
+	resolveType
+}=require("./_data");
 const {
 	formatMouseSpecification,
 	unformatMouseSpecification
@@ -27,8 +30,8 @@ class ModuleString extends ModuleBase {
 	 */
 	async format(blob) {
 		assertType(blob, ["Array", "Object"]);
-		assertType(this.params[0], "String");
-		return formatMouseSpecification(this.params[0], blob);
+		const format=await resolveType(blob, this.params[0], "String");
+		return formatMouseSpecification(format, blob);
 	}
 
 	/**
@@ -39,18 +42,17 @@ class ModuleString extends ModuleBase {
 	 * @throws {Error}
 	 */
 	async replace(blob) {
-		if(blob!=null) {
-			let search=this.params[0],
-				replace=this.params[1];
+		if(blob==null) {
+			return blob;
+		} else {
 			assertType(blob, "String");
-			assertType(search, ["RegExp", "String"]);
-			assertType(replace, ["String"]);
+			let search=await resolveType(blob, this.params[0], ["RegExp", "String"]),
+				replace=await resolveType(blob, this.params[1], "String");
 			if(search.constructor.name!=="RegExp") {
 				search=new RegExp(search, "g");
 			}
-			blob=blob.replace(search, replace);
+			return blob.replace(search, replace);
 		}
-		return blob;
 	}
 
 	/**
@@ -66,7 +68,9 @@ class ModuleString extends ModuleBase {
 			return [];
 		} else {
 			assertType(blob, "String");
-			const argument=_.get(this.params, "0", {method: "white"});
+			const argument=(this.params.length>0)
+				? await resolveType(blob, this.params[0], ["Object", "RegExp", "String"])
+				: {method: "white"};
 			if(argument.constructor.name==="String") {
 				return blob.split(argument);
 			} else if(argument.constructor.name==="RegExp") {
@@ -107,13 +111,11 @@ class ModuleString extends ModuleBase {
 	 * @private
 	 */
 	_splitByMethod(blob, spec) {
-		assertType(spec, "Object");
 		/**
 		 * Most methods can be uniquely identified by their properties in which case we let the method slip
 		 * @type {string}
 		 */
 		const method=(()=>{
-			//
 			if(spec.method) {
 				return spec.method;
 			} else if(spec.hasOwnProperty("delimiter")) {
@@ -125,9 +127,8 @@ class ModuleString extends ModuleBase {
 		})();
 		switch(method) {
 			case "delimiter": {
-				const delimiter=_.get(spec, "delimiter", "\\s*,\\s*"),
-					regex=new RegExp(delimiter);
-				return blob.split(regex);
+				const delimiter=assertType(_.get(spec, "delimiter", /\s*,\s*/), ["RegExp", "String"]);
+				return blob.split(delimiter);
 			}
 			case "format": {
 				assertType(spec.format, "String");
@@ -161,6 +162,7 @@ class ModuleString extends ModuleBase {
 	 * 2. by regular expression capture groups
 	 * @param {string} blob
 	 * @param {RegExp} regex
+	 * @returns {DataBlob}
 	 * @private
 	 */
 	_splitByRegex(blob, regex) {

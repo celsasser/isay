@@ -18,40 +18,40 @@ const {assertType}=require("./_data");
 class ModuleMidi extends ModuleIO {
 	/**
 	 * Parses input and returns a parsed midi structure.
-	 * @param {Buffer|string} data
+	 * @param {Buffer|string} blob
 	 * @returns {Promise<MidiIoSong>}
 	 */
-	async parse(data) {
-		if(Buffer.isBuffer(data)) {
-			data=data.toString("utf8");
+	async parse(blob) {
+		if(Buffer.isBuffer(blob)) {
+			blob=blob.toString("utf8");
 		}
-		return midi.parseMidiBuffer(data);
+		return midi.parseMidiBuffer(blob);
 	}
 
 	/**
 	 * Reads and parses specified midi file. See resolution rules at <link>_getReadPath</link>
-	 * @param {string|undefined} data
+	 * @param {string|undefined} blob
 	 * @returns {Promise<MidiIoSong>}
 	 * @throws {Error}
 	 */
-	async read(data) {
-		const path=await this._getReadPath(data);
+	async read(blob) {
+		const path=await this._getReadPath(blob);
 		return midi.parseMidiFile(path);
 	}
 
 	/**
 	 * Writes data to path that should be in <code>this.params[0]</code>. See resolution rules at <link>_getWritePath</link>
-	 * @param {MidiIoSong} data
+	 * @param {MidiIoSong} blob
 	 * @returns {Promise<MidiIoSong>}
 	 * @throws {Error}
 	 */
-	async write(data) {
-		assertType(data, "Object");
-		const uri=await this._getWritePath(data);
+	async write(blob) {
+		assertType(blob, "Object");
+		const uri=await this._getWritePath(blob);
 		return fs.ensureDir(path.parse(uri).dir)
 			.then(()=>{
-				midi.writeMidiToFile(data, uri);
-				return data;
+				midi.writeMidiToFile(blob, uri);
+				return blob;
 			});
 	}
 }

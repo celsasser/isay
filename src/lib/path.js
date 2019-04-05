@@ -5,7 +5,6 @@
  * Copyright @2019 by Xraymen Inc.
  */
 
-const _=require("lodash");
 const node_path=require("path");
 const {ModuleBase}=require("./_base");
 const {assertType, resolveType}=require("./_data");

@@ -157,6 +157,7 @@ describe("lib.ModuleIO", function() {
 			return instance._getWritePathAndOptions()
 				.then(result=>assert.deepEqual(result, {
 					"encoding": "utf8",
+					"mode": 0o666,
 					"path": "path"
 				}));
 		});
@@ -165,12 +166,16 @@ describe("lib.ModuleIO", function() {
 			const instance=_createInstance({
 				params: [
 					"path",
-					{encoding: "ascii"}
+					{
+						encoding: "ascii",
+						mode: 0o111
+					}
 				]
 			});
 			return instance._getWritePathAndOptions()
 				.then(result=>assert.deepEqual(result, {
 					"encoding": "ascii",
+					"mode": 0o111,
 					"path": "path"
 				}));
 		});
@@ -185,6 +190,7 @@ describe("lib.ModuleIO", function() {
 			return instance._getWritePathAndOptions()
 				.then(result=>assert.deepEqual(result, {
 					"encoding": "ascii",
+					"mode": 0o666,
 					"path": "path"
 				}));
 		});

@@ -114,7 +114,7 @@ class ModuleObject extends ModuleIO {
 	 * It transforms the top level of properties into an array. One may alter the default results by specifying a
 	 * a predicate function that returns the per array element value.
 	 * @resolves predicate:function(object:Object, key:string):Object in this.params[0]
-	 * @param {Object} blob
+	 * @param {DataBlob} blob
 	 * @returns {Promise<void>}
 	 */
 	async toArray(blob) {

@@ -5,9 +5,8 @@
  * Copyright @2019 by Xraymen Inc.
  */
 
-const _=require("lodash");
 const {ModuleBase}=require("./_base");
-const {assertType, resolveType}=require("./_data");
+const {resolveType}=require("./_data");
 
 /**
  * @typedef {ModuleBase} ModuleEnv
@@ -31,6 +30,7 @@ class ModuleEnv extends ModuleBase {
 	 * - otherwise looks for variable specified in params[0]
 	 * @resolves variable:(string|undefined) in this.params[0] - optional
 	 * @resolves default:(*|undefined) in this.params[1] - optional
+	 * @param {DataBlob} blob
 	 * @return {Promise<Object|*>}
 	 */
 	async get(blob) {

@@ -23,13 +23,13 @@ class ModuleFile extends ModuleIO {
 	 * @resolves source:string in this.params[0]|data
 	 * @resolves target:string in this.params[0]|this.params[1]
 	 * @resolves options:Object in this.params[1]|this.params[2]
-	 * @param {DataBlob} data
+	 * @param {DataBlob} blob
 	 * @return {Promise<DataBlob>}
 	 * @throws {Error}
 	 */
-	async copy(data) {
-		return this._copy(data)
-			.then(Promise.resolve.bind(Promise, data));
+	async copy(blob) {
+		return this._copy(blob)
+			.then(Promise.resolve.bind(Promise, blob));
 	}
 
 	/**
@@ -37,12 +37,12 @@ class ModuleFile extends ModuleIO {
 	 * - created because it doesn't exist
 	 * - or will delete it and recreate it
 	 * See resolution rules at <link>_getReadPathAndOptions</link>
-	 * @param {string|undefined} data
+	 * @param {string|undefined} blob
 	 * @return {Promise<DataBlob>}
 	 * @throws {Error}
 	 */
-	async create(data) {
-		const {path, type}=await this._getReadPathAndOptions(data),
+	async create(blob) {
+		const {path, type}=await this._getReadPathAndOptions(blob),
 			directory=_.includes(["dir", "directory"], (type||"").toLocaleLowerCase());
 		return fs.pathExists(path)
 			.then(exists=>{
@@ -55,29 +55,29 @@ class ModuleFile extends ModuleIO {
 					? fs.mkdir(path)
 					: fs.outputFile(path, "");
 			})
-			.then(Promise.resolve.bind(Promise, data));
+			.then(Promise.resolve.bind(Promise, blob));
 	}
 
 	/**
 	 * Removes the file or directory if it exists. See resolution rules at <link>_getReadPath</link>
-	 * @param {string|undefined} data
+	 * @param {string|undefined} blob
 	 * @returns {Promise<DataBlob>}
 	 * @throws {Error}
 	 */
-	async delete(data) {
-		const path=await this._getReadPath(data);
+	async delete(blob) {
+		const path=await this._getReadPath(blob);
 		return fs.remove(path)
-			.then(Promise.resolve.bind(Promise, data));
+			.then(Promise.resolve.bind(Promise, blob));
 	}
 
 	/**
 	 * Ensures that the file or directory pointed to by "path" exists. See resolution rules at <link>_getReadPathAndOptions</link>
-	 * @param {string|undefined} data
+	 * @param {string|undefined} blob
 	 * @return {Promise<DataBlob>}
 	 * @throws {Error}
 	 */
-	async ensure(data) {
-		const {path, type}=await this._getReadPathAndOptions(data),
+	async ensure(blob) {
+		const {path, type}=await this._getReadPathAndOptions(blob),
 			directory=_.includes(["dir", "directory"], (type||"").toLocaleLowerCase());
 		return fs.pathExists(path)
 			.then(exists=>{
@@ -99,49 +99,47 @@ class ModuleFile extends ModuleIO {
 						: fs.outputFile(path, "");
 				}
 			})
-			.then(Promise.resolve.bind(Promise, data));
+			.then(Promise.resolve.bind(Promise, blob));
 	}
 
 	/**
 	 * A convenience function that combines copy and delete. Supports all options that copy supports
 	 * @resolves source:string in data|this.params[0]
 	 * @resolves target:string in this.params[0]|this.params[1]
-	 * @param {DataBlob} data
+	 * @param {DataBlob} blob
 	 * @return {Promise<DataBlob>}
 	 * @throws {Error}
 	 */
-	async move(data) {
-		return this._copy(data)
+	async move(blob) {
+		return this._copy(blob)
 			.then(({source})=>fs.remove(source))
-			.then(Promise.resolve.bind(Promise, data));
+			.then(Promise.resolve.bind(Promise, blob));
 	}
 
 	/**
 	 * Loads file. See resolution rules at <link>_getReadPathAndOptions</link>.
-	 * @param {string|undefined} data
+	 * @param {string|undefined} blob
 	 * @returns {Promise<DataBlob>}
 	 * @throws {Error}
 	 */
-	async read(data) {
-		const {path, encoding}=await this._getReadPathAndOptions(data);
+	async read(blob) {
+		const {path, encoding}=await this._getReadPathAndOptions(blob);
 		return fs.readFile(path, {encoding});
 	}
 
 	/**
 	 * Writes data to file. See resolution rules at <link>_getWritePathAndOptions</link>
-	 * @param {Object} data
+	 * @param {DataBlob} blob
 	 * @returns {Promise<DataBlob>}
 	 * @throws {Error}
 	 */
-	async write(data) {
-		const {append, encoding, path}=await this._getWritePathAndOptions(data, {
-			append: false,
-			encoding: "utf8"
-		});
-		return fs.outputFile(path, data, {
+	async write(blob) {
+		const {append, encoding, mode, path}=await this._getWritePathAndOptions(blob, {append: false});
+		return fs.outputFile(path, blob, {
 			encoding,
-			flag: (append) ? "a" : "w"
-		}).then(Promise.resolve.bind(Promise, data));
+			flag: (append) ? "a" : "w",
+			mode
+		}).then(Promise.resolve.bind(Promise, blob));
 	}
 
 	/**
@@ -149,20 +147,20 @@ class ModuleFile extends ModuleIO {
 	 * @resolves files:Array<string> in data
 	 * @resolves archive:string in this.params[0]
 	 * @resolves options:(undefined|Object) this.params[1]
-	 * @param {DataBlob} data
+	 * @param {DataBlob} blob
 	 * @returns {Promise<DataBlob>}
 	 * @throws {Error}
 	 */
-	async zip(data) {
-		assertType(data, ["String", "Array"]);
-		const param0=await resolveType(data, this.params[0], "String"),
-			param1=await resolveType(data, this.params[1], "Object", {allowNullish: true});
+	async zip(blob) {
+		assertType(blob, ["String", "Array"]);
+		const param0=await resolveType(blob, this.params[0], "String"),
+			param1=await resolveType(blob, this.params[1], "Object", {allowNullish: true});
 		// if we don't terminate it with .zip then zip will. We want the final name so that we may
 		// find it when we want to remove it (if we remove it)
 		const archivePath=param0.endsWith(".zip") ? param0 : `${param0}.zip`,
 			archiveParsed=node_path.parse(archivePath),
 			{replace}=Object.assign({replace: true}, param1),
-			files=_.isArray(data) ? data : [data],
+			files=_.isArray(blob) ? blob : [blob],
 			options=["-q"];
 
 		return ((replace)
@@ -175,7 +173,7 @@ class ModuleFile extends ModuleIO {
 						.concat(files),
 					command: "zip"
 				}))
-				.then(Promise.resolve.bind(Promise, data));
+				.then(Promise.resolve.bind(Promise, blob));
 	}
 
 	/**************** Private Interface ****************/
@@ -185,20 +183,20 @@ class ModuleFile extends ModuleIO {
 	 * @resolves source:string in this.params[0]|data
 	 * @resolves target:string in this.params[0]|this.params[1]
 	 * @resolves options:Object in this.params[1]|this.params[2]
-	 * @param {DataBlob} data
+	 * @param {DataBlob} blob
 	 * @return {Promise<{source:string, target:string}>}
 	 * @throws {Error}
 	 */
-	async _copy(data) {
+	async _copy(blob) {
 		let source, target, options;
-		const param0=await resolveType(data, this.params[0], "String"),
-			param1=await resolveType(data, this.params[1], ["Object", "String"], {allowNullish: true});
+		const param0=await resolveType(blob, this.params[0], "String"),
+			param1=await resolveType(blob, this.params[1], ["Object", "String"], {allowNullish: true});
 		if(getType(param1)==="String") {
 			source=param0;
 			target=param1;
-			options=await resolveType(data, this.params[2], "Object", {allowNullish: true});
+			options=await resolveType(blob, this.params[2], "Object", {allowNullish: true});
 		} else {
-			source=assertType(data, "String");
+			source=assertType(blob, "String");
 			target=param0;
 			options=param1;
 		}

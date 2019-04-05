@@ -9,7 +9,8 @@
 
 /**
  * Creates a promise that resolves upon process.nextTick
- * @param {*} args
+ * @param {...*} args
+ * @returns {Promise}
  */
 function rejectNextTick(...args) {
 	return new Promise((resolve, reject)=>{
@@ -19,7 +20,8 @@ function rejectNextTick(...args) {
 
 /**
  * Creates a promise that rejects upon process.nextTick
- * @param {*} args
+ * @param {...*} args
+ * @returns {Promise}
  */
 function resolveNextTick(...args) {
 	return new Promise((resolve)=>{

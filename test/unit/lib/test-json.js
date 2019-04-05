@@ -182,6 +182,7 @@ describe("lib.ModuleJson", function() {
 					"async": true,
 					"data": data,
 					"encoding": "binary",
+					"mode": 0o666,
 					"uri": path
 				});
 				return Promise.resolve();
@@ -189,6 +190,5 @@ describe("lib.ModuleJson", function() {
 			return instance.write(data)
 				.then(result=>assert.strictEqual(result, data));
 		});
-
 	});
 });

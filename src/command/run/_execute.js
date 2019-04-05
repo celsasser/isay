@@ -281,7 +281,7 @@ function _parseChain({
 	/**
 	 * Creates and adds a ModuleDescriptor to our call-sequence
 	 * @param {LibraryNode} node
-	 * @param {Array<string>} args
+	 * @param {...string} args
 	 * @returns {Proxy}
 	 */
 	function _addCall(node, ...args) {

@@ -6,6 +6,7 @@
  */
 
 const assert=require("../../support/assert");
+const {resolveNextTick}=require("../../../src/common/promise");
 const {ModuleString}=require("../../../src/lib/string");
 
 describe("lib.ModuleString", function() {
@@ -55,6 +56,16 @@ describe("lib.ModuleString", function() {
 					assert.strictEqual(result, "input");
 				});
 		});
+
+		it("should resolve the format spec from predicate", async function() {
+			const instance=_createInstance({
+				params: [resolveNextTick.bind(null, "${l}")]
+			});
+			return instance.format(["input"])
+				.then(result=>{
+					assert.strictEqual(result, "input");
+				});
+		});
 	});
 
 	describe("replace", function() {
@@ -89,7 +100,7 @@ describe("lib.ModuleString", function() {
 				.then(result=>assert.strictEqual(result, "bird, cat, bird"));
 		});
 
-		it("should successfully process valid non-global, regex search", async function() {
+		it("should successfully process valid non-global regex search", async function() {
 			const input="dog, cat, dog",
 				search=/dog/,
 				replace="bird",
@@ -100,7 +111,7 @@ describe("lib.ModuleString", function() {
 				.then(result=>assert.strictEqual(result, "bird, cat, dog"));
 		});
 
-		it("should successfully process valid global, regex search", async function() {
+		it("should successfully process valid global regex search", async function() {
 			const input="dog, cat, dog",
 				search=/dog/g,
 				replace="bird",
@@ -110,135 +121,204 @@ describe("lib.ModuleString", function() {
 			return instance.replace(input)
 				.then(result=>assert.strictEqual(result, "bird, cat, bird"));
 		});
+
+		it("should get search and replace args from predicates", async function() {
+			const input="dog, cat, dog",
+				search=resolveNextTick.bind(null, "cat"),
+				replace=resolveNextTick.bind(null, "dog"),
+				instance=new _createInstance({
+					params: [search, replace]
+				});
+			return instance.replace(input)
+				.then(result=>assert.strictEqual(result, "dog, dog, dog"));
+		});
 	});
 
 	describe("split", function() {
+		it("should raise exception if blob is not a string", async function() {
+			const instance=_createInstance();
+			return instance.split(10)
+				.then(assert.notCalled)
+				.catch(error=>{
+					assert.strictEqual(error.message, "expecting String but found Number");
+				});
+		});
+
 		it("should raise exception if param is unknown", async function() {
 			const instance=_createInstance({
 				params: [10]
 			});
-			instance.split("")
+			return instance.split("")
 				.then(assert.notCalled)
 				.catch(error=>{
-					assert.strictEqual(error.message, "expecting Object but found Number");
+					assert.strictEqual(error.message, "expecting Object, RegExp or String but found Number");
 				});
 		});
 
 		it("should use white method by default", async function() {
-			const instance=_createInstance({}),
+			const instance=_createInstance(),
 				blob=await instance.split("a\\ b");
 			assert.deepEqual(blob, ["a\\", "b"]);
 		});
 
-		it("should split via string", async function() {
-			const instance=_createInstance({
-					params: ["."]
-				}),
-				blob=await instance.split("a.b.c.d");
-			assert.deepEqual(blob, ["a", "b", "c", "d"]);
-		});
-
-		it("should split via regex without capture groups", async function() {
-			const instance=_createInstance({
-					params: [/\W/]
-				}),
-				blob=await instance.split("a.b.c.d");
-			assert.deepEqual(blob, ["a", "b", "c", "d"]);
-		});
-
-		it("should return capture groups if regex includes capture groups", async function() {
-			const instance=_createInstance({
-					params: [/(\d+)\w+(\d+)(.+)/]
-				}),
-				blob=await instance.split("1a2--");
-			assert.deepEqual(blob, ["1", "2", "--"]);
-		});
-
-		it("should not split on escaped parenthesis", async function() {
-			const instance=_createInstance({
-					params: [/\(\w+\)/]
-				}),
-				blob=await instance.split("a(1)b");
-			assert.deepEqual(blob, ["a", "b"]);
-		});
-
-		it("should apply default 'delimiter' properly", async function() {
-			const instance=_createInstance({
-					params: [{method: "delimiter"}]
-				}),
-				blob=await instance.split("a,b, c, d");
-			assert.deepEqual(blob, ["a", "b", "c", "d"]);
-		});
-
-		it("should apply specified 'delimiter' properly", async function() {
-			const instance=_createInstance({
-					params: [{method: "delimiter", delimiter: "\\s*:\\s*"}]
-				}),
-				blob=await instance.split("a:b: c: d");
-			assert.deepEqual(blob, ["a", "b", "c", "d"]);
-		});
-
-		it("should apply newline properly", async function() {
-			const instance=_createInstance({
-					params: [{method: "newline"}]
-				}),
-				blob=await instance.split("1\n2 \n 3");
-			assert.deepEqual(blob, ["1", "2", "3"]);
-		});
-
-		it("should apply 'white' properly", async function() {
-			const instance=_createInstance({
-					params: [{method: "white"}]
-				}),
-				blob=await instance.split("'a b'");
-			assert.deepEqual(blob, ["'a", "b'"]);
-		});
-
-		it("should raise exception if method='format' and format is missing from configuration", async function() {
-			const instance=_createInstance({
-				params: [{
-					method: "format"
-				}]
+		describe("literal", function() {
+			it("should split via '.'", async function() {
+				const instance=_createInstance({
+						params: ["."]
+					}),
+					blob=await instance.split("a.b.c.d");
+				assert.deepEqual(blob, ["a", "b", "c", "d"]);
 			});
-			return instance.split(" a b")
-				.then(assert.notCalled)
-				.catch(error=>{
-					assert.strictEqual(error.message, "expecting String but found undefined");
-				});
 		});
 
-		it("should forward method='format' to unformatMouseSpecification if requirements satisified", async function() {
-			const instance=_createInstance({
-					params: [{
-						format: "${2r}${2r}",
-						method: "format"
-					}]
-				}),
-				result=await instance.split(" a b");
-			assert.deepEqual(result, ["a", "b"]);
-		});
-
-		it("should infer method='format' if not explicitly specified", async function() {
-			const instance=_createInstance({
-					params: [{
-						format: "${2r}${2r}"
-					}]
-				}),
-				result=await instance.split(" a b");
-			assert.deepEqual(result, ["a", "b"]);
-		});
-
-		it("should raise exception if method cannot be divined", async function() {
-			const instance=_createInstance({
-				params: [{
-					unknown: "configuration"
-				}]
+		describe("regex", function() {
+			it("should split /[a-z]/ without capture groups", async function() {
+				const instance=_createInstance({
+						params: [/[a-z]/]
+					}),
+					blob=await instance.split("AaBbC");
+				assert.deepEqual(blob, ["A", "B", "C"]);
 			});
-			return instance.split(" a b")
-				.then(assert.notCalled)
-				.catch(error=>{
-					assert.strictEqual(error.message, 'unsupported configuration {"unknown":"configuration"}');
+
+			it("should return capture groups if regex includes capture groups", async function() {
+				const instance=_createInstance({
+						params: [/(\d+)\w+(\d+)(.+)/]
+					}),
+					blob=await instance.split("1a2->");
+				assert.deepEqual(blob, ["1", "2", "->"]);
+			});
+
+			it("should not be fooled by escaped parenthesis", async function() {
+				const instance=_createInstance({
+						params: [/\(\w+\)/]
+					}),
+					blob=await instance.split("a(1)b");
+				assert.deepEqual(blob, ["a", "b"]);
+			});
+		});
+
+		describe("method", function() {
+			it("should raise exception if method cannot be divined", async function() {
+				const instance=_createInstance({
+					params: [{
+						unknown: "configuration"
+					}]
 				});
+				return instance.split(" a b")
+					.then(assert.notCalled)
+					.catch(error=>{
+						assert.strictEqual(error.message, 'unsupported configuration {"unknown":"configuration"}');
+					});
+			});
+
+			describe("delimiter", function() {
+				it("should raise exception if 'delimiter' property is unknown", async function() {
+					const instance=_createInstance({
+						params: [{
+							delimiter: 10
+						}]
+					});
+					return instance.split("a,b")
+						.then(assert.notCalled)
+						.catch(error=>{
+							assert.strictEqual(error.message, "expecting RegExp or String but found Number");
+						});
+				});
+
+				it("should by default to '/s*,/s*'", async function() {
+					const instance=_createInstance({
+							params: [{method: "delimiter"}]
+						}),
+						blob=await instance.split("a , b , c");
+					assert.deepEqual(blob, ["a", "b", "c"]);
+				});
+
+				it("should infer method by 'delimiter' property", async function() {
+					const instance=_createInstance({
+							params: [{delimiter: ";"}]
+						}),
+						blob=await instance.split("a;b;c");
+					assert.deepEqual(blob, ["a", "b", "c"]);
+				});
+
+				it("should apply specified 'delimiter' string properly", async function() {
+					const instance=_createInstance({
+							params: [{
+								method: "delimiter",
+								delimiter: ":"
+							}]
+						}),
+						blob=await instance.split("a : b : c");
+					assert.deepEqual(blob, ["a ", " b ", " c"]);
+				});
+
+				it("should apply specified 'delimiter' regex properly", async function() {
+					const instance=_createInstance({
+							params: [{
+								method: "delimiter",
+								delimiter: /\s*:\s*/
+							}]
+						}),
+						blob=await instance.split("a : b : c");
+					assert.deepEqual(blob, ["a", "b", "c"]);
+				});
+			});
+
+			describe("format", function() {
+				it("should raise exception if method='format' and format is missing from configuration", async function() {
+					const instance=_createInstance({
+						params: [{
+							method: "format"
+						}]
+					});
+					return instance.split("")
+						.then(assert.notCalled)
+						.catch(error=>{
+							assert.strictEqual(error.message, "expecting String but found undefined");
+						});
+				});
+
+				it("should split via unformatMouseSpecification if requirements satisified", async function() {
+					const instance=_createInstance({
+							params: [{
+								format: "${2r}${2r}",
+								method: "format"
+							}]
+						}),
+						result=await instance.split(" a b");
+					assert.deepEqual(result, ["a", "b"]);
+				});
+
+				it("should infer method by 'format' property if not explicitly specified", async function() {
+					const instance=_createInstance({
+							params: [{
+								format: "${2r}${2r}"
+							}]
+						}),
+						result=await instance.split(" a b");
+					assert.deepEqual(result, ["a", "b"]);
+				});
+			});
+
+			describe("newline", function() {
+				it("should apply newline properly", async function() {
+					const instance=_createInstance({
+							params: [{method: "newline"}]
+						}),
+						blob=await instance.split("1\n2 \n 3");
+					assert.deepEqual(blob, ["1", "2", "3"]);
+				});
+			});
+
+			describe("white", function() {
+				it("should apply 'white' properly", async function() {
+					const instance=_createInstance({
+							params: [{method: "white"}]
+						}),
+						blob=await instance.split("'a b'");
+					assert.deepEqual(blob, ["'a", "b'"]);
+				});
+			});
 		});
 	});
 

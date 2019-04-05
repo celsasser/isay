@@ -26,7 +26,7 @@ class XRayError extends Error {
 	 * @param {Error} error - error that will be promoted to "message" or "details" if they are not specified.
 	 * @param {Object|string} instance - instance of object in which the error occurred
 	 * @param {string} message
-	 * @param {Object} properties - additional properties that you want captured and logged.
+	 * @param {...*} properties - additional properties that you want captured and logged.
 	 */
 	constructor({
 		code=undefined,

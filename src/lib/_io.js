@@ -7,7 +7,6 @@
  * Base class for all domains that interact with files
  */
 
-const _=require("lodash");
 const {ModuleBase}=require("./_base");
 const {assertType, getType, resolveType}=require("./_data");
 
@@ -41,8 +40,8 @@ class ModuleIO extends ModuleBase {
 	 * @resolves options:(Object|undefined) in this.params[0]|this.params[1]
 	 * @param {string|undefined} blob
 	 * @param {Encoding} encoding
-	 * @param {Object} options
-	 * @returns {{path:string, encoding:string, ...options}} - will include whatever other options are discovered
+	 * @param {...*} options
+	 * @returns {{path:string, encoding:string, ...*}} - will include whatever other options are discovered
 	 * @throws {Error}
 	 * @protected
 	 */
@@ -76,24 +75,26 @@ class ModuleIO extends ModuleBase {
 		return resolveType(blob, this.params[0], "String");
 	}
 
-	// eslint-disable-next-line valid-jsdoc
 	/**
 	 * Writes data to path that should be in <code>this.params[0]</code>.
 	 * Write options may optionally be in <code>this.params[1]</code>
 	 * @param {DataBlob} blob
 	 * @param {Encoding} encoding
-	 * @param {Object} options
-	 * @returns {{path:string, encoding:string, ...options}}
+	 * @param {uint} mode
+	 * @param {...*} options
+	 * @returns {{path:string, encoding:string, ...*}}
 	 * @throws {Error}
 	 */
 	async _getWritePathAndOptions(blob, {
 		encoding="utf8",
+		mode=0o666,
 		...options
 	}={}) {
 		const path=await resolveType(blob, this.params[0], "String"),
 			overrides=await resolveType(blob, this.params[1], "Object", {allowNullish: true});
 		return Object.assign({
 			encoding,
+			mode,
 			path
 		}, options, overrides);
 	}

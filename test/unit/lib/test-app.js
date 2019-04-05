@@ -154,6 +154,6 @@ describe("lib.ModuleApp", function() {
 						assert.strictEqual(result, "input");
 					});
 			});
-		})
+		});
 	});
 });

@@ -29,7 +29,7 @@ function toLocalPath(relativeToRoot) {
  * @param {string} uri
  * @param {string} encoding
  * @param {boolean} local - will apply <code>toLocalPath</code> to uri if true
- * @param {Object} options
+ * @param {...*} options
  * @param {Function} callback
  * @return {Promise<Object>}
  */
@@ -58,7 +58,7 @@ async function readToJSON(uri, {
  * @param {string} uri
  * @param {string} encoding
  * @param {boolean} local - will apply <code>toLocalPath</code> to uri if true
- * @param {Object} options
+ * @param {...*} options
  * @return {Object}
  */
 function readToJSONSync(uri, {

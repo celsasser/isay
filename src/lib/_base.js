@@ -41,7 +41,7 @@ class ModuleBase {
 	/**
 	 * Processes data for this module and passes results down the pipeline
 	 * @param {DataBlob} data
-	 * @param {Array<*>} args - a few of our action predicates offering extra params such as array.map
+	 * @param {...*} args - a few of our action predicates offering extra params such as array.map
 	 * @returns {Promise<DataBlob>}
 	 */
 	async process(data=undefined, ...args) {

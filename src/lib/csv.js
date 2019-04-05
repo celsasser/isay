@@ -22,15 +22,15 @@ class ModuleCsv extends ModuleIO {
 	 * where the input path is specified.
 	 * @resolves data:string in data
 	 * @resolves options:Object in params[0]
-	 * @param {string} data
+	 * @param {string} blob
 	 * @returns {Promise<CsvDoc>}
 	 * @throws {Error}
 	 */
-	async parse(data) {
-		assertType(data, "String");
-		const options=await resolveType(data, this.params[0], "Object", {allowNullish: true});
+	async parse(blob) {
+		assertType(blob, "String");
+		const options=await resolveType(blob, this.params[0], "Object", {allowNullish: true});
 		return new Promise((resolve, reject)=>{
-			parse(data, {
+			parse(blob, {
 				delimiter: _.get(options, "delimiter", ",")
 			}, (error, parsed)=>{
 				if(error) {
@@ -44,37 +44,36 @@ class ModuleCsv extends ModuleIO {
 
 	/**
 	 * Reads and parses specified csv file. See resolution rules at <link>_getReadPathAndOptions</link>
-	 * @param {string|undefined} data
+	 * @param {string|undefined} blob
 	 * @returns {Promise<CsvDoc>}
 	 * @throws {Error}
 	 */
-	async read(data) {
-		const {path, encoding}=await this._getReadPathAndOptions(data);
+	async read(blob) {
+		const {path, encoding}=await this._getReadPathAndOptions(blob);
 		return fs.readFile(path, {encoding})
 			.then(data=>this.parse(data));
 	}
 
 	/**
 	 * Writes data to path. See resolution rules at <link>_getWritePathAndOptions</link>
-	 * @param {CsvDoc} data
+	 * @param {CsvDoc} blob
 	 * @returns {Promise<CsvDoc>}
 	 * @throws {Error}
 	 */
-	async write(data) {
+	async write(blob) {
 		const {
 			delimiter,
 			encoding,
+			mode,
 			path
-		}=await this._getWritePathAndOptions(data, {delimiter: ","});
+		}=await this._getWritePathAndOptions(blob, {delimiter: ","});
 		return new Promise((resolve, reject)=>{
-			stringify(data, {
-				delimiter
-			}, (error, text)=>{
+			stringify(blob, {delimiter}, (error, text)=>{
 				if(error) {
 					reject(error);
 				} else {
-					fs.outputFile(path, text, {encoding})
-						.then(resolve.bind(null, data))
+					fs.outputFile(path, text, {encoding, mode})
+						.then(resolve.bind(null, blob))
 						.catch(reject);
 				}
 			});
