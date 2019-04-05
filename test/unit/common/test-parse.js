@@ -20,6 +20,9 @@ describe("common.parse", function() {
 			assert.deepEqual(parse.shell("\"quoted\""), ["\"quoted\""]);
 			assert.deepEqual(parse.shell("'quoted'"), ["'quoted'"]);
 			assert.deepEqual(parse.shell("100.00"), ["100.00"]);
+			assert.deepEqual(parse.shell("\\ escaped"), ["\\ escaped"]);
+			assert.deepEqual(parse.shell("escaped\\ "), ["escaped\\ "]);
+			assert.deepEqual(parse.shell("\\ escaped\\ "), ["\\ escaped\\ "]);
 		});
 
 		it("properly parse multiple tokens", function() {
@@ -31,6 +34,7 @@ describe("common.parse", function() {
 
 		it("properly parse escaped space", function() {
 			assert.deepEqual(parse.shell("one\\ two three"), ["one\\ two", "three"]);
+			assert.deepEqual(parse.shell("one\\  two\\  three\\ "), ["one\\ ", "two\\ ", "three\\ "]);
 		});
 
 		it("properly parse mixed sequences", function() {

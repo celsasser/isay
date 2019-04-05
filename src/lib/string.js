@@ -70,16 +70,7 @@ class ModuleString extends ModuleBase {
 			if(argument.constructor.name==="String") {
 				return blob.split(argument);
 			} else if(argument.constructor.name==="RegExp") {
-				// we consider two possibilities here:
-				// 1. they want to split on regex matches
-				// 2. they want the split to be capture groups
-				// So, if we find capture groups then we assume the latter, otherwise we split on the pattern
-				if(/[^\\]\(.+?[^\\]\)/.test(argument.source)) {
-					const match=blob.match(argument) || [];
-					return match.slice(1);
-				} else {
-					return blob.split(argument);
-				}
+				return this._splitByRegex(blob, argument);
 			} else {
 				return this._splitByMethod(blob, argument);
 			}
@@ -109,7 +100,7 @@ class ModuleString extends ModuleBase {
 	/**************** Private Interface ****************/
 	/**
 	 * We are being asked to spit by one of the methods we support. Figure out which one it is and apply it.
-	 * @param {DataBlob} blob
+	 * @param {string} blob
 	 * @param {Object} spec
 	 * @returns {string}
 	 * @throws {Error}
@@ -117,8 +108,12 @@ class ModuleString extends ModuleBase {
 	 */
 	_splitByMethod(blob, spec) {
 		assertType(spec, "Object");
+		/**
+		 * Most methods can be uniquely identified by their properties in which case we let the method slip
+		 * @type {string}
+		 */
 		const method=(()=>{
-			// some can be uniquely identified by their properties in which case we let the method slip
+			//
 			if(spec.method) {
 				return spec.method;
 			} else if(spec.hasOwnProperty("delimiter")) {
@@ -141,9 +136,11 @@ class ModuleString extends ModuleBase {
 			case "newline": {
 				const result=blob.split(/\s*\n\s*/);
 				if(_.last(result)==="") {
-					// What are we doing here? It's an executive decision that we may back out of. The reason is because function such as
-					// "ls", "find" all return with a trailing newline which when parsed will result in an empty line. And split
-					// includes an empty trailing line. I think it's safe to assume that we never want it.
+					// What are we doing here? We are trimming off the trailing empty string included when a string is
+					// terminated with "\n". Is it right? Yes and no. My decision is motivated by our integration and
+					// focus on OS commands. "ls", "find" and friends all return with a trailing newline which when
+					// parsed will result in an empty line. I think it's safe to assume that we never want it.
+					// In conclusion - it's an executive decision that we may back out of.
 					result.pop();
 				}
 				return result;
@@ -155,6 +152,26 @@ class ModuleString extends ModuleBase {
 			default: {
 				return blob.split(/\s+/);
 			}
+		}
+	}
+
+	/**
+	 * Splits string using regular expressions. It splits in one of two ways:
+	 * 1. by regular expression matches
+	 * 2. by regular expression capture groups
+	 * @param {string} blob
+	 * @param {RegExp} regex
+	 * @private
+	 */
+	_splitByRegex(blob, regex) {
+		// if we find capture groups then we assume method #2 (see javadoc header), otherwise the pattern.
+		if(/[^\\]\(.+?[^\\]\)/.test(regex.source)) {
+			// method #2 - they want the split to be matched capture groups
+			const match=blob.match(regex) || [];
+			return match.slice(1);
+		} else {
+			// method #1 - they want to split on regex matches
+			return blob.split(regex);
 		}
 	}
 }

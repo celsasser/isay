@@ -8,7 +8,8 @@
 const _=require("lodash");
 
 /**
- * Parses what is assumed to be a command as it would be typed into a shell
+ * Parses what is assumed to be a command as it would be split by bash quoting rules:
+ * https://www.gnu.org/software/bash/manual/html_node/Quoting.html
  * @param {string} line
  * @returns {Array<string>}
  */

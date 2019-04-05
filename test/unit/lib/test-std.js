@@ -10,7 +10,7 @@ const proxy=require("../../support/proxy");
 const {resolveNextTick}=require("../../../src/common/promise");
 const {ModuleStd}=require("../../../src/lib/std");
 
-describe.only("lib.ModuleStd", function() {
+describe("lib.ModuleStd", function() {
 	function _createInstance({
 		action="action",
 		domain="domain",
