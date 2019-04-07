@@ -5,6 +5,6 @@
  * 3. write to stdout
  */
 
- json.read("./examples/data/pets.json")
+json.read("./examples/data/pets.json")
 	.json.stringify({compact: true})
 	.std.outln()
