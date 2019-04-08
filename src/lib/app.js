@@ -35,7 +35,10 @@ class ModuleApp extends ModuleIO {
 	async assert(blob) {
 		const result=await resolveType(blob, this.params[0], "*", {allowNull: true});
 		if(boolean(result)===false) {
-			throw new Error(_.get(this.params, 1, "assertion failed"));
+			const message=(this.params.length>1)
+				? await resolveType(blob, this.params[1], "*", {allowNull: true})
+				: this.params[0].toString();
+			throw new Error(message);
 		}
 		return blob;
 	}

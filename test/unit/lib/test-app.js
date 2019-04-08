@@ -80,7 +80,7 @@ describe("lib.ModuleApp", function() {
 			return instance.assert(false)
 				.then(assert.notCalled)
 				.catch(error=>{
-					assert.strictEqual(error.message, "assertion failed");
+					assert.strictEqual(error.message, "false");
 				});
 		});
 
@@ -91,7 +91,7 @@ describe("lib.ModuleApp", function() {
 			return instance.assert(false)
 				.then(assert.notCalled)
 				.catch(error=>{
-					assert.strictEqual(error.message, "assertion failed");
+					assert.strictEqual(error.message, "input=>input");
 				});
 		});
 

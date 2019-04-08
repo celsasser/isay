@@ -79,6 +79,9 @@ function assertType(value, allowed, {
 	if(allowNullish) {
 		allowNull=allowUndefined=true;
 	}
+	if(_.size(allowed)===1) {
+		allowed=allowed[0];
+	}
 	if(value===undefined) {
 		if(defaultUndefined!==undefined) {
 			value=defaultUndefined;

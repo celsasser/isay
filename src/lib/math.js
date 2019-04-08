@@ -70,8 +70,7 @@ class ModuleMath extends ModuleBase {
 	 * @returns {Promise<number>}
 	 */
 	async max(input) {
-		assertType(input, "Array");
-		return Math.max.apply(null, input);
+		return this._applyMinMax(input, Math.max);
 	}
 
 	/**
@@ -80,8 +79,7 @@ class ModuleMath extends ModuleBase {
 	 * @returns {Promise<number>}
 	 */
 	async min(input) {
-		assertType(input, "Array");
-		return Math.min.apply(null, input);
+		return this._applyMinMax(input, Math.min);
 	}
 
 	/**
@@ -113,32 +111,22 @@ class ModuleMath extends ModuleBase {
 
 	/********************* Private Interface *********************/
 	/**
-	 * Applies operation to either the <param>input</param> and params[0] or to the sequence of <param>input</param>
-	 * @param {number|Array<number>} input
-	 * @param {function(a:number):number} operation
-	 * @return {number}
-	 * @throws {Error}
-	 * @private
-	 */
-	_applyUnary(input, operation) {
-		assertType(input, ["Array", "Number"]);
-		return (input.constructor.name==="Number")
-			? operation(input)
-			: input.map(operation);
-	}
-
-	/**
-	 * Applies operator either the <param>input</param> and params[0] or to the sequence of <param>input</param>
+	 * Operates on two operands. Where those operands come from are determined by the number of params:
+	 * - this.params.length=1: operand1=input, operand2=this.params[0]
+	 * - this.params.length=2: operand1=this.params[0], operand2=this.params[1]
+	 *
+	 * Applies operator either to the <param>operand1</param> and operand2 or to the sequence of <param>operand1</param>
 	 * There are three different types of operations this function supports:
-	 * 1. input=value-type: how we treat this depends on the <param>input</param>
+	 * 1. operand1=value-type: how we treat this depends on <param>operand2</param>
 	 *    a. params.length=0: this is an error condition
-	 *    b. params[0]=value-type: return value-type calculated as follows - <code>operator(input, params[0])</code>
-	 *    c. params[0]=array: return array result as follows - <code>operator(input, params[0][n])</code>
-	 * 2. input=array: how we treat this depends on the <param>input</param>
-	 *    a. params.length=0: no param then we reduce and apply the operation in succession to <param>input</param>
-	 *    b. params[0]=value-type: then we return an array <code>operator(input, param[n])</code>
-	 *    c. params[0]=array: we process each element as follows - <code>operator(input[n], param[n])</code>
+	 *    b. operand2=value-type: return value-type calculated as follows - <code>operator(operand1, operand2)</code>
+	 *    c. operand2=array: return array calculated as follows - <code>operator(operand1, operand2[n])</code>
+	 * 2. operand1=array: how we treat this depends on the <param>operand2</param>
+	 *    a. params.length=0: no param then we reduce and apply the operation in succession to <param>operand1</param>
+	 *    b. operand2=value-type: then we return an array <code>operator(operand1, operand2[n])</code>
+	 *    c. operand2=array: we process each element as follows - <code>operator(operand1[n], operand2[n])</code>
 	 *       if the array lengths differ then error is thrown
+	 *
 	 * @param {number|Array<number>} input
 	 * @param {function(a:number,b:number):number} operation
 	 * @return {number}
@@ -146,37 +134,91 @@ class ModuleMath extends ModuleBase {
 	 * @private
 	 */
 	async _applyBinary(input, operation) {
-		assertType(input, ["Array", "Number"]);
-		if(input.constructor.name==="Number") {
-			const param=await resolveType(input, this.params[0], ["Array", "Number"]);
-			if(param.constructor.name==="Number") {
+		let operand1, operand2;
+		if(this.params.length>1) {
+			operand1=this.params[0];
+			operand2=this.params[1];
+		} else {
+			operand1=input;
+			operand2=this.params[0];
+		}
+		operand1=await resolveType(input, operand1, ["Array", "Number"]);
+		if(operand1.constructor.name==="Number") {
+			operand2=await resolveType(input, operand2, ["Array", "Number"]);
+			if(operand2.constructor.name==="Number") {
 				// this is the 1.b condition described in the documentation header
-				return operation(input, param);
+				return operation(operand1, operand2);
 			} else {
 				// this is the 1.c condition described in the documentation header
-				return param.map(operation.bind(null, input));
+				return operand2.map(operation.bind(null, operand1));
 			}
 		} else {
-			// input is an Array<number>
+			// operand1 is an Array<number>
 			if(this.params.length===0) {
 				// this is the 2.a condition in the documentation header
-				return input.slice(1)
-					.reduce(operation, input[0]);
+				return operand1.slice(1)
+					.reduce(operation, operand1[0]);
 			} else {
-				const param=await resolveType(input, this.params[0], ["Array", "Number"]);
-				if(param.constructor.name==="Number") {
+				operand2=await resolveType(input, operand2, ["Array", "Number"]);
+				if(operand2.constructor.name==="Number") {
 					// this is the 2.b condition in the documentation header
-					return input.map(value=>operation(value, param));
+					return operand1.map(value=>operation(value, operand2));
 				} else {
 					// this is the 2.c condition in the documentation header
-					if(input.length!==param.length) {
-						throw new Error(`input array (${input.length}) and param (${param.length}) differ in length`);
+					if(operand1.length!==operand2.length) {
+						throw new Error(`operand arrays (${operand1.length}) and (${operand2.length}) differ in length`);
 					} else {
-						return input.map((value, index)=>operation(value, param[index]));
+						return operand1.map((value, index)=>operation(value, operand2[index]));
 					}
 				}
 			}
 		}
+	}
+
+	/**
+	 * Operates on a single value or an array of values. Where that operand come from is determined by the number of params:
+	 * - this.params.length=0: operand=input
+	 * - this.params.length>0: operand=this.params[0] or this.params
+	 * Applies operation to either the <param>input</param> and params[0] or to the sequence of <param>input</param>
+	 * @param {number|Array<number>} input
+	 * @param {function(a:number):number} operation
+	 * @return {Promise<number>}
+	 * @throws {Error}
+	 * @private
+	 */
+	async _applyMinMax(input, operation) {
+		let operand;
+		if(this.params.length===0) {
+			operand=assertType(input, "Array");
+		} else if(this.params===1) {
+			operand=await resolveType(input, this.params[0], "Array");
+		} else {
+			operand=this.params;
+		}
+		return operation(...operand);
+	}
+
+	/**
+	 * Operates on a single value or an array of values. Where that operand come from is determined by the number of params:
+	 * - this.params.length=0: operand=input
+	 * - this.params.length>0: operand=this.params[0] or this.params
+	 * Applies operation to either the <param>input</param> and params[0] or to the sequence of <param>input</param>
+	 * @param {number|Array<number>} input
+	 * @param {function(a:number):number} operation
+	 * @return {Promise<number>}
+	 * @throws {Error}
+	 * @private
+	 */
+	async _applyUnary(input, operation) {
+		let operand;
+		if(this.params.length===0) {
+			operand=assertType(input, ["Array", "Number"]);
+		} else {
+			operand=await resolveType(input, this.params[0], ["Array", "Number"]);
+		}
+		return (operand.constructor.name==="Number")
+			? operation(operand)
+			: operand.map(operation);
 	}
 }
 

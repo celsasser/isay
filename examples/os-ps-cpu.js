@@ -13,12 +13,12 @@ loop.forever(
 		format: "${l} ${ri} ${ri} ${ri} ${rf} ${r} ${l+}"
 	}))
 	.array.sort(-4)
-	.array.first(math.subtract(tty.height(), 4))
+	.array.first(math.subtract(tty.height(), 2))
 	.array.insert(["USER", "PID", "PRIORITY", "SIZE KB", "CPU%", "UTIME", "COMMAND"])
 	.tty.clear()
 	.array.each(
 		string.format("${16l} ${8r} ${10c} ${10r} ${8r} ${10r}  ${l}")
 			.std.outln()
 	)
-	.app.sleep({millis:500})
+	.app.sleep({seconds:1})
 );

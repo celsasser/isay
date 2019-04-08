@@ -33,7 +33,7 @@ describe("lib.ModuleMath", function() {
 		["round", "unary"],
 		["subtract", "binary"]
 	].forEach(([action, cardinality])=>{
-		it(`${action} should throw exception if input is not a number`, async function() {
+		it(`input=string: ${action} should throw exception`, async function() {
 			const instance=_createInstance();
 			return instance[action]("string")
 				.then(assert.notCalled)
@@ -43,11 +43,22 @@ describe("lib.ModuleMath", function() {
 		});
 
 		if(cardinality==="binary") {
-			it(`${action} should throw exception if params[0] is not a number`, async function() {
+			it(`input=number, params[0]=string: ${action} should throw exception since params[0] is invalid`, async function() {
 				const instance=_createInstance({
 					params: ["string"]
 				});
 				return instance[action](100)
+					.then(assert.notCalled)
+					.catch(error=>{
+						assert.strictEqual(error.message, "expecting Array or Number but found String");
+					});
+			});
+
+			it(`params[0]=number, params[1]=string: ${action} should throw exception since params[1] is invalid`, async function() {
+				const instance=_createInstance({
+					params: [100, "string"]
+				});
+				return instance[action]()
 					.then(assert.notCalled)
 					.catch(error=>{
 						assert.strictEqual(error.message, "expecting Array or Number but found String");
@@ -90,7 +101,7 @@ describe("lib.ModuleMath", function() {
 		["multiply", [2, 3, 4], 24],
 		["subtract", [10, 5, 1], 4]
 	].forEach(([action, input, expected])=>{
-		it(`input=array, param=none: ${action} should ${action} ${JSON.stringify(input)} and reduce to ${expected}`, async function() {
+		it(`input=array, params[0]=none: ${action} should ${action} ${JSON.stringify(input)} and reduce to ${expected}`, async function() {
 			const instance=_createInstance();
 			return instance[action](input)
 				.then(result=>{
@@ -107,12 +118,22 @@ describe("lib.ModuleMath", function() {
 		["divmod", 100, 100, [1, 0]],
 		["multiply", 100, 50, 5000],
 		["subtract", 100, 50, 50]
-	].forEach(([action, input, operand, expected])=>{
-		it(`input=value-type, param=value-type: should properly ${action} ${input} to or by ${operand} and get ${expected}`, async function() {
+	].forEach(([action, operand1, operand2, expected])=>{
+		it(`input=value-type, params[0]=value-type: should properly ${action} ${operand1} and ${operand2} and get ${expected}`, async function() {
 			const instance=_createInstance({
-				params: [operand]
+				params: [operand2]
 			});
-			return instance[action](input)
+			return instance[action](operand1)
+				.then(result=>{
+					assert.deepEqual(result, expected);
+				});
+		});
+
+		it(`params[0]=value-type, params[1]=value-type: should properly ${action} ${operand1} and ${operand2} and get ${expected}`, async function() {
+			const instance=_createInstance({
+				params: [operand1, operand2]
+			});
+			return instance[action]()
 				.then(result=>{
 					assert.deepEqual(result, expected);
 				});
@@ -125,12 +146,22 @@ describe("lib.ModuleMath", function() {
 		["divmod", [5, 10, 15], 10, [[0, 5], [1, 0], [1, 5]]],
 		["multiply", [2, 3, 4], 10, [20, 30, 40]],
 		["subtract", [10, 11, 12], 10, [0, 1, 2]]
-	].forEach(([action, input, param, expected])=>{
-		it(`input=array, param=value-type: should properly ${action} ${JSON.stringify(input)} to or by ${param} and get ${expected}`, async function() {
+	].forEach(([action, operand1, operand2, expected])=>{
+		it(`input=array, params[0]=value-type: should properly ${action} ${JSON.stringify(operand1)} and ${operand2} and get ${expected}`, async function() {
 			const instance=_createInstance({
-				params: [param]
+				params: [operand2]
 			});
-			return instance[action](input)
+			return instance[action](operand1)
+				.then(result=>{
+					assert.deepEqual(result, expected);
+				});
+		});
+
+		it(`params[0]=array, params[1]=value-type: should properly ${action} ${JSON.stringify(operand1)} and ${operand2} and get ${expected}`, async function() {
+			const instance=_createInstance({
+				params: [operand1, operand2]
+			});
+			return instance[action]()
 				.then(result=>{
 					assert.deepEqual(result, expected);
 				});
@@ -143,12 +174,22 @@ describe("lib.ModuleMath", function() {
 		["divmod", 10, [1, 2, 3], [[10, 0], [5, 0], [3, 1]]],
 		["multiply", 10, [1, 2, 3], [10, 20, 30]],
 		["subtract", 10, [1, 2, 3], [9, 8, 7]]
-	].forEach(([action, input, param, expected])=>{
-		it(`input=value-type, param=array: should properly ${action} ${JSON.stringify(input)} to or by ${param} and get ${expected}`, async function() {
+	].forEach(([action, operand1, operand2, expected])=>{
+		it(`input=value-type, params[0]=array: should properly ${action} ${JSON.stringify(operand1)} and ${operand2} and get ${expected}`, async function() {
 			const instance=_createInstance({
-				params: [param]
+				params: [operand2]
 			});
-			return instance[action](input)
+			return instance[action](operand1)
+				.then(result=>{
+					assert.deepEqual(result, expected);
+				});
+		});
+
+		it(`params[0]=value-type, params[1]=array: should properly ${action} ${JSON.stringify(operand1)} and ${operand2} and get ${expected}`, async function() {
+			const instance=_createInstance({
+				params: [operand1, operand2]
+			});
+			return instance[action](operand1)
 				.then(result=>{
 					assert.deepEqual(result, expected);
 				});
@@ -161,12 +202,22 @@ describe("lib.ModuleMath", function() {
 		["divmod", [5, 10, 15], [4, 5, 6], [[1, 1], [2, 0], [2, 3]]],
 		["multiply", [1, 2, 3], [4, 5, 6], [4, 10, 18]],
 		["subtract", [1, 2, 3], [4, 5, 6], [-3, -3, -3]]
-	].forEach(([action, input, param, expected])=>{
-		it(`input=array, param=array: should properly ${action} ${JSON.stringify(input)} to or by 10 and get ${expected}`, async function() {
+	].forEach(([action, operand1, operand2, expected])=>{
+		it(`input=array, params[0]=array: should properly ${action} ${JSON.stringify(operand1)} and ${JSON.stringify(operand2)} and get ${expected}`, async function() {
 			const instance=_createInstance({
-				params: [param]
+				params: [operand2]
 			});
-			return instance[action](input)
+			return instance[action](operand1)
+				.then(result=>{
+					assert.deepEqual(result, expected);
+				});
+		});
+
+		it(`params[0]=array, params[1]=array: should properly ${action} ${JSON.stringify(operand1)} and ${JSON.stringify(operand2)} and get ${expected}`, async function() {
+			const instance=_createInstance({
+				params: [operand1, operand2]
+			});
+			return instance[action](operand1)
 				.then(result=>{
 					assert.deepEqual(result, expected);
 				});
@@ -179,15 +230,15 @@ describe("lib.ModuleMath", function() {
 		["divmod", [1, 2, 3], [1, 2]],
 		["multiply", [1, 2, 3], [1, 2]],
 		["subtract", [1, 2, 3], [1, 2]]
-	].forEach(([action, input, param])=>{
-		it(`input=array, param=array: should raise exception if ${action}'s input and param array lengths differ`, async function() {
+	].forEach(([action, operand1, operand2])=>{
+		it(`input=array, params[0]=array: should raise exception if ${action}'s input and param array lengths differ`, async function() {
 			const instance=_createInstance({
-				params: [param]
+				params: [operand2]
 			});
-			return instance[action](input)
+			return instance[action](operand1)
 				.then(assert.notCalled)
 				.catch(error=>{
-					assert.strictEqual(error.message, "input array (3) and param (2) differ in length");
+					assert.strictEqual(error.message, "operand arrays (3) and (2) differ in length");
 				});
 		});
 	});

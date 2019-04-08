@@ -9,7 +9,7 @@ const assert=require("../../support/assert");
 const proxy=require("../../support/proxy");
 const {ModuleTty}=require("../../../src/lib/tty");
 
-describe.only("lib.ModuleTty", function() {
+describe("lib.ModuleTty", function() {
 	function _createInstance({
 		action="action",
 		domain="domain",
