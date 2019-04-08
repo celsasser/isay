@@ -13,8 +13,8 @@ const assert=require("./assert");
 const log=require("../../src/common/log");
 
 
-let _stubs=[],
-	_settings={};
+let _stubs=[];
+const _props=[];
 
 /**
  * Stubs this method and at the same time adds him to our collection of stubs
@@ -82,35 +82,40 @@ exports.unstub=function(functions=undefined) {
 	});
 };
 
-
 /**
  * Sets value for object[name] and retains the original value
  * @param {Object} object object with property you want to set
  * @param {string} name
  * @param {*} value
  */
-exports.setSetting=function(object, name, value) {
-	_settings[name]=_.get(_settings, name, {count: 0});
-	if(++_settings[name].count===1) {
-		_settings[name].name=name;
-		_settings[name].object=object;
-		_settings[name].value=object[name];
+exports.setProperty=function(object, name, value) {
+	let instance=_.find(_props, {name, object});
+	if(instance===undefined) {
+		_props.push((instance={
+			count: 0,
+			name,
+			object,
+			value: object[name]
+		}));
 	}
+	instance.count++;
 	object[name]=value;
 };
 
 /**
  * Restores original value if ref count is 0
+ * @param {Object} object
  * @param {string} name
  */
-exports.restoreSetting=function(name) {
-	const setting=_settings[name];
-	assert.ok(setting.count>0);
-	if(--setting.count===0) {
-		if(setting.value===undefined) {
-			delete setting.object[setting.name];
+exports.restoreProperty=function(object, name) {
+	const instance=_.find(_props, {name, object});
+	assert.ok(instance!==undefined);
+	assert.ok(instance.count>0);
+	if(--instance.count===0) {
+		if(instance.value===undefined) {
+			delete instance.object[instance.name];
 		} else {
-			setting.object[setting.name]=setting.value;
+			instance.object[instance.name]=instance.value;
 		}
 	}
 };

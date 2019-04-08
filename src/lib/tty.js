@@ -31,7 +31,7 @@ class ModuleTty extends ModuleBase {
 	 */
 	async height() {
 		this._assertTty();
-		return process.stdout.columns;
+		return process.stdout.rows;
 	}
 
 	/**
@@ -40,7 +40,7 @@ class ModuleTty extends ModuleBase {
 	 */
 	async width() {
 		this._assertTty();
-		return process.stdout.rows;
+		return process.stdout.columns;
 	}
 
 	/********************* Private Interface *********************/
