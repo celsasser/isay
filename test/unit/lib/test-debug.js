@@ -28,6 +28,21 @@ describe("lib.ModuleDebug", function() {
 		proxy.unstub();
 	});
 
+	/**
+	 * This is well tested in test-_data. We just do some sanity testing.
+	 */
+	describe("assert", function() {
+		it("should return input if params[0] is truthy", async function() {
+			const instance=_createInstance({
+				params: [true]
+			});
+			return instance.assert("input")
+				.then(result=>{
+					assert.strictEqual(result, "input");
+				});
+		});
+	});
+
 	describe("dump", function() {
 		it("should write blob to stdout and return input blob", async function() {
 			const instance=_createInstance({

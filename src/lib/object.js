@@ -6,13 +6,13 @@
  */
 
 const _=require("lodash");
-const {ModuleIO}=require("./_io");
+const {ModuleBase}=require("./_base");
 const {assertPredicate, assertProperties, assertType, resolveType}=require("./_data");
 
 /**
- * @typedef {ModuleIO} ModuleObject
+ * @typedef {ModuleBase} ModuleObject
  */
-class ModuleObject extends ModuleIO {
+class ModuleObject extends ModuleBase {
 	/**
 	 * Calls predicate for each key/value pair in the object. By default it does not recurse into objects but you may
 	 * override this behavior with the <code>recurse</code> option.

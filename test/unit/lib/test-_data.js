@@ -10,6 +10,10 @@ const {
 	resolveNextTick,
 }=require("../../../src/common/promise");
 const {
+	ModuleBase
+}=require("../../../src/lib/_base");
+const {
+	assertAction,
 	assertPredicate,
 	assertProperties,
 	assertType,
@@ -19,6 +23,89 @@ const {
 }=require("../../../src/lib/_data");
 
 describe("lib.ModuleArray", function() {
+	describe("assertAction", function() {
+		function _createModule({
+			action="action",
+			domain="domain",
+			method="method",
+			params=[]
+		}={}) {
+			return new ModuleBase({
+				action,
+				domain,
+				method,
+				params
+			});
+		}
+
+		it("should raise exception if no params are included", async function() {
+			const instance=_createModule();
+			return assertAction(instance)
+				.then(assert.notCalled)
+				.catch(error=>{
+					assert.strictEqual(error.message, "expecting a value but found undefined");
+				});
+		});
+
+		it("should return input if params[0] is truthy", async function() {
+			const instance=_createModule({
+				params: [true]
+			});
+			return assertAction(instance, "input")
+				.then(result=>{
+					assert.strictEqual(result, "input");
+				});
+		});
+
+		it("should return input if predicate returns true", async function() {
+			const instance=_createModule({
+				params: [
+					input=>{
+						assert.strictEqual(input, "input");
+						return true;
+					}
+				]
+			});
+			return assertAction(instance, "input")
+				.then(result=>{
+					assert.strictEqual(result, "input");
+				});
+		});
+
+		it("should raise default error if params[0] is falsey", async function() {
+			const instance=_createModule({
+				params: [false]
+			});
+			return assertAction(instance, false)
+				.then(assert.notCalled)
+				.catch(error=>{
+					assert.strictEqual(error.message, "false");
+				});
+		});
+
+		it("should raise default error if predicate returns false", async function() {
+			const instance=_createModule({
+				params: [input=>input]
+			});
+			return assertAction(instance, false)
+				.then(assert.notCalled)
+				.catch(error=>{
+					assert.strictEqual(error.message, "input=>input");
+				});
+		});
+
+		it("should raise specified error with params[1] text if predicate returns false", async function() {
+			const instance=_createModule({
+				params: [input=>input, "error message"]
+			});
+			return assertAction(instance, false)
+				.then(assert.notCalled)
+				.catch(error=>{
+					assert.strictEqual(error.message, "error message");
+				});
+		});
+	});
+
 	describe("assertPredicate", function() {
 		it("should throw exception if not a function", function() {
 			assert.throws(()=>assertPredicate("string"));

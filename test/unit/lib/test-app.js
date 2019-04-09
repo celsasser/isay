@@ -40,16 +40,10 @@ describe("lib.ModuleApp", function() {
 		});
 	});
 
+	/**
+	 * This is well tested in test-_data. We just do some sanity testing.
+	 */
 	describe("assert", function() {
-		it("should raise exception if no params are included", async function() {
-			const instance=_createInstance();
-			return instance.assert()
-				.then(assert.notCalled)
-				.catch(error=>{
-					assert.strictEqual(error.message, "expecting a value but found undefined");
-				});
-		});
-
 		it("should return input if params[0] is truthy", async function() {
 			const instance=_createInstance({
 				params: [true]
@@ -57,52 +51,6 @@ describe("lib.ModuleApp", function() {
 			return instance.assert("input")
 				.then(result=>{
 					assert.strictEqual(result, "input");
-				});
-		});
-
-		it("should return input if predicate returns true", async function() {
-			const instance=_createInstance({
-				params: [input=>{
-					assert.strictEqual(input, "input");
-					return true;
-				}]
-			});
-			return instance.assert("input")
-				.then(result=>{
-					assert.strictEqual(result, "input");
-				});
-		});
-
-		it("should raise default error if params[0] is falsey", async function() {
-			const instance=_createInstance({
-				params: [false]
-			});
-			return instance.assert(false)
-				.then(assert.notCalled)
-				.catch(error=>{
-					assert.strictEqual(error.message, "false");
-				});
-		});
-
-		it("should raise default error if predicate returns false", async function() {
-			const instance=_createInstance({
-				params: [input=>input]
-			});
-			return instance.assert(false)
-				.then(assert.notCalled)
-				.catch(error=>{
-					assert.strictEqual(error.message, "input=>input");
-				});
-		});
-
-		it("should raise specified error with params[1] text if predicate returns false", async function() {
-			const instance=_createInstance({
-				params: [input=>input, "error message"]
-			});
-			return instance.assert(false)
-				.then(assert.notCalled)
-				.catch(error=>{
-					assert.strictEqual(error.message, "error message");
 				});
 		});
 	});

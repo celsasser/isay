@@ -12,6 +12,27 @@ const _=require("lodash");
 const assert=require("assert");
 const util=require("../common/util");
 
+
+/**
+ * Asserts using the predicate in params[0]:  Boolean(this.params[0](blob)).
+ * Intended to be used with domains <code>is</code> and <code>not</code>, but the world is your oyster.
+ * @param {ModuleBase} module
+ * @param {DataBlob} blob
+ * @return {Promise<DataBlob>}
+ * @throws {Error}
+ */
+async function assertAction(module, blob) {
+	const result=await resolveType(blob, module.params[0], "*", {allowNull: true});
+	if(boolean(result)===false) {
+		const message=(module.params.length>1)
+			? await resolveType(blob, module.params[1], "String")
+			: module.params[0].toString();
+		throw new Error(message);
+	}
+	return blob;
+}
+
+
 /**
  * Asserts that the properties specified are in <param>object</param>
  * @param {Object} object
@@ -211,6 +232,7 @@ async function resolveType(blob, value, allowed, {
 
 /********************* Private Interface *********************/
 module.exports={
+	assertAction,
 	assertPredicate,
 	assertProperties,
 	assertType,

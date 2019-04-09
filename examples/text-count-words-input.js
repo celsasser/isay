@@ -9,7 +9,7 @@
  * printf "./readme.md" | ./mouse.js run -s "./examples/text-count-words-input.js"
 */
 
-app.assert(is.type("String"))
+app.assert(is.type("String"), "input file is missing")
 	.file.read()
 	.string.lower()
 	.string.split(/\W+/)

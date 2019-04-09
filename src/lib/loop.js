@@ -5,7 +5,7 @@
  * Copyright @2019 by Xraymen Inc.
  */
 
-const {ModuleIO}=require("./_io");
+const {ModuleBase}=require("./_base");
 const {assertPredicate}=require("./_data");
 
 /**
@@ -21,9 +21,9 @@ const {assertPredicate}=require("./_data");
  *
  * Note: see history before 3/5/2019 if you are curious about an implementation for "times" (called range) that I am rejecting.
  *
- * @typedef {ModuleIO} ModuleLoop
+ * @typedef {ModuleBase} ModuleLoop
  */
-class ModuleLoop extends ModuleIO {
+class ModuleLoop extends ModuleBase {
 	/**
 	 * Loops forever. One may exit via error.throw or an interrupt signal (to app)
 	 * @param {DataBlob} blob

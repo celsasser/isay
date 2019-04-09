@@ -7,14 +7,14 @@
 
 const _=require("lodash");
 const constant=require("../common/constant");
-const {ModuleIO}=require("./_io");
-const {boolean, resolveType}=require("./_data");
+const {ModuleBase}=require("./_base");
+const {assertAction, resolveType}=require("./_data");
 
 /**
  * A body of functionality that affects application execution
  * @typedef {ModuleIO} ModuleApp
  */
-class ModuleApp extends ModuleIO {
+class ModuleApp extends ModuleBase {
 	/**
 	 * Forces abort
 	 * @throws {Error}
@@ -26,21 +26,14 @@ class ModuleApp extends ModuleIO {
 	}
 
 	/**
-	 * Asserts that the condition in params[0]. It probably will most often be used with
-	 * domains <code>is</code> and <code>not</code>, but we don't enforce anything.
+	 * Asserts using the predicate in params[0]:  Boolean(this.params[0](blob)).
+	 * Intended to be used with domains <code>is</code> and <code>not</code>, but the world is your oyster.
 	 * @param {DataBlob} blob
-	 * @return {Promise<DataBlob>} - returns input
+	 * @return {Promise<DataBlob>}
 	 * @throws {Error}
 	 */
 	async assert(blob) {
-		const result=await resolveType(blob, this.params[0], "*", {allowNull: true});
-		if(boolean(result)===false) {
-			const message=(this.params.length>1)
-				? await resolveType(blob, this.params[1], "*", {allowNull: true})
-				: this.params[0].toString();
-			throw new Error(message);
-		}
-		return blob;
+		return assertAction(this, blob);
 	}
 
 	/**

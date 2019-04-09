@@ -177,6 +177,10 @@ describe("command.run.index", function() {
 				]
 			},
 			{
+				script: "test/scripts/script-math-assert-binary.js",
+				expected: true
+			},
+			{
 				script: "test/scripts/script-object-get.js",
 				expected: "cat"
 			},
@@ -266,7 +270,6 @@ describe("command.run.index", function() {
 					})
 					.then(result=>{
 						if(errorText===undefined) {
-							assert.strictEqual(errorText, undefined);
 							if(expected.constructor.name==="String") {
 								assert.strictEqual(result, expected);
 							} else {

@@ -5,13 +5,26 @@
  * Copyright @2019 by Xraymen Inc.
  */
 
-const {ModuleIO}=require("./_io");
+const {ModuleBase}=require("./_base");
+const {assertAction}=require("./_data");
+
 
 /**
  * Diagnostic actions
- * @typedef {ModuleIO} ModuleDebug
+ * @typedef {ModuleBase} ModuleDebug
  */
-class ModuleDebug extends ModuleIO {
+class ModuleDebug extends ModuleBase {
+	/**
+	 * Asserts using the predicate in params[0]:  Boolean(this.params[0](blob)).
+	 * Intended to be used with domains <code>is</code> and <code>not</code>, but the world is your oyster.
+	 * @param {DataBlob} blob
+	 * @return {Promise<DataBlob>}
+	 * @throws {Error}
+	 */
+	async assert(blob) {
+		return assertAction(this, blob);
+	}
+
 	/**
 	 * Dumps the state of <param>blob</blob> as well as <code>this.params</code>
 	 * @param {DataBlob} blob
