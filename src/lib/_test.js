@@ -49,16 +49,18 @@ class ModuleTest extends ModuleBase {
 	}
 
 	/**
-	 * Returns true if empty as tested by lodash
+	 * Returns true if <param>blob</param> is empty as tested by lodash, but it is restrictive about types
+	 * 'cause isEmpty is meaningless on types such as numbers and dates.
 	 * @param {DataBlob} blob
 	 * @returns {Promise<boolean>}
 	 */
 	async empty(blob) {
+		assertType(blob, ["Array", "Object", "String"], {allowNull: true});
 		return this._processTestResult(blob, _.isEmpty(blob));
 	}
 
 	/**
-	 * returns true if <param>blob</param> ends with the value, or one of the values, in this.params[0]
+	 * returns true if <param>blob</param> ends with the value or one of the values in this.params[0]
 	 * @param {string} blob
 	 * @returns {Promise<boolean>}
 	 */
@@ -105,8 +107,7 @@ class ModuleTest extends ModuleBase {
 
 	/**
 	 * Simple fella that evaluates whether the input is false as evaluated by <code>boolean(value)</code>
-	 * @resolves predicate:ActionPredicate in this.params[0]
-	 * @resolves state:* in this.params[0]
+	 * @resolves state:* in (this.params[0]|blob)
 	 * @param {DataBlob} blob
 	 * @returns {Promise<boolean>}
 	 */
@@ -120,7 +121,9 @@ class ModuleTest extends ModuleBase {
 	}
 
 	/**
-	 * Tests for <param>blob</param> > this.params[0]
+	 * Tests for leftOperand > rightOperand
+	 * @resolves leftOperand:* in blob
+	 * @resolves rightOperand:* in this.params[0]
 	 * @param {DataBlob} blob
 	 * @return {Promise<DataBlob>}
 	 */
@@ -129,7 +132,9 @@ class ModuleTest extends ModuleBase {
 	}
 
 	/**
-	 * Tests for <param>blob</param> < this.params[0]
+	 * Tests for leftOperand < rightOperand
+	 * @resolves leftOperand:* in blob
+	 * @resolves rightOperand:* in this.params[0]
 	 * @param {DataBlob} blob
 	 * @return {Promise<DataBlob>}
 	 */
@@ -139,6 +144,7 @@ class ModuleTest extends ModuleBase {
 
 	/**
 	 * returns true if <param>blob</param> is included in this.params[0]
+	 * @resolves compareSource:* in blob
 	 * @resolves compareToItems:Array<*> in this.params[0]
 	 * @param {DataBlob} blob
 	 * @returns {Promise<boolean>}
@@ -154,7 +160,7 @@ class ModuleTest extends ModuleBase {
 	}
 
 	/**
-	 * returns true if <param>blob</param> starts with value, or one of the values, in this.params[0]
+	 * returns true if <param>blob</param> starts with the value or one of the values in this.params[0]
 	 * @param {string} blob
 	 * @returns {boolean}
 	 */
@@ -190,8 +196,7 @@ class ModuleTest extends ModuleBase {
 
 	/**
 	 * Simple fella that evaluates whether the input is true as evaluated by <code>boolean(value)</code>
-	 * @resolves predicate:ActionPredicate in this.params[0]
-	 * @resolves state:* in this.params[0]
+	 * @resolves state:* in (this.params[0]|blob)
 	 * @param {DataBlob} blob
 	 * @returns {Promise<boolean>}
 	 */

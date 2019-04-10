@@ -367,6 +367,18 @@ describe("lib.ModuleObject", function() {
 
 
 	describe("merge", function() {
+		it("should raise exception if params[0] cannot be resolved to accepted type", async function() {
+			const source={property: "value"},
+				instance=_createInstance({
+					params: "string"
+				});
+			return instance.merge(source)
+				.then(assert.notCalled)
+				.catch(error=>{
+					assert.strictEqual(error.message, "expecting Array or Object but found String");
+				});
+		});
+
 		it("should merge json into json", async function() {
 			const source={property: "value"},
 				merge={merge: "data"},
@@ -388,6 +400,19 @@ describe("lib.ModuleObject", function() {
 				}),
 				result=await instance.merge(source);
 			assert.deepEqual(result, [{a: 1, c: 3}, {b: 2, d: 4}]);
+		});
+
+		it("should merge predicate result", async function() {
+			const source={property: "value"},
+				merge={merge: "data"},
+				instance=_createInstance({
+					params: [resolveNextTick.bind(null, merge)]
+				}),
+				result=await instance.merge(source);
+			assert.deepEqual(result, {
+				"merge": "data",
+				"property": "value"
+			});
 		});
 	});
 

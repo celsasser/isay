@@ -19,8 +19,6 @@ class ModuleError extends ModuleBase {
 	 * - params[0] is a predicate: predicate(blob) called and its result is returned
 	 * - params[0] is not a predicate: params[0] is returned
 	 * Note: which exception handler is called follows after and nearest rules. See <link>ModuleBase.process</link> for more info.
-	 * @resolves predicate:CatchPredicate in this.params[0]
-	 * @resolves result:(*) in this.params[0]
 	 * @param {Error} error
 	 * @param {DataBlob} blob
 	 * @returns {Promise<*>}
@@ -42,8 +40,6 @@ class ModuleError extends ModuleBase {
 	 * 1. where there is a catch there should be a throw
 	 * 2. a user may want to catch and rethrow an error.
 	 * 3. a user may want to use exceptions as a means of flow control
-	 * @resolves predicate:ActionPredicate in this.params[0]
-	 * @resolves text:(string|Error} in this.params[0]
 	 * @param {DataBlob} blob
 	 * @returns {Promise<void>}
 	 * @attribute flow

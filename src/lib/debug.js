@@ -17,6 +17,7 @@ class ModuleDebug extends ModuleBase {
 	/**
 	 * Asserts using the predicate in params[0]:  Boolean(this.params[0](blob)).
 	 * Intended to be used with domains <code>is</code> and <code>not</code>, but the world is your oyster.
+	 * @resolves predicate:ActionPredicate in this.params[0]
 	 * @param {DataBlob} blob
 	 * @return {Promise<DataBlob>}
 	 * @throws {Error}

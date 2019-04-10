@@ -90,5 +90,4 @@ describe("lib.ModuleTty", function() {
 				});
 		});
 	});
-
 });

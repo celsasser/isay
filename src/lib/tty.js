@@ -26,7 +26,7 @@ class ModuleTty extends ModuleBase {
 	}
 
 	/**
-	 * Returns the number of columns in the terminal
+	 * Returns the number of rows in the terminal
 	 * @return {Promise<Number>}
 	 */
 	async height() {
@@ -35,7 +35,7 @@ class ModuleTty extends ModuleBase {
 	}
 
 	/**
-	 * Returns the number of rows in the terminal
+	 * Returns the number of columns in the terminal
 	 * @return {Promise<Number>}
 	 */
 	async width() {

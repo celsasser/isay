@@ -21,7 +21,7 @@ class ModuleCsv extends ModuleIO {
 	 * Parses input and returns csv. Overrides may exist in params[0] or params[1] depending on
 	 * where the input path is specified.
 	 * @resolves data:string in data
-	 * @resolves options:Object in params[0]
+	 * @resolves options:(Object|undefined) in params[0]
 	 * @param {string} blob
 	 * @returns {Promise<CsvDoc>}
 	 * @throws {Error}

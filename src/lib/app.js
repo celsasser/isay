@@ -5,7 +5,6 @@
  * Copyright @2019 by Xraymen Inc.
  */
 
-const _=require("lodash");
 const constant=require("../common/constant");
 const {ModuleBase}=require("./_base");
 const {assertAction, resolveType}=require("./_data");
@@ -16,7 +15,7 @@ const {assertAction, resolveType}=require("./_data");
  */
 class ModuleApp extends ModuleBase {
 	/**
-	 * Forces abort
+	 * Forces abort and exits with error code = 1
 	 * @throws {Error}
 	 */
 	async abort() {
@@ -28,6 +27,7 @@ class ModuleApp extends ModuleBase {
 	/**
 	 * Asserts using the predicate in params[0]:  Boolean(this.params[0](blob)).
 	 * Intended to be used with domains <code>is</code> and <code>not</code>, but the world is your oyster.
+	 * @resolves predicate:ActionPredicate in this.params[0]
 	 * @param {DataBlob} blob
 	 * @return {Promise<DataBlob>}
 	 * @throws {Error}
@@ -38,8 +38,7 @@ class ModuleApp extends ModuleBase {
 
 	/**
 	 * Sleeps for the number of seconds specified in <code>this.params[0]</code> and then returns <param>blob</param>
-	 * @resolves seconds:Number in this.params[0]
-	 * @resolves {millis:Number, seconds:Number, minutes:Number, hours:Number, days:Number} in this.params[0]
+	 * @resolves duration:(DurationObject|Number) in this.params[0]
 	 * @param {DataBlob} blob
 	 * @return {Promise<void>}
 	 */

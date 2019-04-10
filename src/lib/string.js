@@ -18,12 +18,14 @@ const {
 const string=require("../common/parse");
 
 /**
+ * String manipulation
  * @typedef {ModuleBase} ModuleString
  */
 class ModuleString extends ModuleBase {
 	/**
 	 * Formats the data in <param>blob<param>. We are using a somewhat hybrid approach to formatting. It's a little
 	 * sprintf, it's a little es6 template and it's a little custom. See <code>formatMouseSpecification</code> for more information.
+	 * @resolves spec:string in this.params[0]
 	 * @param {DataBlob} blob
 	 * @return {Promise<string>}
 	 * @throws {Error}
@@ -35,8 +37,10 @@ class ModuleString extends ModuleBase {
 	}
 
 	/**
-	 * Replaces <code>params[0]</code> with <code>params[1]</code>. If <code>params[0]</code> is a string then this guy
-	 * is going to make an assumption and apply it globally.
+	 * Replaces text.
+	 * @resolves searchText:(string|RegExp) in this.params[0]
+	 * @resolves replaceText:string in this.params[1]
+	 * Note: If <code>params[0]</code> is a string then we make an assumption and replace "searchText" globally.
 	 * @param {string} blob - string to be replaced
 	 * @returns {Promise<string>}
 	 * @throws {Error}
@@ -56,9 +60,9 @@ class ModuleString extends ModuleBase {
 	}
 
 	/**
-	 * Parses string to array using specified method in this.params[0]
-	 * @resolves method:string in this.params[0]. Defaults to "white"
-	 * @supported {"delimiter"|"newline"|"shell"|"white"|RegExp}
+	 * Parses and splits string into an array
+	 * @resolves method:(Object|RegExp|string|undefined) in this.params[0]. Defaults to "white"
+	 * @supported {"delimiter"|"format"|"newline"|"shell"|"white"|RegExp}
 	 * @param {string} blob
 	 * @returns {Promise<string>}
 	 * @throws {Error}

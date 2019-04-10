@@ -18,11 +18,8 @@ const spawn=require("../common/spawn");
  */
 class ModuleFile extends ModuleIO {
 	/**
-	 * It copies the source file or directory to the target path.  The rules for finding the source and target
-	 * path treat the params as a sequence: [source, target]. And it looks for them in the following order:
-	 * @resolves source:string in this.params[0]|data
-	 * @resolves target:string in this.params[0]|this.params[1]
-	 * @resolves options:Object in this.params[1]|this.params[2]
+	 * It copies the source file or directory to the target path.
+	 * See <code>_copy</code> for param order processing rules and info
 	 * @param {DataBlob} blob
 	 * @return {Promise<DataBlob>}
 	 * @throws {Error}
@@ -103,9 +100,8 @@ class ModuleFile extends ModuleIO {
 	}
 
 	/**
-	 * A convenience function that combines copy and delete. Supports all options that copy supports
-	 * @resolves source:string in data|this.params[0]
-	 * @resolves target:string in this.params[0]|this.params[1]
+	 * A convenience function that combines copy and delete.
+	 * See <code>_copy</code> for param order processing rules and info
 	 * @param {DataBlob} blob
 	 * @return {Promise<DataBlob>}
 	 * @throws {Error}
@@ -181,7 +177,7 @@ class ModuleFile extends ModuleIO {
 	 * Copies the source file or directory to the target path.  The rules for finding the source and target
 	 * path treat the params as a sequence: [source, target]. And it looks for them in the following order:
 	 * @resolves source:string in this.params[0]|data
-	 * @resolves target:string in this.params[0]|this.params[1]
+	 * @resolves target:string in this.params[1]|this.params[0]
 	 * @resolves options:Object in this.params[1]|this.params[2]
 	 * @param {DataBlob} blob
 	 * @return {Promise<{source:string, target:string}>}

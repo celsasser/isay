@@ -7,21 +7,58 @@
  * Library of locally defined types
  */
 
-/********************* Simple Types *********************/
+
+/********************* API Types *********************/
 /**
- * @typedef {"debug"|"verbose"|"info"|"warn"|"error"|"crit"} LogLevel
+ * @typedef {function(data:DataBlob):*} ActionPredicate
  */
 
 /**
- * @typedef {"callback-bar"|"callback-cluster"|"callback-tick"|"chord-added"|"chord-deleted"|"note-added"|"note-deleted"|"sequence-added"|"sequence-deleted"|"storage-added"|"storage-removed"|"tempo-added"|"tempo-deleted"|"track-added"|"track-deleted"}
- *     EmitterEventName
+ * @typedef {function(data:DataBlob, error:Error):*} CatchPredicate
  */
 
 /**
  * @typedef {"ascii", "binary", "utf8", "unicode"} Encoding
  */
 
-/********************* Complex Types *********************/
+/**
+ * @typedef {function(value:*, index:(number|string)):boolean} FilterPredicate
+ */
+
+/**
+ * @typedef {function(value:*, index:(number|string)):void} IteratePredicate
+ */
+
+/**
+ * @typedef {function(value:*, index:(number|string)):*} MapPredicate
+ */
+
+/**
+ * @typedef {function(result:*, data:*, index:(number|string)):*} ReducePredicate
+ */
+
+/**
+ * @typedef {Array<*>} CsvRow
+ */
+
+/**
+ * @typedef {Array<CsvRow>} CsvDoc
+ */
+
+/**
+ * @typedef {{millis:Number, seconds:Number, minutes:Number, hours:Number, days:Number}} DurationObject
+ */
+
+/**
+ * @typedef {*} DataBlob
+ */
+
+
+/********************* Internal Types *********************/
+/**
+ * @typedef {"debug"|"verbose"|"info"|"warn"|"error"|"crit"} LogLevel
+ */
+
 /**
  * @typedef {Object} CliAction
  * @property {string} args - text description of expected args
@@ -45,30 +82,6 @@
  * @property {string} action
  * @property {Array<string>} params
  * @property {Object} options
- */
-
-/**
- * @typedef {function(data:DataBlob):*} ActionPredicate
- */
-
-/**
- * @typedef {function(data:DataBlob, error:Error):*} CatchPredicate
- */
-
-/**
- * @typedef {function(value:*, index:(number|string)):*} MapPredicate
- */
-
-/**
- * @typedef {Array<*>} CsvRow
- */
-
-/**
- * @typedef {Array<CsvRow>} CsvDoc
- */
-
-/**
- * @typedef {*} DataBlob
  */
 
 /**

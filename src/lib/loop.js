@@ -9,7 +9,7 @@ const {ModuleBase}=require("./_base");
 const {assertPredicate}=require("./_data");
 
 /**
- * Allows one to loop. But one must think about what looping means for mouse. We are a very basic scripting language
+ * Supports looping. But one must think about what looping means for mouse. We are a very basic scripting language
  * and want to remain a very basic scripting language. I see two valuable and useful means of looping:
  *  1. forever - to give users the ability to repeatedly do something such as probe, test, etc.
  *  2. n iterations - lets call it "times"

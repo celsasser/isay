@@ -15,7 +15,7 @@ const {ModuleIO}=require("./_io");
  */
 class ModuleYaml extends ModuleIO {
 	/**
-	 * Parses <param>data</param>
+	 * Attempts to parse yaml encoding in <param>data</param>
 	 * @param {string|Buffer} blob
 	 * @returns {Promise<DataBlob>}
 	 * @throws {Error}
@@ -26,7 +26,7 @@ class ModuleYaml extends ModuleIO {
 	}
 
 	/**
-	 * Reads and parses specified yaml encoded file. The path may either be specified as input data or param data:
+	 * Reads and parses specified yaml encoded file. See resolution rules at <link>_getReadPath</link>
 	 * @param {string} blob
 	 * @returns {Promise<DataBlob>}
 	 * @throws {Error}

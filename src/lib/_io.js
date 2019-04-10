@@ -20,8 +20,8 @@ class ModuleIO extends ModuleBase {
 	 * Finds the path as per the following rules
 	 *  - if <code>params[0]</code> then it will be used as the path
 	 *  - else <code>data</data> will be used as the path
-	 * @resolves path:string in data|this.params[0]
-	 * @param {string|undefined} blob
+	 * @resolves path:string in this.params[0]|data
+	 * @param {DataBlob} blob
 	 * @returns {Promise<string>}
 	 * @throws {Error}
 	 * @protected
@@ -35,11 +35,11 @@ class ModuleIO extends ModuleBase {
 	}
 
 	/**
-	 * Finds the path and options. params get priority but will defer to <param>blob</param> if it cannot find the path in params.
-	 * @resolves path:string in data|this.params[0]
-	 * @resolves options:(Object|undefined) in this.params[0]|this.params[1]
-	 * @param {string|undefined} blob
-	 * @param {Encoding} encoding
+	 * Finds the path and options. <code>this.params</code> get priority but will defer to <param>blob</param>.
+	 * @resolves path:string in this.params[0]|data
+	 * @resolves options:(Object|undefined) in this.params[1]|this.params[0]
+	 * @param {DataBlob} blob
+	 * @param {Encoding} encoding - default encoding
 	 * @param {...*} options
 	 * @returns {{path:string, encoding:string, ...*}} - will include whatever other options are discovered
 	 * @throws {Error}
@@ -66,7 +66,7 @@ class ModuleIO extends ModuleBase {
 	}
 
 	/**
-	 * Writes data to path that should be in <code>this.params[0]</code>.
+	 * The path should always be in <code>this.params[0]</code>.
 	 * @param {DataBlob} blob
 	 * @returns {string}
 	 * @throws {Error}
@@ -76,8 +76,8 @@ class ModuleIO extends ModuleBase {
 	}
 
 	/**
-	 * Writes data to path that should be in <code>this.params[0]</code>.
-	 * Write options may optionally be in <code>this.params[1]</code>
+	 * The path should always be in <code>this.params[0]</code>.
+	 * Options may optionally be in <code>this.params[1]</code>
 	 * @param {DataBlob} blob
 	 * @param {Encoding} encoding
 	 * @param {uint} mode

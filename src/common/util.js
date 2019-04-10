@@ -7,7 +7,6 @@
  */
 
 const _=require("lodash");
-const util=require("util");
 
 const inspect={
 	DEFAULT_DEPTH: Infinity,
@@ -59,19 +58,6 @@ exports.compare=function(object1, object2, options=undefined) {
 	return object1-object2;
 };
 
-/**
- * Executes function within try catch and returns its value or dfault if an exception is handled
- * @param {function():*} fn
- * @param {*} dfault
- * @returns {*}
- */
-module.exports.try=function(fn, dfault=undefined) {
-	try {
-		return fn();
-	} catch(error) {
-		return dfault;
-	}
-};
 
 /********************** Array **********************/
 /**
@@ -102,65 +88,6 @@ module.exports.ensureArray=function(value) {
 		return [];
 	}
 	return [value];
-};
-
-/**
- * unwinds and flattens all of the arrays in the specified <param>path</path>
- * @param {Object|Array|null} object
- * @param {string} path
- * @returns {Array<Object>}
- */
-exports.unwind=function(object, path) {
-	if(!object) {
-		return [];
-	} else {
-		const pathFragments=path.split(".");
-		return _.reduce(pathFragments, (outterResult, pathFragment, pathFragmentIndex)=>{
-			const subpath=pathFragments.slice(0, pathFragmentIndex+1).join(".");
-			return _.reduce(outterResult, (innerResult, arrayElement)=>{
-				const subpathObjects=_.get(arrayElement, subpath);
-				if(_.isArray(subpathObjects)) {
-					subpathObjects.forEach(subpathObject=>{
-						arrayElement=exports.clonePath(arrayElement, subpath, {minus: 1});
-						innerResult.push(_.set(arrayElement, subpath, subpathObject));
-					});
-				} else {
-					innerResult.push(arrayElement);
-				}
-				return innerResult;
-			}, []);
-		}, _.isArray(object) ? object : [object]);
-	}
-};
-
-/**************** Date  ****************/
-/**
- * @param {Date} date1
- * @param {Date} date2
- * @return {boolean}
- */
-exports.datesEqual=function(date1, date2) {
-	return date1.getTime()===date2.getTime();
-};
-
-exports.dateAddMillis=function(date, millis) {
-	return new Date(date.getTime()+millis);
-};
-
-exports.dateAddSeconds=function(date, seconds) {
-	return new Date(date.getTime()+seconds*1000);
-};
-
-exports.dateAddMinutes=function(date, minutes) {
-	return new Date(date.getTime()+minutes*60*1000);
-};
-
-exports.dateAddHours=function(date, hours) {
-	return new Date(date.getTime()+hours*60*60*1000);
-};
-
-exports.dateAddDays=function(date, days) {
-	return new Date(date.getTime()+days*24*60*60*1000);
 };
 
 
@@ -266,27 +193,6 @@ module.exports.ensure=function(object, path, value) {
 };
 
 /**
- * Uses <code>toDataObject</code> to refine <param>object</param> and shake the dust out of him.
- * And then, if this is a node environment we further condition it with util.inspect. Otherwise
- * you get him back as conditioned by <code>toDataObject</code>.
- * @param {Object} object
- * @param {Object} options
- * @param {number} options.depth
- * @param {Set} options.shallow optional object constructor types that we don't descend into
- * @param {number} options.breakLength - forwarded to node.util.inspect
- * @param {boolean} options.colors - forwarded to node.util.inspect
- * @returns {String}
- */
-exports.inspect=function(object, options=undefined) {
-	object=exports.objectToData(object, options);
-	return util.inspect(object, Object.assign({
-		breakLength: Infinity,
-		colors: true,
-		depth: inspect.DEFAULT_DEPTH
-	}, _.omit(options, ["shallow", "sort"])));
-};
-
-/**
  * Gets the object name if possible. If not then the type.
  * @param {*} object
  * @returns {string}
@@ -370,29 +276,6 @@ exports.objectToData=function(object, {
 	return _.isEmpty(object)
 		? object
 		: inspect(object);
-};
-
-/**
- * Create a unique and reliable hash for the specified object
- * @param {Object} object
- * @param {string} hashKey
- * @return {{hash: string, reliable: object}}
- * @requires node
- */
-exports.objectToHash=function(object, {
-	hashKey="pig-key"
-}={}) {
-	const crypto=require("crypto");
-	const hmac=crypto.createHmac("sha256", hashKey),
-		reliable=exports.objectToData(object, {
-			sort: true
-		}),
-		encoded=JSON.stringify(reliable);
-	return {
-		reliable,
-		hash: hmac.update(encoded)
-			.digest("hex")
-	};
 };
 
 /**

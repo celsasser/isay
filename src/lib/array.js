@@ -18,8 +18,7 @@ const util=require("../common/util");
 class ModuleArray extends ModuleBase {
 	/**
 	 * Appends this.params[0] to blob and returns the results
-	 * @resolves data:DataBlob in this.params[0] - appended data
-	 * @resolves predicate:function():Array<*> in this.params[0]
+	 * @resolves appendData:DataBlob in this.params[0]
 	 * @resolves {index:number=blob.length, expand:boolean=false} in this.params[1]
 	 * @param {DataBlob} blob
 	 * @returns {Promise<Array<DataBlob>>}
@@ -31,7 +30,7 @@ class ModuleArray extends ModuleBase {
 
 	/**
 	 * Calls predicate for every element in blob
-	 * @resolves predicate:MapPredicate in this.params[0]
+	 * @resolves predicate:IteratePredicate in this.params[0]
 	 * @param {DataBlob} blob
 	 * @returns {Promise<Array<DataBlob>>}
 	 * @throws {Error} if <param>blob</param> cannot be treated as an array
@@ -48,7 +47,7 @@ class ModuleArray extends ModuleBase {
 
 	/**
 	 * Calls right through to <code>each</code>
-	 * @resolves predicate:MapPredicate in this.params[0]
+	 * @resolves predicate:IteratePredicate in this.params[0]
 	 * @param {DataBlob} blob
 	 * @returns {Promise<Array<DataBlob>>}
 	 * @throws {Error} if <param>blob</param> cannot be treated as an array
@@ -58,9 +57,8 @@ class ModuleArray extends ModuleBase {
 	}
 
 	/**
-	 * Filters array selecting elements that evaluate to true
-	 * @resolves predicate:MapPredicate in this.params[0]
-	 * @resolves value:* in this.params[0]
+	 * Filters array by selecting elements that evaluate to true
+	 * @resolves filter:(FilterPredicate:*) in this.params[0]
 	 * @param {DataBlob} blob
 	 * @returns {Promise<Array<DataBlob>>}
 	 * @throws {Error}
@@ -92,8 +90,7 @@ class ModuleArray extends ModuleBase {
 
 	/**
 	 * Finds first element using predicate
-	 * @resolves predicate:MapPredicate in this.params[0]
-	 * @resolves value:* in this.params[0]
+	 * @resolves filter:(FilterPredicate|*) in this.params[0]
 	 * @param {DataBlob} blob
 	 * @returns {Promise<Array<DataBlob>>}
 	 * @throws {Error}
@@ -117,7 +114,7 @@ class ModuleArray extends ModuleBase {
 
 	/**
 	 * Returns the first element or the first n elements of the input array
-	 * @resolves count:number in params[0]
+	 * @resolves count:(number|undefined) in params[0]
 	 * @param {DataBlob} blob
 	 * @returns {Promise<(DataBlob|Array<DataBlob>)>}
 	 * @throws {Error}
@@ -134,9 +131,8 @@ class ModuleArray extends ModuleBase {
 
 	/**
 	 * Inserts this.params[0] into blob and returns the results
-	 * @resolves data:DataBlob in this.params[0] - inserted data
-	 * @resolves predicate:function():Array<*> in this.params[0]
-	 * @resolves {index:number=0, expand:boolean=false} in this.params[1]
+	 * @resolves insertData:DataBlob in this.params[0]
+	 * @resolves {index:number=blob.length, expand:boolean=false} in this.params[1]
 	 * @param {DataBlob} blob
 	 * @returns {Promise<Array<DataBlob>>}
 	 * @throws {Error}
@@ -147,7 +143,7 @@ class ModuleArray extends ModuleBase {
 
 	/**
 	 * Returns the last element or last n elements of the input array
-	 * @resolves count:number in params[0]
+	 * @resolves count:(number|undefined) in params[0]
 	 * @param {DataBlob} blob
 	 * @returns {Promise<(DataBlob|Array<DataBlob>)>}
 	 * @throws {Error}
@@ -223,8 +219,8 @@ class ModuleArray extends ModuleBase {
 
 	/**
 	 * Reduces array down to the little or big guy you make him.
-	 * @resolves predicate:function(result:*, data:*, index:number):* in this.params[0]
-	 * @resolves startingValue: in this.params[1] - defaults to []
+	 * @resolves predicate:ReducePredicate in this.params[0]
+	 * @resolves startingValue:(Array|Object|undefined=[]) in this.params[1]
 	 * @param {DataBlob} blob
 	 * @returns {Promise<DataBlob>}
 	 * @throws {Error}
@@ -297,7 +293,7 @@ class ModuleArray extends ModuleBase {
 
 	/**
 	 * Sorts array elements. By default it sorts using lodash's default comparison operator.
-	 * @resolves sortBy:(string|function) in this.params[0] - defaults to undefined
+	 * @resolves sortBy:(string|function|undefined) in this.params[0]
 	 * @param {DataBlob} blob
 	 * @returns {Promise<Array<DataBlob>>}
 	 * @throws {Error}
@@ -383,8 +379,7 @@ class ModuleArray extends ModuleBase {
 
 	/**
 	 * General purpose append/insert function for use by our public append/insert methods.
-	 * @resolves data:DataBlob in this.params[0] - inserted data
-	 * @resolves predicate:function():Array<*> in this.params[0]
+	 * @resolves insertData:DataBlob in this.params[0]
 	 * @resolves {index:number=blob.length, expand:boolean=false} in this.params[1]
 	 * @param {DataBlob} blob
 	 * @param {boolean} tail - whether to use head or tail as a default insert point

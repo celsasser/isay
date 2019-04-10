@@ -14,8 +14,9 @@ const util=require("../common/util");
 
 
 /**
- * Asserts using the predicate in params[0]:  Boolean(this.params[0](blob)).
+ * Asserts the result of the predicate in params[0]:  Boolean(this.params[0](blob)).
  * Intended to be used with domains <code>is</code> and <code>not</code>, but the world is your oyster.
+ * @resolves predicate:ActionPredicate in this.params[0]
  * @param {ModuleBase} module
  * @param {DataBlob} blob
  * @return {Promise<DataBlob>}
@@ -50,25 +51,27 @@ function assertProperties(object, properties) {
 }
 
 /**
- * A "predicate" is a function that takes 1 or more arguments and returns a single value. They are
- * designed to be used with our API. So that they are fully compatible and in parity we make sure that
- * the are asynchronous. If <param>predicate</param> is not found to be async then we make him async
- * @param {Function} predicate
+ * Asserts that <param>value</param> is a predicate.
+ * A "predicate" is a function that takes 1 or more arguments and returns a single value. Our API assumes that
+ * everything is asynchronous via Promises.  Here we ensure that too.  If <param>value</param> is a function
+ * but is not async then we wrap it with an async function.
+ * @param {Function} value
  * @returns {Promise<*>}
+ * @throws {Error}
  */
-function assertPredicate(predicate) {
-	if(predicate==null) {
+function assertPredicate(value) {
+	if(value==null) {
 		throw new Error("missing predicate function");
-	} else if(_.isFunction(predicate)) {
-		if(predicate[Symbol.toStringTag]==="AsyncFunction") {
-			return predicate;
+	} else if(_.isFunction(value)) {
+		if(value[Symbol.toStringTag]==="AsyncFunction") {
+			return value;
 		} else {
 			return async(...args)=>{
-				return predicate(...args);
+				return value(...args);
 			};
 		}
 	} else {
-		throw new Error(`expecting predicate but found ${util.name(predicate)}`);
+		throw new Error(`expecting predicate but found ${util.name(value)}`);
 	}
 }
 
@@ -79,7 +82,7 @@ function assertPredicate(predicate) {
  * @param {boolean} allowNullish - shorthand for allowNull and allowUndefined
  * @param {boolean} allowNull
  * @param {boolean} allowUndefined
- * @param {*} defaultUndefined - a default that should be used if resolution=undefined.
+ * @param {*} defaultUndefined - a default that should be used if resolution=undefined. It implies allowUndefined
  * @returns {*} returns <param>value</param> if all is good
  * @throws {Error}
  */
@@ -145,7 +148,7 @@ function assertTypesEqual(value1, value2) {
 }
 
 /**
- * Casts value to <code>boolean</code> type.
+ * Casts <param>value</param> to <code>boolean</code> type.
  * For the most part we will follow javascript rules...except for the goofy stuff
  * @param {*} value
  * @returns {boolean}
@@ -180,11 +183,12 @@ function getType(value) {
 }
 
 /**
- * He will make an attempt to ensure that the object is parsed JSON.
+ * He will make an attempt to ensure that <param>data</param> is parsed JSON.
  * @param {*} data
  * @returns {Object}
+ * @throws {Error}
  */
-function ensureJson(data) {
+function ensureParsedJson(data) {
 	if(_.isPlainObject(data)) {
 		return data;
 	} else if(_.isString(data)) {
@@ -197,7 +201,7 @@ function ensureJson(data) {
 
 /**
  * This guy brings together assertType and retrieval. So what? His value comes from dealing with predicates.
- * It always allows for <param>value</param> to be a predicate that takes a blob as input. Hence the <param>blob</param>.
+ * It always allows for <param>value</param> to be a predicate that takes a blob as input (hence the <param>blob</param>).
  * Follows are two examples illustrating a literal param and a predicate param:
  * - literal: array.first(10)
  * - predicate: array.first(tty.height())
@@ -238,7 +242,7 @@ module.exports={
 	assertType,
 	assertTypesEqual,
 	boolean,
-	ensureJson,
+	ensureParsedJson,
 	getType,
 	resolveType
 };

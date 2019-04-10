@@ -60,9 +60,26 @@ describe("lib.ModuleTest", function() {
 	});
 
 	describe("empty", function() {
+		it("should raise exception if blob is undefined", async function() {
+			const instance=_createInstance();
+			return instance.empty()
+				.then(assert.notCalled)
+				.catch(error=>{
+					assert.strictEqual(error.message, "expecting Array, Object or String but found undefined");
+				});
+		});
+
+		it("should raise exception if type is not supported", async function() {
+			const instance=_createInstance();
+			return instance.empty(0)
+				.then(assert.notCalled)
+				.catch(error=>{
+					assert.strictEqual(error.message, "expecting Array, Object or String but found Number");
+				});
+		});
+
 		it("should return true if input is considered empty", async function() {
 			const instance=_createInstance();
-			assert.strictEqual(await instance.empty(), true);
 			assert.strictEqual(await instance.empty(null), true);
 			assert.strictEqual(await instance.empty({}), true);
 			assert.strictEqual(await instance.empty([]), true);
@@ -72,7 +89,6 @@ describe("lib.ModuleTest", function() {
 			const instance=_createInstance({
 				positive: false
 			});
-			assert.strictEqual(await instance.empty(), false);
 			assert.strictEqual(await instance.empty(null), false);
 			assert.strictEqual(await instance.empty({}), false);
 			assert.strictEqual(await instance.empty([]), false);

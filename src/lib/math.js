@@ -9,12 +9,18 @@ const {ModuleBase}=require("./_base");
 const {assertType, resolveType}=require("./_data");
 
 /**
- * Support for basic arithmetic
+ * Support for basic arithmetic.
+ * Unary operations - we support value-type and array operands. And apply operations as follows:
+ *  this.params.length===0: operation(<code>blob</code>)
+ *  this.params.length===1: operation(<code>this.params[0]</code>)
+ * Binary operations - we support value-type and array operands. And apply operations as follows:
+ * 	this.params.length===1: <code>blob</code> operation <code>this.params[0]</code>
+ * 	this.params.length===2: <code>this.params[0]</code> operation <code>this.params[1]</code>
  * @typedef {ModuleBase} ModuleMath
  */
 class ModuleMath extends ModuleBase {
 	/**
-	 * Adds whatever is in this.params[0], provided it is a number, to the incoming <param>input</param>
+	 * Addition. See <code>_applyBinary</code> for more information about binary operations.
 	 * @param {number|Array<number>} input
 	 * @returns {Promise<(number|Array<number>)>}
 	 */
@@ -23,7 +29,7 @@ class ModuleMath extends ModuleBase {
 	}
 
 	/**
-	 * Applies ceiling to the incoming <param>input</param>
+	 * Ceiling: See <code>_applyUnary</code> for more information about unary operations.
 	 * @param {number|Array<number>} input
 	 * @returns {Promise<(number|Array<number>)>}
 	 */
@@ -32,7 +38,7 @@ class ModuleMath extends ModuleBase {
 	}
 
 	/**
-	 * Divides incoming <param>input</param> from whatever is in this.params[0] provided it is a number
+	 * Division. See <code>_applyBinary</code> for more information about binary operations.
 	 * @param {number|Array<number>} input
 	 * @returns {Promise<(number|Array<number>)>}
 	 */
@@ -56,7 +62,7 @@ class ModuleMath extends ModuleBase {
 	}
 
 	/**
-	 * Applies floor to the incoming <param>input</param>
+	 * Floor: See <code>_applyUnary</code> for more information about unary operations.
 	 * @param {number|Array<number>} input
 	 * @returns {Promise<(number|Array<number>)>}
 	 */
@@ -65,7 +71,7 @@ class ModuleMath extends ModuleBase {
 	}
 
 	/**
-	 * Returns the largest number in the <param>input</param> sequence
+	 * Returns largest value. See <code>_applyMinMax</code> for more information about min/max operations.
 	 * @param {Array<number>} input
 	 * @returns {Promise<number>}
 	 */
@@ -74,7 +80,7 @@ class ModuleMath extends ModuleBase {
 	}
 
 	/**
-	 * Returns the smallest number in the <param>input</param> sequence
+	 * Returns smallest value. See <code>_applyMinMax</code> for more information about min/max operations.
 	 * @param {Array<number>} input
 	 * @returns {Promise<number>}
 	 */
@@ -83,7 +89,7 @@ class ModuleMath extends ModuleBase {
 	}
 
 	/**
-	 * Multiplies incoming <param>input</param> from whatever is in this.params[0] provided it is a number
+	 * Multiplication. See <code>_applyBinary</code> for more information about binary operations.
 	 * @param {number|Array<number>} input
 	 * @returns {Promise<(number|Array<number>)>}
 	 */
@@ -92,7 +98,7 @@ class ModuleMath extends ModuleBase {
 	}
 
 	/**
-	 * Rounds the incoming <param>input</param>
+	 * Rounds to nearest integer. See <code>_applyUnary</code> for more information about min/max operations.
 	 * @param {number|Array<number>} input
 	 * @returns {Promise<(number|Array<number>)>}
 	 */
@@ -101,7 +107,7 @@ class ModuleMath extends ModuleBase {
 	}
 
 	/**
-	 * Subtracts whatever is in this.params[0], provided it is a number, from the incoming <param>input</param>
+	 * Subtraction. See <code>_applyBinary</code> for more information about binary operations.
 	 * @param {number|Array<number>} input
 	 * @returns {Promise<(number|Array<number>)>}
 	 */

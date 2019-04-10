@@ -16,10 +16,16 @@ const log=require("../common/log");
 /**
  * Formats the data in <param>blob<param>. We are using a somewhat hybrid approach to formatting. It's a little
  * sprintf, it's a little es6 template and it's a little custom.
- * The format spec is as follows: "${[path:][0][width][.precision]<l|r|c>}"
+ * The format spec is as follows: "${[path:][pad][width][.precision]<l|r|c>}":
+ * - path: optional property path of the data in <param>data</param>. Defaults to field spec index.
+ * - pad: optional character to pad with. It may not be 1-9. And width must be included for it to be useful.
+ * - width: optional width of field in characters.
+ * - precision: optional floating point precision
+ * - l|r|c: align left, right or center
  * @param {string} format
  * @param {Array|Object} data
  * @returns {string}
+ * @throws {Error}
  */
 function formatMouseSpecification(format, data) {
 	let result=format;
@@ -84,13 +90,23 @@ function formatMouseSpecification(format, data) {
 }
 
 /**
- * Disassembles what could have been put together by formatMouseSpecification. But everything it does is not 100%
- * dissectable without ambiguity. If width is included then all is fine. If not....then there are some potential gray areas.
- * The format spec is as follows: "${[path:][0][width][.precision]<l|r|c>[ifd][+]}"
+ * Disassembles what could have been put together by formatMouseSpecification. If width is included then we can assure
+ * 100% accuracy provided <param>encoded</param> does not fall out of bounds. But if widths are not included then this function
+ * does it's best by looking for padded boundaries. But should one field butt up against another it is impossible for this
+ * function to know exactly where the division should be made and the results you get probably aren't the ones you are expecting.
+ * The format spec is as follows: "${[path:][pad][width][.precision]<l|r|c>[i|f|d][+]}"
+ * - path: optional property path of the value in the result. Defaults to field spec index.
+ * - pad: optional character field is padded with. It may not be 1-9.
+ * - width: optional width of field in characters.
+ * - precision: optional floating point precision
+ * - l|r|c: aligned left, right or center
+ * - i|f|d: optional conversion type for the field: i=integer, f=floating point, d=date. String by default.
+ * - +: optional flag which reads to end of the line. Useful for variable length fields at the end of a line.
  * @param {string} format
  * @param {string} encoded
  * @param {boolean} exceptionOnMismatch - can't see value in partial matches but leaving wiggle room.
  * @returns {Array<string>}
+ * @throws {Error}
  */
 function unformatMouseSpecification(format, encoded, {
 	exceptionOnMismatch=true
@@ -133,16 +149,17 @@ function unformatMouseSpecification(format, encoded, {
 	}
 
 	/**
-	 * What do we want to do here? I don't think we can assume anything.
+	 * Something failed. Depending on how we are configured we either throw an
+	 * exception or returns successful matches.
 	 * @param {string} text
 	 * @returns {Array<string>}
 	 * @throws {Error}
 	 */
-	function _processMismatch(text) {
+	function _processFailure(text) {
 		if(exceptionOnMismatch) {
 			throw new Error(text);
 		} else {
-			log.debug(`- incomplete match: ${text}`, {
+			log.debug(text, {
 				meta: {
 					encoded,
 					format
@@ -166,7 +183,7 @@ function unformatMouseSpecification(format, encoded, {
 			match,
 			specPrefix,
 			specStartIndex,
-			specEndIndex,
+			specEndIndex
 		}=matches[index];
 
 		/**
@@ -285,7 +302,7 @@ function unformatMouseSpecification(format, encoded, {
 		// 1. make sure the junk between the end of the last field specifier and this field specifier are identical
 		let encodedPrefix=encoded.substr(lastEncodedEndIndex, specPrefix.length);
 		if(specPrefix!==encodedPrefix) {
-			return _processMismatch(`failed to match "${specPrefix}" to "${encodedPrefix}"`);
+			return _processFailure(`failed to match "${specPrefix}" to "${encodedPrefix}"`);
 		} else {
 			lastEncodedEndIndex+=specStartIndex-lastSpecEndIndex;
 		}
@@ -301,7 +318,7 @@ function unformatMouseSpecification(format, encoded, {
 			let encodedField=encoded.substr(lastEncodedEndIndex, fieldWidth),
 				depadded=_depad(encodedField);
 			if(depadded===undefined) {
-				return _processMismatch(`could not parse "${encodedField}" with "${match[0]}"`);
+				return _processFailure(`could not parse "${encodedField}" with "${match[0]}"`);
 			} else {
 				_.set(result, fieldPath, _convert(depadded));
 				lastEncodedEndIndex+=fieldWidth;
@@ -309,7 +326,7 @@ function unformatMouseSpecification(format, encoded, {
 		} else {
 			let deciphered=_decipher();
 			if(deciphered===undefined) {
-				return _processMismatch(`could not match "${match[0]}"`);
+				return _processFailure(`could not match "${match[0]}"`);
 			} else {
 				_.set(result, fieldPath, _convert(deciphered.data));
 				lastEncodedEndIndex+=deciphered.length;
@@ -320,7 +337,7 @@ function unformatMouseSpecification(format, encoded, {
 	const specTrailing=format.substr(lastSpecEndIndex),
 		encodedTrailing=encoded.substr(lastEncodedEndIndex);
 	if(specTrailing!==encodedTrailing) {
-		return _processMismatch(`failed to match "${specTrailing}" to "${encodedTrailing}"`);
+		return _processFailure(`failed to match "${specTrailing}" to "${encodedTrailing}"`);
 	}
 	return result;
 }

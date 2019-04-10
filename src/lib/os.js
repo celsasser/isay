@@ -16,7 +16,7 @@ const spawn=require("../common/spawn");
  */
 class ModuleOs extends ModuleBase {
 	/**
-	 * This is the single point through which we send all command requests.
+	 * This is the single point through which we send all OS command requests.
 	 * @param {DataBlob} blob
 	 * @returns {Promise<DataBlob>}
 	 */

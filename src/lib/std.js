@@ -20,8 +20,7 @@ const {resolveType}=require("./_data");
 class ModuleStd extends ModuleBase {
 	/**
 	 * Writes to stderr. Only ensures that data is text or a buffer. Assumes compact formatting of objects.
-	 * @resolves output:* in this.params[0..n]
-	 * @resolves output:* in blob
+	 * @resolves output:* in (this.params[0..n]|blob)
 	 * @param {DataBlob} blob
 	 * @returns {Promise<DataBlob>}
 	 */
@@ -35,8 +34,7 @@ class ModuleStd extends ModuleBase {
 	/**
 	 * Writes to stderr. Always converts to text and always adds a newline. Assumes spacious formatting of objects.
 	 * Note: I borrowed the naming convention from java. Not crazy about it but want to keep it close to raw's "error"
-	 * @resolves output:* in this.params[0..n]
-	 * @resolves output:* in blob
+	 * @resolves output:* in (this.params[0..n]|blob)
 	 * @param {DataBlob} blob
 	 * @returns {Promise<DataBlob>}
 	 */
@@ -61,8 +59,7 @@ class ModuleStd extends ModuleBase {
 
 	/**
 	 * Writes output to stdout. Only ensures that data is text or a buffer. Assumes compact formatting of objects.
-	 * @resolves output:* in this.params[0..n]
-	 * @resolves output:* in blob
+	 * @resolves output:* in (this.params[0..n]|blob)
 	 * @param {DataBlob} blob
 	 * @returns {Promise<DataBlob>}
 	 */
@@ -76,8 +73,7 @@ class ModuleStd extends ModuleBase {
 	/**
 	 * Writes output to stdout. Always converts to text and always adds a newline. Assumes spacious formatting of objects.
 	 * Note: I borrowed the naming convention from java. Not crazy about it but want to keep it close to raw's "out"
-	 * @resolves output:* in this.params[0..n]
-	 * @resolves output:* in blob
+	 * @resolves output:* in (this.params[0..n]|blob)
 	 * @param {DataBlob} blob
 	 * @returns {Promise<DataBlob>}
 	 */

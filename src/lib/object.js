@@ -16,8 +16,8 @@ class ModuleObject extends ModuleBase {
 	/**
 	 * Calls predicate for each key/value pair in the object. By default it does not recurse into objects but you may
 	 * override this behavior with the <code>recurse</code> option.
-	 * @resolves predicate:MapPredicate in this.params[0]
-	 * @resolves options:{recurse:boolean=false} in this.params[0]
+	 * @resolves predicate:IteratePredicate in this.params[0]
+	 * @resolves options:{recurse:boolean=false} in this.params[1]
 	 * @param {DataBlob} blob
 	 * @returns {Promise<DataBlob>}
 	 */
@@ -35,7 +35,7 @@ class ModuleObject extends ModuleBase {
 
 	/**
 	 * Gets value at property path
-	 * @resolves path:(string|undefined) in this.params[0]
+	 * @resolves path:string in this.params[0]|blob
 	 * @param {DataBlob} blob
 	 * @returns {Promise<DataBlob>}
 	 * @throws {Error}
@@ -89,13 +89,15 @@ class ModuleObject extends ModuleBase {
 
 	/**
 	 * Merges param data in <code>params[0]</code> into <param>blob</param>
+	 * @resolves mergeData:(Array|Object) in this.params[0]
 	 * @param {Array|Object} blob
 	 * @returns {Promise<DataBlob>}
 	 * @throws {Error}
 	 */
 	async merge(blob) {
 		assertType(blob, ["Array", "Object"]);
-		return _.merge(blob, this.params[0]);
+		const mergeData=await resolveType(blob, this.params[0], ["Array", "Object"], {allowNull: true});
+		return _.merge(blob, mergeData);
 	}
 
 
@@ -121,8 +123,8 @@ class ModuleObject extends ModuleBase {
 		const result=[],
 			predicate=assertPredicate(_.get(this.params, 0, object=>object));
 		assertType(blob, "Object", {allowNullish: true});
-		for(let key in blob) {
-			result.push(await predicate(blob[key], key));
+		for(let property in blob) {
+			result.push(await predicate(blob[property], property));
 		}
 		return result;
 	}

@@ -13,7 +13,7 @@ const {resolveType}=require("./_data");
  */
 class ModuleEnv extends ModuleBase {
 	/**
-	 * Sets env variable to value. The rules for where it finds it's operands are as follows:
+	 * Deletes environment variable.
 	 * @resolves variable:string in this.params[0]
 	 * @param {*} blob
 	 * @return {Promise<DataBlob>}
@@ -28,8 +28,8 @@ class ModuleEnv extends ModuleBase {
 	 * Follows read rules
 	 * - if no params then returns all variables.
 	 * - otherwise looks for variable specified in params[0]
-	 * @resolves variable:(string|undefined) in this.params[0] - optional
-	 * @resolves default:(*|undefined) in this.params[1] - optional
+	 * @resolves variable:(string|undefined) in this.params[0]
+	 * @resolves default:(*|undefined) in this.params[1]
 	 * @param {DataBlob} blob
 	 * @return {Promise<Object|*>}
 	 */
@@ -47,7 +47,7 @@ class ModuleEnv extends ModuleBase {
 	}
 
 	/**
-	 * Sets env variable to value. The rules for where it finds it's operands are as follows:
+	 * Sets environment variable to value. The rules for where it finds it's operands are as follows:
 	 * @resolves variable:string in this.params[0]
 	 * @resolves value:(string|number|boolean) in this.params[1]|blob
 	 * @param {string|undefined} blob

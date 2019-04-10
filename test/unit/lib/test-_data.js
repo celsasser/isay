@@ -18,7 +18,7 @@ const {
 	assertProperties,
 	assertType,
 	assertTypesEqual,
-	ensureJson,
+	ensureParsedJson,
 	resolveType
 }=require("../../../src/lib/_data");
 
@@ -223,10 +223,10 @@ describe("lib.ModuleArray", function() {
 		});
 	});
 
-	describe("ensureJson", function() {
+	describe("ensureParsedJson", function() {
 		it("should return input if it is an object", function() {
 			const input={};
-			assert.strictEqual(ensureJson(input), input);
+			assert.strictEqual(ensureParsedJson(input), input);
 		});
 
 		[
@@ -235,7 +235,7 @@ describe("lib.ModuleArray", function() {
 			"{\"a\": 1}"
 		].forEach(input=>{
 			it(`should convert ${input} encoding`, function() {
-				assert.deepEqual(ensureJson(input), JSON.parse(input));
+				assert.deepEqual(ensureParsedJson(input), JSON.parse(input));
 			});
 		});
 	});
