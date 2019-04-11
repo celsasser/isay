@@ -16,19 +16,15 @@ describe("lib.ModuleNot", function() {
 		action="action",
 		catchModule=undefined,
 		domain="domain",
-		elseModule=undefined,
 		method="method",
-		params=[],
-		thenModule=undefined,
+		params=[]
 	}={}) {
 		return new ModuleNot({
 			action,
 			catchModule,
 			domain,
-			elseModule,
 			method,
-			params,
-			thenModule
+			params
 		});
 	}
 
@@ -39,12 +35,8 @@ describe("lib.ModuleNot", function() {
 
 	it("should properly construct with modules", function() {
 		const instance=_createInstance({
-			catchModule: "catch",
-			elseModule: "else",
-			thenModule: "then"
+			catchModule: "catch"
 		});
 		assert.strictEqual(instance._catchModule, "catch");
-		assert.strictEqual(instance._elseModule, "else");
-		assert.strictEqual(instance._thenModule, "then");
 	});
 });

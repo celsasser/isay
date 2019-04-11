@@ -10,34 +10,6 @@
 
 /********************* API Types *********************/
 /**
- * @typedef {function(data:DataBlob):*} ActionPredicate
- */
-
-/**
- * @typedef {function(data:DataBlob, error:Error):*} CatchPredicate
- */
-
-/**
- * @typedef {"ascii", "binary", "utf8", "unicode"} Encoding
- */
-
-/**
- * @typedef {function(value:*, index:(number|string)):boolean} FilterPredicate
- */
-
-/**
- * @typedef {function(value:*, index:(number|string)):void} IteratePredicate
- */
-
-/**
- * @typedef {function(value:*, index:(number|string)):*} MapPredicate
- */
-
-/**
- * @typedef {function(result:*, data:*, index:(number|string)):*} ReducePredicate
- */
-
-/**
  * @typedef {Array<*>} CsvRow
  */
 
@@ -46,11 +18,43 @@
  */
 
 /**
+ * @typedef {*} DataBlob
+ */
+
+/**
  * @typedef {{millis:Number, seconds:Number, minutes:Number, hours:Number, days:Number}} DurationObject
  */
 
 /**
- * @typedef {*} DataBlob
+ * @typedef {"ascii", "binary", "utf8", "unicode"} Encoding
+ */
+
+/**
+ * @typedef {function(data:DataBlob):DataBlob} ActionPredicate
+ */
+
+/**
+ * @typedef {function(data:DataBlob, error:Error):DataBlob} CatchPredicate
+ */
+
+/**
+ * @typedef {function(value:DataBlob, index:(number|string)):boolean} FilterPredicate
+ */
+
+/**
+ * @typedef {function(value:DataBlob, index:(number|string)):void} IteratePredicate
+ */
+
+/**
+ * @typedef {function(value:DataBlob, index:(number|string)):DataBlob} MapPredicate
+ */
+
+/**
+ * @typedef {function(result:DataBlob, data:DataBlob, index:(number|string)):*} ReducePredicate
+ */
+
+/**
+ * @typedef {function(value:DataBlob):boolean} TestPredicate
  */
 
 

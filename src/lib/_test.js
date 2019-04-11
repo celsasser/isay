@@ -24,28 +24,22 @@ class ModuleTest extends ModuleBase {
 	 * @param {string} action
 	 * @param {ModuleBase} catchModule
 	 * @param {string} domain
-	 * @param {ModuleBase} elseModule - else module handler if there is one
 	 * @param {string} method
 	 * @param {ModuleBase} nextModule
 	 * @param {Array<*>} params
 	 * @param {boolean} positive - what state should evaluate to true
-	 * @param {ModuleBase} thenModule - if module if there is one
 	 */
 	constructor({
 		action,
 		catchModule=undefined,
 		domain,
-		elseModule=undefined,
 		method,
 		nextModule=undefined,
 		params=[],
 		positive,
-		thenModule=undefined
 	}) {
 		super({action, catchModule, domain, method, nextModule, params});
-		this._elseModule=elseModule;
 		this._positive=positive;
-		this._thenModule=thenModule;
 	}
 
 	/**
@@ -76,22 +70,6 @@ class ModuleTest extends ModuleBase {
 			}
 		}
 		return this._processTestResult(blob, false);
-	}
-
-	/**
-	 * Is a flow handler much like then and catch. May be used to flow to via a non-flow <code>ModuleTest</code> action
-	 * @resolves predicate:ActionPredicate in this.params[0]
-	 * @resolves result:* in this.params[0]
-	 * @param {DataBlob} blob
-	 * @return {Promise<DataBlob>}
-	 * @attribute flow
-	 */
-	async else(blob) {
-		if(this.params.length===0) {
-			return Promise.resolve(blob);
-		} else  {
-			return resolveType(blob, this.params[0], "*", {allowNullish: true});
-		}
 	}
 
 	/**
@@ -179,22 +157,6 @@ class ModuleTest extends ModuleBase {
 	}
 
 	/**
-	 * Is a flow handler much like else and catch. May be used to flow to via a non-flow <code>ModuleTest</code> action
-	 * @resolves predicate:ActionPredicate in this.params[0]
-	 * @resolves result:* in this.params[0]
-	 * @param {DataBlob} blob
-	 * @return {Promise<DataBlob>}
-	 * @attribute flow
-	 */
-	async then(blob) {
-		if(this.params.length===0) {
-			return Promise.resolve(blob);
-		} else  {
-			return resolveType(blob, this.params[0], "*", {allowNullish: true});
-		}
-	}
-
-	/**
 	 * Simple fella that evaluates whether the input is true as evaluated by <code>boolean(value)</code>
 	 * @resolves state:* in (this.params[0]|blob)
 	 * @param {DataBlob} blob
@@ -243,24 +205,16 @@ class ModuleTest extends ModuleBase {
 	}
 
 	/**
-	 * Processes the result of whatever test up above's results. Puts the result to if/then/else processing.
+	 * Processes the result of whatever test up above's results.
+	 * 4/12/2019 - We used to have then/else processing here. But we changed the way conditionals get processed.
 	 * @param {DataBlob} input
 	 * @param {boolean} positive - should be the result of the test itself. <param>this._positive</param> comparison will be applied here.
-	 * @returns {Promise<DataBlob>} - what gets returned depends on whether there is then/else processing.
-	 *  - if test-state==true and there is a then handler then the result of <code>this._thenModule.process(input)</code> will be returned
-	 *  - if test-state==false and there is an else handler then the result of <code>this._elseModule.process(input)</code> will be returned
-	 *  - else test-state will be returned
+	 * @returns {Promise<DataBlob>}
 	 * @private
 	 */
 	_processTestResult(input, positive) {
-		const state=positive===this._positive;
-		if(this._thenModule && state) {
-			return this._thenModule.process(input);
-		} else if(this._elseModule && !state) {
-			return this._elseModule.process(input);
-		} else {
-			return Promise.resolve(state);
-		}
+		const state=(positive===this._positive);
+		return Promise.resolve(state);
 	}
 }
 

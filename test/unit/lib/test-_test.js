@@ -14,21 +14,17 @@ describe("lib.ModuleTest", function() {
 		action="action",
 		catchModule=undefined,
 		domain="domain",
-		elseModule=undefined,
 		method="method",
 		params=[],
-		positive=true,
-		thenModule=undefined,
+		positive=true
 	}={}) {
 		return new ModuleTest({
 			action,
 			catchModule,
 			domain,
-			elseModule,
 			method,
 			params,
-			positive,
-			thenModule
+			positive
 		});
 	}
 
@@ -49,13 +45,9 @@ describe("lib.ModuleTest", function() {
 
 		it("should properly construct with modules", function() {
 			const instance=_createInstance({
-				catchModule: "catch",
-				elseModule: "else",
-				thenModule: "then"
+				catchModule: "catch"
 			});
 			assert.strictEqual(instance._catchModule, "catch");
-			assert.strictEqual(instance._elseModule, "else");
-			assert.strictEqual(instance._thenModule, "then");
 		});
 	});
 
@@ -146,44 +138,6 @@ describe("lib.ModuleTest", function() {
 			});
 			return instance.endsWith("one.two")
 				.then(value=>assert.strictEqual(value, false));
-		});
-	});
-
-	[
-		"else",
-		"then"
-	].forEach(action=>{
-		describe(action, function() {
-			it("should return input if no params", async function() {
-				const instance=_createInstance();
-				return instance[action]("input")
-					.then(result=>{
-						assert.strictEqual(result, "input");
-					});
-			});
-
-			it("should return result of predicate if params[0] is a function", async function() {
-				const instance=_createInstance({
-					params: [input=>{
-						assert.strictEqual(input, "input");
-						return resolveNextTick("output");
-					}]
-				});
-				return instance[action]("input")
-					.then(result=>{
-						assert.strictEqual(result, "output");
-					});
-			});
-
-			it("should return params[0] if it is not a function", async function() {
-				const instance=_createInstance({
-					params: ["param"]
-				});
-				return instance[action]("input")
-					.then(result=>{
-						assert.strictEqual(result, "param");
-					});
-			});
 		});
 	});
 
