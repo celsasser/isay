@@ -113,3 +113,8 @@
  * @property {string} method
  * @property {Array<string>} params
  */
+
+/**
+ * @typedef {function(module:ModuleBase):void} ModuleSequenceValidator
+ * @throws {Error}
+ */

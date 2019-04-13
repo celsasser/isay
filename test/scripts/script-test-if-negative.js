@@ -2,5 +2,5 @@
  * Should return result of test
  */
 
-is.true(false)
-	.is.then("then")
+step.if(false, true)
+	.step.else(false)

@@ -25,7 +25,7 @@ describe("command.run.index", function() {
 			const configuration={
 				options: {
 					input: undefined,
-					script: "test/scripts/script-test-else-negative.js"
+					script: "test/scripts/script-test-elif-invalid.js"
 				}
 			};
 			return run(configuration)
@@ -168,6 +168,10 @@ describe("command.run.index", function() {
 				]
 			},
 			{
+				script: "test/scripts/script-json-stringify.js",
+				expected: "{\"george\":{\"type\":\"cat\"}}"
+			},
+			{
 				script: "test/scripts/script-math-binary.js",
 				expected: [
 					"1! = 1",
@@ -185,10 +189,6 @@ describe("command.run.index", function() {
 				expected: "cat"
 			},
 			{
-				script: "test/scripts/script-json-stringify.js",
-				expected: "{\"george\":{\"type\":\"cat\"}}"
-			},
-			{
 				script: "test/scripts/script-object-set.js",
 				expected: {
 					"george": {
@@ -200,40 +200,32 @@ describe("command.run.index", function() {
 				}
 			},
 			{
+				script: "test/scripts/script-test-elif-head.js",
+				errorText: "unexpected step.elif head of the chain"
+			},
+			{
+				script: "test/scripts/script-test-elif-invalid.js",
+				errorText: "misplaced step.elif statement"
+			},
+			{
 				script: "test/scripts/script-test-else-head.js",
-				errorText: "unexpected is.else head of the chain"
+				errorText: "unexpected step.else head of the chain"
 			},
 			{
 				script: "test/scripts/script-test-else-invalid.js",
-				errorText: "misplaced is.else statement"
+				errorText: "misplaced step.else statement"
 			},
 			{
-				script: "test/scripts/script-test-else-negative.js",
-				expected: true
-			},
-			{
-				script: "test/scripts/script-test-else-positive.js",
-				expected: "else"
-			},
-			{
-				script: "test/scripts/script-test-then-else.js",
+				script: "test/scripts/script-test-if-else.js",
 				expected: [0, 2, 4, 12, 16, 20]
 			},
 			{
-				script: "test/scripts/script-test-then-head.js",
-				errorText: "unexpected is.then head of the chain"
-			},
-			{
-				script: "test/scripts/script-test-then-invalid.js",
-				errorText: "misplaced is.then statement"
-			},
-			{
-				script: "test/scripts/script-test-then-negative.js",
+				script: "test/scripts/script-test-if-negative.js",
 				expected: false
 			},
 			{
-				script: "test/scripts/script-test-then-positive.js",
-				expected: "then"
+				script: "test/scripts/script-test-if-positive.js",
+				expected: true
 			},
 			{
 				script: "test/scripts/script-throw-error.js",

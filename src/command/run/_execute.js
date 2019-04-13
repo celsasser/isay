@@ -15,7 +15,6 @@ const {createHmac}=require("crypto");
 const vm=require("vm");
 const log=require("../../common/log");
 const {ModuleOs}=require("../../lib/os");
-const {ModuleTest}=require("../../lib/_test");
 const util=require("../../common/util");
 
 
@@ -47,114 +46,90 @@ function _buildChain(descriptors) {
 	 * @param {ModuleBase} nextModule
 	 * @param {ModuleBase} catchModule - "catch" handler
 	 * @param {ModuleBase} elseModule
-	 * @param {ModuleBase} thenModule
+	 * @param {ModuleSequenceValidator} validate
 	 * @returns {ModuleBase}
 	 */
 	function _build({
-		index,
 		catchModule=undefined,
 		elseModule=undefined,
+		index,
 		nextModule=undefined,
-		thenModule=undefined
+		validate=_.noop
 	}) {
 		if(index<0) {
 			return nextModule;
-		} else {
-			/**
-			 * Asserts the state of the following params.
-			 * Note: we allow an else without a then. There is no good reason to disallow it and could be preferred.
-			 * @param {boolean} assertNotElse
-			 * @param {boolean} assertNotThen
-			 * @param {boolean} assertDeep - asserts that we are not at the top of the stack
-			 */
-			// eslint-disable-next-line no-inner-declarations
-			function _preflightCheck({
-				assertDeep=false,
-				assertNotElse=false,
-				assertNotThen=false
-			}) {
-				if(assertDeep && index===0) {
-					throw new Error(`unexpected ${descriptor.domain}.${descriptor.action} head of the chain`);
-				}
-				if(assertNotThen && thenModule) {
-					throw new Error(`misplaced ${thenModule.domain}.${thenModule.action} statement`);
-				}
-				if(assertNotElse && elseModule) {
-					throw new Error(`misplaced ${elseModule.domain}.${elseModule.action} statement`);
-				}
-			}
+		}
 
-			const descriptor=descriptors[index];
-			const instance=new descriptor.class({
-				action: descriptor.action,
-				catchModule,
-				domain: descriptor.domain,
-				elseModule,
-				method: descriptor.method,
-				nextModule,
-				params: descriptor.params,
-				thenModule
-			});
-			// Every action within ModuleTest may take a then and else action. If this guy was that action then
-			// our thenModule and elseModule have found a home.
-			if(instance instanceof ModuleTest
-				&& descriptor.action!=="then"
-				&& descriptor.action!=="else") {
-				elseModule=undefined;
-				thenModule=undefined;
+		const descriptor=descriptors[index];
+		const instance=new descriptor.class({
+			action: descriptor.action,
+			catchModule,
+			domain: descriptor.domain,
+			elseModule,
+			method: descriptor.method,
+			nextModule,
+			params: descriptor.params
+		});
+
+		/**
+		 * Asserts that the current descriptor is not at the head of a chain
+		 */
+		const assertDeep=()=>{
+			if(index===0) {
+				throw new Error(`unexpected ${descriptor.domain}.${descriptor.action} head of the chain`);
 			}
-			switch(descriptor.action) {
-				case "catch": {
-					_preflightCheck({
-						assertDeep: true,
-						assertNotElse: true,
-						assertNotThen: true
-					});
-					// This instance is a catch handler. We never want to flow into him. If an error is thrown then we want
-					// to flow around him. But from here on he will be installed as the catch handler (until superseded)
-					return _build({
-						index: index-1,
-						catchModule: instance,
-						nextModule
-					});
-				}
-				case "then": {
-					_preflightCheck({
-						assertDeep: true,
-						assertNotThen: true
-					});
-					return _build({
-						index: index-1,
-						catchModule,
-						elseModule,
-						nextModule,
-						thenModule: instance
-					});
-				}
-				case "else": {
-					_preflightCheck({
-						assertDeep: true,
-						assertNotElse: true,
-						assertNotThen: true
-					});
-					return _build({
-						index: index-1,
-						catchModule,
-						elseModule: instance,
-						nextModule
-					});
-				}
-				default: {
-					_preflightCheck({
-						assertNotElse: true,
-						assertNotThen: true
-					});
-					return _build({
-						index: index-1,
-						catchModule,
-						nextModule: instance,
-					});
-				}
+		};
+
+		/**
+		 * Asserts that <param>module</param> is the same domain as <code>instance</code> and is "else" or "elif"
+		 * @param {ModuleBase} module
+		 */
+		const assertIflike=(module)=>{
+			if(module.domain!==instance.domain
+				|| module.action!=="if"
+				|| module.action!=="elif") {
+				throw new Error(`misplaced ${instance.domain}.${instance.action} statement`);
+			}
+		};
+
+		validate(instance);
+		switch(descriptor.action) {
+			case "catch": {
+				// This instance is an exception handler. We never want to flow into him. If an error is thrown then we want
+				// to flow around him. But from here on he will be installed as the catch handler (until superseded)
+				assertDeep();
+				return _build({
+					index: index-1,
+					catchModule: instance,
+					nextModule
+				});
+			}
+			case "elif": {
+				assertDeep();
+				return _build({
+					index: index-1,
+					catchModule,
+					elseModule: instance,
+					nextModule,
+					validate: assertIflike
+				});
+			}
+			case "else": {
+				assertDeep();
+				return _build({
+					index: index-1,
+					catchModule,
+					elseModule: instance,
+					nextModule,
+					validate: assertIflike
+				});
+			}
+			default: {
+				return _build({
+					index: index-1,
+					catchModule,
+					nextModule: instance
+				});
 			}
 		}
 	}
@@ -182,7 +157,7 @@ function _compileFunction({
 		return null;
 	}
 	if(es6) {
-		log.warn('compiler warning: arrow functions cannot be optimized. Consider using "function" notation');
+		log.warn("compiler warning: arrow functions cannot be optimized. Consider using \"function\" notation");
 		return null;
 	}
 	// compile does not do a very good job with es6 predicates. It compiles them as functions

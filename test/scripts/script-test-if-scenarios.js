@@ -30,3 +30,11 @@ loop.if(true, function(){})
 loop.elif(false, function(){})
 loop.elif(false, function(){})
 loop.else(function(){})
+
+
+/******* 2 param problem *******/
+step.if(true)
+	.step.then(function(){})
+.step.elif(false)
+	.step.then(function(){})
+.step.else(function(){})

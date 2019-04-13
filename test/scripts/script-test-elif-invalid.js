@@ -3,4 +3,4 @@
  */
 
 std.in("data")
-	.step.else("should fail")
+	.step.elif("should fail")
