@@ -38,3 +38,22 @@ step.if(true)
 .step.elif(false)
 	.step.then(function(){})
 .step.else(function(){})
+
+loop.while(true)
+	.loop.then(function(){})
+
+
+/****** preferred ******/
+step.if(true)
+	.then(function(){})
+	.elif(true)
+	.then(function(){})
+	.else(function(){})
+
+// note: the problem here is that we need to loop back to the test. But the test will contain the then. So that should not be a problem.
+loop.if(true)
+	.then(function(){})
+
+// let's just get rid of while
+loop.while(true)
+	.do(function(){})
