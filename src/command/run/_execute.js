@@ -13,9 +13,20 @@ const _=require("lodash");
 const assert=require("assert");
 const {createHmac}=require("crypto");
 const vm=require("vm");
+const {buildChain}=require("./_chain");
 const log=require("../../common/log");
 const {ModuleOs}=require("../../lib/os");
 const util=require("../../common/util");
+
+/**
+ * These are a few exceptions for which we can safely assume a domain
+ * @type {string[]}
+ */
+const LONER_ACTIONS=[
+	"elif",
+	"else",
+	"then"
+];
 
 
 /**************** Public Interface  ****************/
@@ -30,111 +41,8 @@ const util=require("../../common/util");
 async function runScript({input=undefined, library, script}) {
 	const transpiled=_transpileScript({library, script}),
 		{sequence}=_parseChain({library, transpiled}),
-		chain=_buildChain(sequence);
+		chain=buildChain(sequence);
 	return chain.process(input);
-}
-
-/**
- * Translates parsed script into a sequence of modules
- * @param {Array<ModuleDescriptor>} descriptors
- * @returns {ModuleBase}
- */
-function _buildChain(descriptors) {
-	/**
-	 * Builds chain of modules. Works it's way forward
-	 * @param {number} index
-	 * @param {ModuleBase} nextModule
-	 * @param {ModuleBase} catchModule - "catch" handler
-	 * @param {ModuleBase} elseModule
-	 * @param {ModuleSequenceValidator} validate
-	 * @returns {ModuleBase}
-	 */
-	function _build({
-		catchModule=undefined,
-		elseModule=undefined,
-		index,
-		nextModule=undefined,
-		validate=_.noop
-	}) {
-		if(index<0) {
-			return nextModule;
-		}
-
-		const descriptor=descriptors[index];
-		const instance=new descriptor.class({
-			action: descriptor.action,
-			catchModule,
-			domain: descriptor.domain,
-			elseModule,
-			method: descriptor.method,
-			nextModule,
-			params: descriptor.params
-		});
-
-		/**
-		 * Asserts that the current descriptor is not at the head of a chain
-		 */
-		const assertDeep=()=>{
-			if(index===0) {
-				throw new Error(`unexpected ${descriptor.domain}.${descriptor.action} head of the chain`);
-			}
-		};
-
-		/**
-		 * Asserts that <param>module</param> is the same domain as <code>instance</code> and is "else" or "elif"
-		 * @param {ModuleBase} module
-		 */
-		const assertIflike=(module)=>{
-			if(module.domain!==instance.domain
-				|| module.action!=="if"
-				|| module.action!=="elif") {
-				throw new Error(`misplaced ${instance.domain}.${instance.action} statement`);
-			}
-		};
-
-		validate(instance);
-		switch(descriptor.action) {
-			case "catch": {
-				// This instance is an exception handler. We never want to flow into him. If an error is thrown then we want
-				// to flow around him. But from here on he will be installed as the catch handler (until superseded)
-				assertDeep();
-				return _build({
-					index: index-1,
-					catchModule: instance,
-					nextModule
-				});
-			}
-			case "elif": {
-				assertDeep();
-				return _build({
-					index: index-1,
-					catchModule,
-					elseModule: instance,
-					nextModule,
-					validate: assertIflike
-				});
-			}
-			case "else": {
-				assertDeep();
-				return _build({
-					index: index-1,
-					catchModule,
-					elseModule: instance,
-					nextModule,
-					validate: assertIflike
-				});
-			}
-			default: {
-				return _build({
-					index: index-1,
-					catchModule,
-					nextModule: instance
-				});
-			}
-		}
-	}
-
-	return _build({index: descriptors.length-1});
 }
 
 /**
@@ -153,7 +61,7 @@ function _compileFunction({
 	sandbox
 }) {
 	if(!vm.compileFunction) {
-		// pre 10.x.x version of nodejs
+		// pre 10.x.x version of nodejs. They've already been warned.
 		return null;
 	}
 	if(es6) {
@@ -161,7 +69,7 @@ function _compileFunction({
 		return null;
 	}
 	// compile does not do a very good job with es6 predicates. It compiles them as functions
-	// but does not seem to return the value with the following notation: (input)=>value
+	// but does not return values with the following notation: (input)=>value
 	if(body.indexOf("return")<0) {
 		log.warn("compiler warning: predicates should explicitly return values");
 	}
@@ -265,13 +173,12 @@ function _parseChain({
 		const declarationIndex=args[0];
 		args=args.slice(1);
 		if(_.get(args, "0._type")==="urn:graph:proxy") {
-			// The call's first argument is a graph proxy so that means the user is using a chain as an argument
-			// - a predicate. This chain will take the calling functions output as input.
-			// Here we build the predicate chain and remove him from the call sequence.
+			// The call's first argument is a graph proxy so that means the user is using a chain as an argument.
+			// Here we build the predicate chain and remove his descriptors from the call sequence.
 			// How do we know how much to pull of the stack? By the declarationIndex. Everything that remains on
 			// the call-stack that is greater this function declaration must be links in the nested chain.
 			const predicateHeadIndex=_.findIndex(callSequence, descriptor=>descriptor._declarationIndex>declarationIndex),
-				predicateChain=_buildChain(callSequence.slice(predicateHeadIndex));
+				predicateChain=buildChain(callSequence.slice(predicateHeadIndex));
 			args[0]=predicateChain.process.bind(predicateChain);
 			callSequence=callSequence.slice(0, predicateHeadIndex);
 		} else if(_.isFunction(args[0])) {
@@ -290,8 +197,10 @@ function _parseChain({
 	}
 
 	/**
-	 * Our only concern here is whether it includes a chain which will not execute properly without our help.
-	 * So, we parse him as we did the top level chain and then inspect the results and do chain processing if we find one.
+	 * Deals with predicates that are not described fully as a chain. <param>predicate</param> is either a pure
+	 * javascript function or a hybrid with both javascript and chain code. Our biggest concern is whether it
+	 * includes a chain. They will not execute properly without our intervention. So, we parse him as we did the
+	 * top level chain and then inspect the results and do chain processing if we find one.
 	 * @param {Function} predicate
 	 * @return {Function}
 	 */
@@ -306,7 +215,7 @@ function _parseChain({
 			// if we have encountered this guy before with the same content then he may be compiled or compilable
 			if(cached && cached.compilable!==false) {
 				// We have already processed this function (see below) and know that it is a pure javascript function. We
-				// may be able to take advantage of this knowledge and call him directly if he can be compiled
+				// may be able to take advantage of this knowledge and call him directly.
 				if(cached.compiled) {
 					return cached.compiled(...input);
 				} else {
@@ -347,7 +256,7 @@ function _parseChain({
 			});
 			// now we either have found a chain or we have run a chain free function and have what we need.
 			if(sequence.length>0) {
-				const chain=_buildChain(sequence);
+				const chain=buildChain(sequence);
 				return chain.process.apply(chain, input);
 			} else {
 				if(!cached) {
@@ -384,14 +293,18 @@ function _parseChain({
 	 * Note that all <code>os.</code> dereferences are handled by proxyOSHandler.
 	 */
 	const runContext=library.reduce((result, node)=>{
-		// and all domain.action combinations
+		// add all <domain>.<action> combinations
 		_.set(result, `${node.domain}.${node.action}`, _addCall.bind(null, node));
+		return result;
+	}, LONER_ACTIONS.reduce((result, action)=>{
+		// all of our single name <action>s. Their domain and class will be resolved when the chain is built
+		result[action]=_addCall.bind(null, {action});
 		return result;
 	}, {
 		os: proxyOS,
 		_type: "urn:graph:proxy",
 		...context
-	});
+	}));
 	const sandbox=vm.createContext(runContext);
 
 	// this is the crank that gets everything up above rolling. We use our graph-proxy as the context in
@@ -399,7 +312,8 @@ function _parseChain({
 	// 1. parsed the code
 	// 2. we can steal his parsing of arguments
 	// 3. it puts javascript at our (script's) disposal.
-	// todo: stack is pretty weird here. If it can be cleaned up then catch and revise the error
+	// todo: stack is pretty weird here when errors are thrown. If it can be cleaned up then we should wrap
+	//  it up in a try/catch and revise the error to be something more meaningful.
 	const result=vm.runInContext(transpiled, sandbox, {displayErrors: true});
 	return {
 		sequence: callSequence,
@@ -419,10 +333,13 @@ function _parseChain({
 function _transpileScript({library, script}) {
 	// first we are going to insert argument[0] indexes into each <domain>.<function> call so that we may be able
 	// to properly manage the stack when processing nested chains
-	const regexList=library.reduce((text, node)=>{
-			return `${text}|${node.domain}\\.${node.action}`;
-		}, ""),
-		regexText=`(\\W|^)((os.\\w+${regexList})\\s*\\()`,
+	const domainActionList=library.reduce((text, node)=>{
+		return `${text}|${node.domain}\\.${node.action}`;
+	}, "");
+	const lonerActionList=LONER_ACTIONS.reduce((text, action)=>{
+		return `${text}|${action}`;
+	}, "");
+	const regexText=`(\\W|^)((os.\\w+${domainActionList}${lonerActionList})\\s*\\()`,
 		regex=new RegExp(regexText, "g");
 	for(let index=0; true; index++) {
 		let match=regex.exec(script);
@@ -437,7 +354,6 @@ function _transpileScript({library, script}) {
 
 module.exports={
 	runScript,
-	_buildChain,
 	_functionArgumentToPojo,
 	_parseFunction,
 	_parseChain,

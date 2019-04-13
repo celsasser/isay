@@ -65,7 +65,7 @@ function _edit(path) {
 				path
 			];
 		}
-		// todo: insert your favs.
+		// todo: insert your favorite editors here.
 		return [path];
 	}
 

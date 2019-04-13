@@ -6,7 +6,7 @@
  */
 
 const {ModuleBase}=require("./_base");
-const {assertPredicate, boolean, resolveType}=require("./_data");
+const {boolean, resolveType}=require("./_data");
 
 /**
  * Base class for all modules that can alter the flow of execution
@@ -20,6 +20,7 @@ class ModuleFlow extends ModuleBase {
 	 * @param {ModuleBase} elseModule - else or elif module handler (if there is one)
 	 * @param {string} method
 	 * @param {ModuleBase} nextModule
+	 * @param {ModuleBase} thenModule
 	 * @param {Array<*>} params
 	 */
 	constructor({
@@ -29,10 +30,23 @@ class ModuleFlow extends ModuleBase {
 		elseModule=undefined,
 		method,
 		nextModule=undefined,
-		params=[]
+		params=[],
+		thenModule=undefined
 	}) {
 		super({action, catchModule, domain, method, nextModule, params});
 		this._elseModule=elseModule;
+		this._thenModule=thenModule;
+	}
+
+	/**
+	 * Simple beast that resolves the value/predicate in this.params[0]
+	 * @param {DataBlob} blob
+	 * @returns {Promise<void>}
+	 */
+	async then(blob) {
+		// I can't see the use case for omitting this.params[0] or setting it to null,
+		// but I can't justify not allowing it either.
+		return resolveType(blob, this.params[0], "*", {allowNullish: true});
 	}
 
 	/********************* Protected Interface *********************/
@@ -51,11 +65,10 @@ class ModuleFlow extends ModuleBase {
 		// here we are not going to all null/undefined. Cause the use cases are fewer
 		// that the mistake that omitting it likely is.
 		if(boolean(await resolveType(blob, this.params[0], "*"))) {
-			const predicate=assertPredicate(this.params[1]);
 			// Now we loop until this.params[0] returns falsey
 			return new Promise((resolve, reject)=>{
 				const _loop=(blob)=>{
-					predicate(blob)
+					this._thenModule.process(blob)
 						.then(async(result)=>{
 							const input=(feedback)
 								? result
@@ -87,9 +100,7 @@ class ModuleFlow extends ModuleBase {
 	 */
 	async _processConditionalStepAction(blob) {
 		if(boolean(await resolveType(blob, this.params[0], "*"))) {
-			// I can't see the use case for omitting this.params[0] or setting it to null,
-			// but I can't justify not allowing it either.
-			return resolveType(blob, this.params[1], "*", {allowNullish: true});
+			return this._thenModule.process(blob);
 		} else if(this._elseModule) {
 			return this._elseModule.process(blob);
 		} else {

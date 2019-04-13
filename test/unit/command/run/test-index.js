@@ -21,11 +21,11 @@ describe("command.run.index", function() {
 	});
 
 	describe("run", function() {
-		it.skip("debug script", async function() {
+		it.only("debug script", async function() {
 			const configuration={
 				options: {
 					input: undefined,
-					script: "test/scripts/script-test-elif-invalid.js"
+					script: "test/scripts/script-test-then-no-domain.js"
 				}
 			};
 			return run(configuration)

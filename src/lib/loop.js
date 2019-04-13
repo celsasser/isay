@@ -58,6 +58,8 @@ class ModuleLoop extends ModuleFlow {
 	 * @returns {Promise<void>}
 	 */
 	async else(blob) {
+		// todo: here we are forcing it to have both a test and actor - "else" and "then". But we
+		// don't need the same for step. How do we want to handle this? No "else" for loops?
 		return this._processConditionalLoopAction(blob, {
 			feedback: false
 		});
@@ -90,17 +92,6 @@ class ModuleLoop extends ModuleFlow {
 					.catch(reject);
 			};
 			_run();
-		});
-	}
-
-	/**
-	 * Loops while this.params[0] returns a truthy value
-	 * @param {DataBlob} blob
-	 * @returns {Promise<void>}
-	 */
-	async while(blob) {
-		return this._processConditionalLoopAction(blob, {
-			feedback: false
 		});
 	}
 }
