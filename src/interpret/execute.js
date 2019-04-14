@@ -14,13 +14,13 @@ const assert=require("assert");
 const {createHmac}=require("crypto");
 const vm=require("vm");
 const {buildChain}=require("./_chain");
-const log=require("../../common/log");
-const {ModuleOs}=require("../../lib/os");
-const util=require("../../common/util");
+const log=require("../common/log");
+const util=require("../common/util");
+const {ModuleOs}=require("../lib/os");
 
 /**
  * These are a few exceptions for which we can safely assume a domain
- * @type {string[]}
+ * @type {Array<string>}
  */
 const LONER_ACTIONS=[
 	"elif",
@@ -46,7 +46,7 @@ async function runScript({input=undefined, library, script}) {
 }
 
 /**
- * Determines whether we can compile this function and makes sure the results expected will be those that are expected.
+ * Determines whether we can interpret this function and makes sure the results expected will be those that are expected.
  * @param {string} body
  * @param {boolean} es6
  * @param {Array<*>} params
@@ -68,7 +68,7 @@ function _compileFunction({
 		log.warn("compiler warning: arrow functions cannot be optimized. Consider using \"function\" notation");
 		return null;
 	}
-	// compile does not do a very good job with es6 predicates. It compiles them as functions
+	// interpret does not do a very good job with es6 predicates. It compiles them as functions
 	// but does not return values with the following notation: (input)=>value
 	if(body.indexOf("return")<0) {
 		log.warn("compiler warning: predicates should explicitly return values");

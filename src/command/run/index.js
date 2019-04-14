@@ -7,10 +7,10 @@
 
 const _=require("lodash");
 const fs=require("fs-extra");
-const editor=require("./_editor");
-const {runScript}=require("./_execute");
 const {toLocalPath}=require("../../common/file");
 const log=require("../../common/log");
+const editor=require("../../editor");
+const {runScript}=require("../../interpret/execute");
 const {loadLibrary}=require("../../lib");
 
 /**

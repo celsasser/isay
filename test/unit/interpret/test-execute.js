@@ -5,10 +5,10 @@
  * Copyright @2019 by Xraymen Inc.
  */
 
-const assert=require("../../../support/assert");
-const execute=require("../../../../src/command/run/_execute");
-const {XRayError}=require("../../../../src/common/error");
-const {loadLibrary}=require("../../../../src/lib/index");
+const assert=require("../../support/assert");
+const execute=require("../../../src/interpret/execute");
+const {XRayError}=require("../../../src/common/error");
+const {loadLibrary}=require("../../../src/lib");
 
 describe("command.run._execute", function() {
 	describe("_functionArgumentToPojo", function() {

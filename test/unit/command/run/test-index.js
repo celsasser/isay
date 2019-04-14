@@ -57,7 +57,7 @@ describe("command.run.index", function() {
 		});
 
 		getTestSpecs().forEach(({fail, pass, script})=>{
-			it.only(`should successfully process '${script}'`, function() {
+			it(`should successfully process '${script}'`, function() {
 				const configuration={
 					options: {
 						// note: we specify input so that we don't look at stdin otherwise we hang
