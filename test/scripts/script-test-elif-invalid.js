@@ -1,6 +1,7 @@
 /**
- * Should catch invalid then following non test
+ * Should catch elif without a then
  */
 
 std.in("data")
-	.step.elif("should fail")
+	.step.elif(true)
+		.then()

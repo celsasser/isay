@@ -1,0 +1,121 @@
+---
+# follows are scripts (within same directory) with their expected result
+# pass - result on successful execution
+# fail - result expected when exits with error
+
+- script: "script-array-map.js"
+  pass:
+    - "Wesley"
+    - "Tiny"
+    - "George"
+- script: "script-catch-one.js"
+  pass: "error=throw"
+- script: "script-catch-two.js"
+  pass: "error=throw1"
+- script: "script-catch-three.js"
+  pass: "input1"
+- script: "script-catch-four.js"
+  pass: "catch"
+- script: "script-catch-five.js"
+  pass:
+    - "catch1"
+    - "catch2"
+- script: "script-catch-head.js"
+  fail: "unexpected error.catch at head of the chain"
+- script: "script-closure-test.js"
+  pass:
+    age: 4
+    name: "George"
+- script: "script-embedded-chain.js"
+  pass:
+    - age: 5
+      link1: "link1"
+      link2: "link2"
+      name: "George"
+      species: "cat"
+    - age: 12
+      link1: "link1"
+      link2: "link2"
+      name: "Wesley"
+      species: "dog"
+    - age: 0.5
+      link1: "link1"
+      link2: "link2"
+      name: "Tiny"
+      species: "cat"
+- script: "script-embedded-predicate.js"
+  pass:
+    - age: 5
+      inserted: "data"
+      name: "George"
+      species: "cat"
+    - age: 12
+      inserted: "data"
+      name: "Wesley"
+      species: "dog"
+    - age: 0.5
+      inserted: "data"
+      name: "Tiny"
+      species: "cat"
+- script: "script-embedded-predicate-deep.js"
+  pass:
+    - "range(1)=[0]"
+    - "range(2)=[0,1]"
+    - "range(3)=[0,1,2]"
+    - "range(4)=[0,1,2,3]"
+- script: "script-function-cache.js"
+  pass: [1, 2]
+- script: "script-function-predicate.js"
+  pass:
+    - age: 5
+      inserted: data
+      name: George
+      species: cat
+    - age: 12
+      inserted: data
+      name: Wesley
+      species: dog
+    - age: 0.5
+      inserted: data
+      name: Tiny
+      species: cat
+- script: "script-json-stringify.js"
+  pass: '{"george":{"type":"cat"}}'
+- script: "script-math-binary.js"
+  pass:
+    - "1! = 1"
+    - "2! = 2"
+    - "3! = 6"
+    - "4! = 24"
+- script: "script-math-binary-assert.js"
+  pass: true
+- script: "script-object-get.js"
+  pass: "cat"
+- script: "script-object-set.js"
+  pass:
+    george:
+      type: cat
+    helen:
+      type: cat
+- script: "script-test-elif-head.js"
+  fail: "unexpected step.elif at head of the chain"
+- script: "script-test-elif-invalid.js"
+  fail: "misplaced step.elif statement"
+- script: "script-test-else-head.js"
+  fail: "unexpected step.else at head of the chain"
+- script: "script-test-else-invalid.js"
+  fail: "misplaced step.else statement"
+- script: "script-test-if-else.js"
+  pass: [0, 2, 4, 12, 16, 20]
+- script: "script-test-if-negative.js"
+  pass: false
+- script: "script-test-if-positive.js"
+  pass: true
+- script: "script-throw-error.js"
+  fail: "as error"
+- script: "script-throw-predicate.js"
+  fail: "as predicate"
+- script: "script-throw-string.js"
+  fail: "as string"
+- script: "script-unknown-action.js"
+  fail: "json.invalid is not a function"

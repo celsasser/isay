@@ -6,6 +6,7 @@
  */
 
 const _=require("lodash");
+const file=require("../../../../src/common/file");
 const proxy=require("../../../support/proxy");
 const assert=require("../../../support/assert");
 const {run}=require("../../../../src/command/run");
@@ -21,7 +22,7 @@ describe("command.run.index", function() {
 	});
 
 	describe("run", function() {
-		it.only("debug script", async function() {
+		it.skip("debug script", async function() {
 			const configuration={
 				options: {
 					input: undefined,
@@ -42,230 +43,30 @@ describe("command.run.index", function() {
 				});
 		});
 
-		[
-			{
-				script: "test/scripts/script-catch-one.js",
-				expected: "error=throw"
-			},
-			{
-				script: "test/scripts/script-catch-two.js",
-				expected: "error=throw1"
-			},
-			{
-				script: "test/scripts/script-catch-three.js",
-				expected: "blob"
-			},
-			{
-				script: "test/scripts/script-catch-four.js",
-				expected: "result"
-			},
-			{
-				script: "test/scripts/script-catch-five.js",
-				expected: [2, 3]
-			},
-			{
-				script: "test/scripts/script-catch-head.js",
-				errorText: "unexpected error.catch head of the chain"
-			},
-			{
-				script: "test/scripts/script-chain.js",
-				expected: [
-					"Wesley",
-					"Tiny",
-					"George"
-				]
-			},
-			{
-				script: "test/scripts/script-closure-test.js",
-				expected: {
-					"age": 4,
-					"name": "George"
-				}
-			},
-			{
-				script: "test/scripts/script-embedded-chain.js",
-				expected: [
-					{
-						"age": 5,
-						"link1": "link1",
-						"link2": "link2",
-						"name": "George",
-						"species": "cat"
-					},
-					{
-						"age": 12,
-						"link1": "link1",
-						"link2": "link2",
-						"name": "Wesley",
-						"species": "dog"
-					},
-					{
-						"age": 0.5,
-						"link1": "link1",
-						"link2": "link2",
-						"name": "Tiny",
-						"species": "cat"
-					}
-				]
-			},
-			{
-				script: "test/scripts/script-embedded-predicate.js",
-				expected: [
-					{
-						"age": 5,
-						"inserted": "data",
-						"name": "George",
-						"species": "cat"
-					},
-					{
-						"age": 12,
-						"inserted": "data",
-						"name": "Wesley",
-						"species": "dog"
-					},
-					{
-						"age": 0.5,
-						"inserted": "data",
-						"name": "Tiny",
-						"species": "cat"
-					}
-				]
-			},
-			{
-				script: "test/scripts/script-embedded-predicate-deep.js",
-				expected: [
-					"range(1)=[0]",
-					"range(2)=[0,1]",
-					"range(3)=[0,1,2]",
-					"range(4)=[0,1,2,3]"
-				]
-			},
-			{
-				script: "test/scripts/script-function-cache.js",
-				expected: [1, 2]
-			},
-			{
-				script: "test/scripts/script-function-predicate.js",
-				expected: [
-					{
-						"age": 5,
-						"inserted": "data",
-						"name": "George",
-						"species": "cat"
-					},
-					{
-						"age": 12,
-						"inserted": "data",
-						"name": "Wesley",
-						"species": "dog"
-					},
-					{
-						"age": 0.5,
-						"inserted": "data",
-						"name": "Tiny",
-						"species": "cat"
-					}
-				]
-			},
-			{
-				script: "test/scripts/script-json-stringify.js",
-				expected: "{\"george\":{\"type\":\"cat\"}}"
-			},
-			{
-				script: "test/scripts/script-math-binary.js",
-				expected: [
-					"1! = 1",
-					"2! = 2",
-					"3! = 6",
-					"4! = 24"
-				]
-			},
-			{
-				script: "test/scripts/script-math-assert-binary.js",
-				expected: true
-			},
-			{
-				script: "test/scripts/script-object-get.js",
-				expected: "cat"
-			},
-			{
-				script: "test/scripts/script-object-set.js",
-				expected: {
-					"george": {
-						"type": "cat"
-					},
-					"helen": {
-						"type": "cat"
-					}
-				}
-			},
-			{
-				script: "test/scripts/script-test-elif-head.js",
-				errorText: "unexpected step.elif head of the chain"
-			},
-			{
-				script: "test/scripts/script-test-elif-invalid.js",
-				errorText: "misplaced step.elif statement"
-			},
-			{
-				script: "test/scripts/script-test-else-head.js",
-				errorText: "unexpected step.else head of the chain"
-			},
-			{
-				script: "test/scripts/script-test-else-invalid.js",
-				errorText: "misplaced step.else statement"
-			},
-			{
-				script: "test/scripts/script-test-if-else.js",
-				expected: [0, 2, 4, 12, 16, 20]
-			},
-			{
-				script: "test/scripts/script-test-if-negative.js",
-				expected: false
-			},
-			{
-				script: "test/scripts/script-test-if-positive.js",
-				expected: true
-			},
-			{
-				script: "test/scripts/script-throw-error.js",
-				errorText: "as error"
-			},
-			{
-				script: "test/scripts/script-throw-predicate.js",
-				errorText: "as predicate"
-			},
-			{
-				script: "test/scripts/script-throw-string.js",
-				errorText: "as string"
-			},
-			{
-				script: "test/scripts/script-unknown-action.js",
-				errorText: "json.invalid is not a function"
-			}
-		].forEach(({errorText, expected, script})=>{
+		const tests=file.readToJSONSync("./test/scripts/test-spec.yaml");
+		tests.forEach(({fail, pass, script})=>{
 			it(`should successfully process '${script}'`, function() {
 				const configuration={
 					options: {
 						// note: we specify input so that we don't look at stdin otherwise we hang
 						input: undefined,
-						script
+						script: `./test/scripts/${script}`
 					}
 				};
 				return run(configuration)
 					.catch(error=>{
-						if(errorText!==undefined) {
-							assert.strictEqual(error.message, errorText, script);
+						if(fail!==undefined) {
+							assert.strictEqual(error.message, fail, script);
 						} else {
 							assert.fail(`processing '${script}' failed - ${error}`);
 						}
 					})
 					.then(result=>{
-						if(errorText===undefined) {
-							if(expected.constructor.name==="String") {
-								assert.strictEqual(result, expected);
+						if(fail===undefined) {
+							if(pass.constructor.name==="String") {
+								assert.strictEqual(result, pass);
 							} else {
-								assert.deepEqual(result, expected);
+								assert.deepEqual(result, pass);
 							}
 						}
 					});

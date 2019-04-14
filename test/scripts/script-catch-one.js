@@ -5,5 +5,5 @@
 std.in("blob")
 	.error.throw("throw")
 	.error.catch(error=>{
-		return `error=${error.message}`;
+		return `error=${error.message}`
 	})

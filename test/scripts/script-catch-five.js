@@ -6,7 +6,7 @@
 std.in([1, 2])
 	.array.map(value=>{
 		std.outln(value)
-			.error.throw(`throw+${value}`)
-			.error.catch(value+1)
+			.error.throw(`throw${value}`)
+			.error.catch(`catch${value}`)
 	})
-	.error.catch("unexpected")
+	.error.catch("catch")

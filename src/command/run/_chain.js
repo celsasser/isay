@@ -78,7 +78,7 @@ function buildChain(descriptors) {
 		 */
 		const assertNotHead=()=>{
 			if(index===0) {
-				throw new Error(`unexpected ${descriptor.domain}.${descriptor.action} head of the chain`);
+				throw new Error(`unexpected ${descriptor.domain}.${descriptor.action} at head of the chain`);
 			}
 		};
 

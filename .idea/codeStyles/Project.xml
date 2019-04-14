@@ -21,6 +21,9 @@
       <option name="SPACE_BEFORE_ASYNC_ARROW_LPAREN" value="false" />
       <option name="IMPORT_SORT_MODULE_NAME" value="true" />
     </JSCodeStyleSettings>
+    <yaml>
+      <option name="AUTOINSERT_SEQUENCE_MARKER" value="false" />
+    </yaml>
     <codeStyleSettings language="CSS">
       <indentOptions>
         <option name="CONTINUATION_INDENT_SIZE" value="4" />

@@ -2,7 +2,7 @@
  * Test catch of thrown with an catch immediately following
  */
 
-std.in("blob")
+std.in("input1")
 	.error.throw("throw")
-	.std.in("unexpected")
-	.error.catch("result")
+	.std.in("input2")
+	.error.catch("catch")
