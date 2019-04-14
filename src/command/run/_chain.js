@@ -84,12 +84,15 @@ function buildChain(descriptors) {
 		};
 
 		/**
-		 * Asserts that <param>module</param> is the same domain as <code>instance</code> and is "else" or "elif"
+		 * Asserts that <param>module</param> is the same domain as <code>instance</code> and is "else" or "elif" or a "then".
 		 * @param {ModuleDescriptor} module
 		 */
-		const assertIfConditional=(module)=>{
+		const assertIsIfConditionalAction=(module)=>{
+			// 
 			if(module.domain!==instance.domain
-				|| (module.action!=="if" && module.action!=="elif")) {
+				// we include "then" because it is the second stage of an if/elif conditional so when testing from
+				// an elif, for example, the previous action in a chain should be "then".
+				|| _.includes(["if", "elif", "then"], module.action)===false) {	
 				throw new Error(`misplaced "${instance.domain}.${instance.action}" statement`);
 			}
 		};
@@ -98,16 +101,21 @@ function buildChain(descriptors) {
 		 * Asserts that <param>module</param> is a then action
 		 * @param {ModuleDescriptor} module
 		 */
-		const assertThen=(module)=>{
-			if(_.get(module, "action")!=="then") {
+		const assertIsThenAction=(module)=>{
+			if(module.domain!==instance.domain || module.action!=="then") {
 				throw new Error(`"${descriptor.domain}.${descriptor.action}" missing a "then" action`);
 			}
 		};
 
+		/**
+		 * Note: whether a module is a link in a chain or contained by a module depends on <code>nextModule</code>.
+		 * Nodes that operate as links set <code>nextModule=instance</code>.
+		 * Nodes that are not links and are meant to be absorbed forward the previous <code>nextModule</code>
+		 */
 		switch(descriptor.action) {
 			case "catch": {
-				// This instance is an exception handler. We never want to flow into him. If an error is thrown then we want
-				// to flow around him. But from here on he will be installed as the catch handler (until superseded)
+				// This instance is an exception handler. We never want to flow into him. But rather want to install
+				// install him in nodes above us as an exception handler.
 				assertNotHead();
 				return _build({
 					index: index-1,
@@ -117,13 +125,13 @@ function buildChain(descriptors) {
 			}
 			case "elif": {
 				assertNotHead();
-				assertThen(thenModule);
+				assertIsThenAction(thenModule);
 				return _build({
 					index: index-1,
 					catchModule,
 					elseModule: instance,
 					nextModule,
-					validate: assertIfConditional
+					validate: assertIsIfConditionalAction
 				});
 			}
 			case "else": {
@@ -133,11 +141,11 @@ function buildChain(descriptors) {
 					catchModule,
 					elseModule: instance,
 					nextModule,
-					validate: assertIfConditional
+					validate: assertIsIfConditionalAction
 				});
 			}
 			case "if": {
-				assertThen(thenModule);
+				assertIsThenAction(thenModule);
 				return _build({
 					index: index-1,
 					catchModule,
@@ -149,10 +157,10 @@ function buildChain(descriptors) {
 				return _build({
 					index: index-1,
 					catchModule,
-					elseModule: instance,
+					elseModule,
 					nextModule,
 					thenModule: instance,
-					validate: assertIfConditional
+					validate: assertIsIfConditionalAction
 				});
 			}
 			default: {
