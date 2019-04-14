@@ -65,28 +65,24 @@ describe("command.run.index", function() {
 						script: `./test/scripts/${script}`
 					}
 				};
-				return run(configuration)
-					.catch(error=>{
-						if(fail!==undefined) {
-							assert.strictEqual(error.message, fail, script);
-						} else {
-							const text=errorToString(error, {
-								details: true,
-								instance: true,
-								stack: true
-							});
-							assert.fail(`processing '${script}' failed - ${text}`);
-						}
-					})
-					.then(result=>{
-						if(fail===undefined) {
+				if(pass!==undefined) {
+					return run(configuration)
+						.catch(assert.notCalled)
+						.then(result=>{
 							if(pass.constructor.name==="String") {
 								assert.strictEqual(result, pass);
 							} else {
 								assert.deepEqual(result, pass);
 							}
-						}
-					});
+						});
+				} else {
+					assert.notStrictEqual(fail, undefined);
+					return run(configuration)
+						.catch(error=>{
+							assert.strictEqual(error.message, fail, script);
+						})
+						.then(assert.notCalled);
+				}
 			});
 		});
 

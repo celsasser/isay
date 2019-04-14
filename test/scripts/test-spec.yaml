@@ -133,6 +133,7 @@
 - script: "step/script-if-test-fail.js"
   pass: false
 - script: "step/script-if-test-pass.js"
+  only: true
   pass: true
 - script: "step/script-if-then-with-domain.js"
   pass: true

@@ -6,7 +6,7 @@
  */
 
 const {ModuleBase}=require("./_base");
-const {boolean, resolveType}=require("./_data");
+const {assertPredicate, boolean, resolveType}=require("./_data");
 
 /**
  * Base class for all modules that can alter the flow of execution
@@ -106,6 +106,32 @@ class ModuleFlow extends ModuleBase {
 		} else {
 			return blob;
 		}
+	}
+
+	/**
+	 * Loops forever. One may exit via error.throw or an interrupt signal (to app)
+	 * @param {DataBlob} blob
+	 * @param {boolean} feedback - should loop result be fed back into loop
+	 * @returns {Promise<void>}
+	 */
+	async _processEndlessLoopAction(blob, {
+		feedback=false
+	}={}) {
+		const predicate=assertPredicate(this.params[0]);
+		return new Promise((resolve, reject)=>{
+			const _run=(blob)=>{
+				predicate(blob)
+					.then(result=>{
+						if(feedback) {
+							process.nextTick(_run, result);
+						} else {
+							process.nextTick(_run, blob);
+						}
+					})
+					.catch(reject);
+			};
+			_run(blob);
+		});
 	}
 }
 
