@@ -7,6 +7,7 @@
 
 const _=require("lodash");
 const file=require("../../../../src/common/file");
+const {errorToString}=require("../../../../src/common/format");
 const proxy=require("../../../support/proxy");
 const assert=require("../../../support/assert");
 const {run}=require("../../../../src/command/run");
@@ -22,11 +23,24 @@ describe("command.run.index", function() {
 	});
 
 	describe("run", function() {
+		/**
+		 * @returns {Array<{fail, pass, script}>}
+		 * @private
+		 */
+		function getTestSpecs() {
+			const all=file.readToJSONSync("./test/scripts/test-spec.yaml")
+					.filter(test=>Boolean(test.skip)===false),
+				only=_.filter(all, {only: true});
+			return (only.length>0)
+				? only
+				: all;
+		}
+
 		it.skip("debug script", async function() {
 			const configuration={
 				options: {
 					input: undefined,
-					script: "test/scripts/script-test-then-no-domain.js"
+					script: "test/scripts/script-if-then-with-domain.js"
 				}
 			};
 			return run(configuration)
@@ -34,7 +48,6 @@ describe("command.run.index", function() {
 					console.log(result);
 				})
 				.catch(error=>{
-					const {errorToString}=require("../../../../src/common/format");
 					assert.fail(errorToString(error, {
 						details: true,
 						instance: true,
@@ -43,9 +56,8 @@ describe("command.run.index", function() {
 				});
 		});
 
-		const tests=file.readToJSONSync("./test/scripts/test-spec.yaml");
-		tests.forEach(({fail, pass, script})=>{
-			it(`should successfully process '${script}'`, function() {
+		getTestSpecs().forEach(({fail, pass, script})=>{
+			it.only(`should successfully process '${script}'`, function() {
 				const configuration={
 					options: {
 						// note: we specify input so that we don't look at stdin otherwise we hang
@@ -58,7 +70,12 @@ describe("command.run.index", function() {
 						if(fail!==undefined) {
 							assert.strictEqual(error.message, fail, script);
 						} else {
-							assert.fail(`processing '${script}' failed - ${error}`);
+							const text=errorToString(error, {
+								details: true,
+								instance: true,
+								stack: true
+							});
+							assert.fail(`processing '${script}' failed - ${text}`);
 						}
 					})
 					.then(result=>{
@@ -73,11 +90,11 @@ describe("command.run.index", function() {
 			});
 		});
 
-		it("should successfully process 'test/scripts/script-os-ls.js'", function() {
+		it("should successfully process 'test/scripts/script-ls.js'", function() {
 			const configuration={
 				options: {
 					input: undefined,
-					script: "test/scripts/script-os-ls.js"
+					script: "test/scripts/script-ls.js"
 				}
 			};
 			return run(configuration)

@@ -4,7 +4,8 @@
 
 array.range(6)
 	.array.map(
-		step.if(is.lessThan(3), math.multiply(2))
-			.step.else(math.multiply(4))
+		step.if(is.lessThan(3))
+			.then(math.multiply(2))
+			.else(math.multiply(4))
 	)
 	.std.outln()

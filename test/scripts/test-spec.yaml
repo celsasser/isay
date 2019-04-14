@@ -3,30 +3,55 @@
 # pass - result on successful execution
 # fail - result expected when exits with error
 
-- script: "script-array-map.js"
+# array scripts
+- script: "array/script-map.js"
   pass:
     - "Wesley"
     - "Tiny"
     - "George"
-- script: "script-catch-one.js"
+
+# error scripts
+- script: "error/script-catch-at-head.js"
+  fail: 'unexpected "error.catch" at head of the chain'
+- script: "error/script-catch-one.js"
   pass: "error=throw"
-- script: "script-catch-two.js"
+- script: "error/script-catch-two.js"
   pass: "error=throw1"
-- script: "script-catch-three.js"
+- script: "error/script-catch-three.js"
   pass: "input1"
-- script: "script-catch-four.js"
+- script: "error/script-catch-four.js"
   pass: "catch"
-- script: "script-catch-five.js"
+- script: "error/script-catch-five.js"
   pass:
     - "catch1"
     - "catch2"
-- script: "script-catch-head.js"
-  fail: "unexpected error.catch at head of the chain"
-- script: "script-closure-test.js"
+- script: "error/script-throw-error.js"
+  fail: "as error"
+- script: "error/script-throw-predicate.js"
+  fail: "as predicate"
+- script: "error/script-throw-string.js"
+  fail: "as string"
+
+# JSON scripts
+- script: "json/script-stringify.js"
+  pass: '{"george":{"type":"cat"}}'
+
+# math scripts
+- script: "math/script-binary.js"
+  pass:
+    - "1! = 1"
+    - "2! = 2"
+    - "3! = 6"
+    - "4! = 24"
+- script: "math/script-binary-assert.js"
+  pass: true
+
+# mouse scripts - scripts testing our "compiler"
+- script: "mouse/script-closure-test.js"
   pass:
     age: 4
     name: "George"
-- script: "script-embedded-chain.js"
+- script: "mouse/script-embedded-chain.js"
   pass:
     - age: 5
       link1: "link1"
@@ -43,7 +68,7 @@
       link2: "link2"
       name: "Tiny"
       species: "cat"
-- script: "script-embedded-predicate.js"
+- script: "mouse/script-embedded-predicate.js"
   pass:
     - age: 5
       inserted: "data"
@@ -57,15 +82,15 @@
       inserted: "data"
       name: "Tiny"
       species: "cat"
-- script: "script-embedded-predicate-deep.js"
+- script: "mouse/script-embedded-predicate-deep.js"
   pass:
     - "range(1)=[0]"
     - "range(2)=[0,1]"
     - "range(3)=[0,1,2]"
     - "range(4)=[0,1,2,3]"
-- script: "script-function-cache.js"
+- script: "mouse/script-function-cache.js"
   pass: [1, 2]
-- script: "script-function-predicate.js"
+- script: "mouse/script-function-predicate.js"
   pass:
     - age: 5
       inserted: data
@@ -79,43 +104,38 @@
       inserted: data
       name: Tiny
       species: cat
-- script: "script-json-stringify.js"
-  pass: '{"george":{"type":"cat"}}'
-- script: "script-math-binary.js"
-  pass:
-    - "1! = 1"
-    - "2! = 2"
-    - "3! = 6"
-    - "4! = 24"
-- script: "script-math-binary-assert.js"
-  pass: true
-- script: "script-object-get.js"
+- script: "mouse/script-unknown-action.js"
+  fail: "json.invalid is not a function"
+
+# object scripts
+- script: "object/script-get.js"
   pass: "cat"
-- script: "script-object-set.js"
+- script: "object/script-set.js"
   pass:
     george:
       type: cat
     helen:
       type: cat
-- script: "script-test-elif-head.js"
-  fail: "unexpected step.elif at head of the chain"
-- script: "script-test-elif-invalid.js"
-  fail: "misplaced step.elif statement"
-- script: "script-test-else-head.js"
-  fail: "unexpected step.else at head of the chain"
-- script: "script-test-else-invalid.js"
-  fail: "misplaced step.else statement"
-- script: "script-test-if-else.js"
+
+# os scripts
+
+# step scripts
+- script: "step/script-elif-at-head.js"
+  fail: 'unexpected "step.elif" at head of the chain'
+- script: "step/script-elif-missing-if.js"
+  fail: '"then" missing a parent "if"'
+- script: "step/script-else-at-head.js"
+  fail: 'unexpected "step.else" at head of the chain'
+- script: "step/script-else-invalid.js"
+  fail: 'misplaced "step.else" statement'
+- script: "step/script-else-sequence.js"
   pass: [0, 2, 4, 12, 16, 20]
-- script: "script-test-if-negative.js"
+  only: true
+- script: "step/script-if-test-fail.js"
   pass: false
-- script: "script-test-if-positive.js"
+- script: "step/script-if-test-pass.js"
   pass: true
-- script: "script-throw-error.js"
-  fail: "as error"
-- script: "script-throw-predicate.js"
-  fail: "as predicate"
-- script: "script-throw-string.js"
-  fail: "as string"
-- script: "script-unknown-action.js"
-  fail: "json.invalid is not a function"
+- script: "step/script-if-then-with-domain"
+  pass: true
+- script: "step/script-if-then-without-domain.js"
+  pass: true

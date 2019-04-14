@@ -37,7 +37,7 @@ function buildChain(descriptors) {
 				}
 			}
 		}
-		throw new Error(`${descriptor.action} missing its parent "if"`);
+		throw new Error(`"${descriptor.action}" missing a parent "if"`);
 	}
 
 	/**
@@ -47,7 +47,7 @@ function buildChain(descriptors) {
 	 * @param {ModuleBase} catchModule - "catch" handler
 	 * @param {ModuleBase} elseModule
 	 * @param {ModuleBase} thenModule
-	 * @param {ModuleSequenceValidator} validate
+	 * @param {ModuleDescriptorValidator} validate
 	 * @returns {ModuleBase}
 	 */
 	function _build({
@@ -62,6 +62,7 @@ function buildChain(descriptors) {
 			return nextModule;
 		}
 		const descriptor=getFullyDescribedModule(index);
+		validate(descriptor);
 		const instance=new descriptor.class({
 			action: descriptor.action,
 			catchModule,
@@ -78,32 +79,31 @@ function buildChain(descriptors) {
 		 */
 		const assertNotHead=()=>{
 			if(index===0) {
-				throw new Error(`unexpected ${descriptor.domain}.${descriptor.action} at head of the chain`);
+				throw new Error(`unexpected "${descriptor.domain}.${descriptor.action}" at head of the chain`);
 			}
 		};
 
 		/**
 		 * Asserts that <param>module</param> is the same domain as <code>instance</code> and is "else" or "elif"
-		 * @param {ModuleBase} module
+		 * @param {ModuleDescriptor} module
 		 */
 		const assertIfConditional=(module)=>{
 			if(module.domain!==instance.domain
 				|| (module.action!=="if" && module.action!=="elif")) {
-				throw new Error(`misplaced ${instance.domain}.${instance.action} statement`);
+				throw new Error(`misplaced "${instance.domain}.${instance.action}" statement`);
 			}
 		};
 
 		/**
 		 * Asserts that <param>module</param> is a then action
-		 * @param {ModuleBase} module
+		 * @param {ModuleDescriptor} module
 		 */
 		const assertThen=(module)=>{
 			if(_.get(module, "action")!=="then") {
-				throw new Error(`${descriptor.domain}.${descriptor.action} missing a then action`);
+				throw new Error(`"${descriptor.domain}.${descriptor.action}" missing a "then" action`);
 			}
 		};
 
-		validate(instance);
 		switch(descriptor.action) {
 			case "catch": {
 				// This instance is an exception handler. We never want to flow into him. If an error is thrown then we want

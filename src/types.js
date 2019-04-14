@@ -115,6 +115,6 @@
  */
 
 /**
- * @typedef {function(module:ModuleBase):void} ModuleSequenceValidator
+ * @typedef {function(module:ModuleDescriptor):void} ModuleDescriptorValidator
  * @throws {Error}
  */
