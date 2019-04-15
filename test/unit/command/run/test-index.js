@@ -22,7 +22,51 @@ describe("command.run.index", function() {
 		proxy.std.unstub();
 	});
 
-	describe("run", function() {
+	it.skip("debug script", async function() {
+		const configuration={
+			options: {
+				input: undefined,
+				script: "test/scripts/script-if-then-with-domain.js"
+			}
+		};
+		return run(configuration)
+			.then(result=>{
+				console.log(result);
+			})
+			.catch(error=>{
+				assert.fail(errorToString(error, {
+					details: true,
+					instance: true,
+					stack: true
+				}));
+			});
+	});
+
+	it("should successfully process 'test/scripts/script-ls.js'", function() {
+		const script="test/scripts/os/script-ls.js",
+			configuration={
+				options: {
+					input: undefined,
+					script
+				}
+			};
+		return run(configuration)
+			.then(result=>{
+				const expected=[
+					"mouse.js",
+					"node_modules",
+					"package.json",
+					"readme.md",
+					"res",
+					"src",
+					"test"
+				];
+				assert.deepEqual(_.intersection(result, expected).sort(), expected);
+			})
+			.catch(error=>assert.fail(`processing "${script}" failed - ${error}`));
+	});
+
+	describe("scripts", function() {
 		/**
 		 * @returns {Array<{fail, pass, script}>}
 		 * @private
@@ -36,26 +80,6 @@ describe("command.run.index", function() {
 				: all;
 		}
 
-		it.skip("debug script", async function() {
-			const configuration={
-				options: {
-					input: undefined,
-					script: "test/scripts/script-if-then-with-domain.js"
-				}
-			};
-			return run(configuration)
-				.then(result=>{
-					console.log(result);
-				})
-				.catch(error=>{
-					assert.fail(errorToString(error, {
-						details: true,
-						instance: true,
-						stack: true
-					}));
-				});
-		});
-
 		getTestSpecs().forEach(({fail, pass, script})=>{
 			it(`should successfully process '${script}'`, function() {
 				const configuration={
@@ -67,7 +91,7 @@ describe("command.run.index", function() {
 				};
 				if(pass!==undefined) {
 					return run(configuration)
-						.catch(assert.notCalled)
+						.catch(assert.notCalled.bind(null, script))
 						.then(result=>{
 							if(pass.constructor.name==="String") {
 								assert.strictEqual(result, pass);
@@ -78,35 +102,12 @@ describe("command.run.index", function() {
 				} else {
 					assert.notStrictEqual(fail, undefined);
 					return run(configuration)
+						.then(assert.notCalled.bind(null, script))
 						.catch(error=>{
 							assert.strictEqual(error.message, fail, script);
-						})
-						.then(assert.notCalled);
+						});
 				}
 			});
-		});
-
-		it("should successfully process 'test/scripts/script-ls.js'", function() {
-			const configuration={
-				options: {
-					input: undefined,
-					script: "test/scripts/script-ls.js"
-				}
-			};
-			return run(configuration)
-				.then(result=>{
-					const expected=[
-						"mouse.js",
-						"node_modules",
-						"package.json",
-						"readme.md",
-						"res",
-						"src",
-						"test"
-					];
-					assert.deepEqual(_.intersection(result, expected).sort(), expected);
-				})
-				.catch(error=>assert.fail(`processing 'test/scripts/script-os-ls.js' failed - ${error}`));
 		});
 	});
 });

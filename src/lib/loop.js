@@ -74,7 +74,7 @@ class ModuleLoop extends ModuleFlow {
 	 * @returns {Promise<void>}
 	 */
 	async forever(blob) {
-		this._processEndlessLoopAction(blob);
+		return this._processEndlessLoopAction(blob);
 	}
 }
 

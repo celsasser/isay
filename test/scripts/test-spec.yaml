@@ -130,10 +130,9 @@
   fail: 'misplaced "step.else" statement'
 - script: "step/script-else-sequence.js"
   pass: [0, 2, 4, 12, 16, 20]
-- script: "step/script-if-test-fail.js"
+- script: "step/script-if-test-fail-with-domain.js"
   pass: false
-- script: "step/script-if-test-pass.js"
-  only: true
+- script: "step/script-if-test-pass-with-domain.js"
   pass: true
 - script: "step/script-if-then-with-domain.js"
   pass: true

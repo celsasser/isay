@@ -11,20 +11,22 @@ const proxy=require("../../support/proxy");
 const {resolveNextTick}=require("../../../src/common/promise");
 const {ModuleFlow}=require("../../../src/lib/_flow");
 
-describe("lib.ModuleLoop", function() {
+describe("lib.ModuleFlow", function() {
 	function _createInstance({
 		action="action",
 		domain="domain",
 		elseModule=undefined,
 		method="method",
-		params=[]
+		params=[],
+		thenModule=undefined
 	}={}) {
 		return new ModuleFlow({
 			action,
 			domain,
 			elseModule,
 			method,
-			params
+			params,
+			thenModule
 		});
 	}
 
@@ -52,44 +54,56 @@ describe("lib.ModuleLoop", function() {
 				});
 		});
 
-		it("should process loop without feedback if test passes", async function() {
+		it("should process loop (then) without feedback if test passes", async function() {
 			let callIndex=5;
-			const predicate=sinon.spy(async(input)=>{
+			const thenPredicate=sinon.spy(async(input)=>{
 				assert.strictEqual(input, 0);
-				return predicate.callCount;
+				// we do this so that we know that no intermittent state was captured
+				return thenPredicate.callCount;
 			});
-			const instance=_createInstance({
-				params: [
-					(input)=>{
-						assert.strictEqual(input, 0);
-						return --callIndex;
-					},
-					predicate
-				]
-			});
+			const thenModule=_createInstance({
+					method: "then",
+					params: [thenPredicate]
+				}),
+				instance=_createInstance({
+					params: [
+						(input)=>{
+							assert.strictEqual(input, 0);
+							return Boolean(--callIndex);
+						}
+					],
+					thenModule
+				});
 			return instance._processConditionalLoopAction(0)
 				.then(result=>{
 					assert.strictEqual(result, 4);
-					assert.strictEqual(predicate.callCount, 4);
+					assert.strictEqual(thenPredicate.callCount, 4);
 				});
 		});
 
-		it("should process loop with feedback if test passes", async function() {
+		it("should process loop (then) with feedback if test passes", async function() {
 			let callIndex=5;
-			const predicate=sinon.spy(async(input)=>{
-				assert.strictEqual(input, predicate.callCount-1);
-				return predicate.callCount;
+			const thenPredicate=sinon.spy(async(input)=>{
+				assert.strictEqual(input, thenPredicate.callCount-1);
+				return thenPredicate.callCount;
 			});
-			const instance=_createInstance({
-				params: [
-					(input)=>--callIndex,
-					predicate
-				]
-			});
+			const thenModule=_createInstance({
+					method: "then",
+					params: [thenPredicate]
+				}),
+				instance=_createInstance({
+					params: [
+						(input)=>{
+							assert.strictEqual(input, thenPredicate.callCount);
+							return Boolean(--callIndex);
+						}
+					],
+					thenModule
+				});
 			return instance._processConditionalLoopAction(0, {feedback: true})
 				.then(result=>{
 					assert.strictEqual(result, 4);
-					assert.strictEqual(predicate.callCount, 4);
+					assert.strictEqual(thenPredicate.callCount, 4);
 				});
 		});
 
@@ -122,24 +136,23 @@ describe("lib.ModuleLoop", function() {
 		});
 
 		it("should test and pass on literal in this.params[0] if test passes", async function() {
-			const instance=_createInstance({
-				params: [
-					true,
-					"output"
-				]
-			});
+			const thenModule=_createInstance({
+					method: "then",
+					params: ["output"]
+				}),
+				instance=_createInstance({
+					params: [true],
+					thenModule
+				});
 			return instance._processConditionalStepAction("input")
 				.then(result=>{
 					assert.strictEqual(result, "output");
 				});
 		});
 
-		it("should test and else on literal in this.params[0] if test fails", async function() {
+		it("should test and return blob if test fails and no else exists", async function() {
 			const instance=_createInstance({
-				params: [
-					false,
-					"output"
-				]
+				params: [false]
 			});
 			return instance._processConditionalStepAction("input")
 				.then(result=>{
@@ -147,20 +160,22 @@ describe("lib.ModuleLoop", function() {
 				});
 		});
 
-		it("should test and pass on predicate in this.params[0] if test passes", async function() {
-			const instance=_createInstance({
-				params: [
-					resolveNextTick.bind(null, true),
-					"output"
-				]
-			});
+		it("should test via predicate and return result of then if test passes", async function() {
+			const thenModule=_createInstance({
+					method: "then",
+					params: ["output"]
+				}),
+				instance=_createInstance({
+					params: [resolveNextTick.bind(null, true)],
+					thenModule
+				});
 			return instance._processConditionalStepAction("input")
 				.then(result=>{
 					assert.strictEqual(result, "output");
 				});
 		});
 
-		it("should test and else on predicate in this.params[0] if test fails", async function() {
+		it("should test via predicate and else if test fails", async function() {
 			const instance=_createInstance({
 				params: [
 					resolveNextTick.bind(null, false),

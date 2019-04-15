@@ -3,4 +3,5 @@
  */
 
 step.if(true, true)
-	.step.else(false)
+	.then(true)
+	.else(false)
