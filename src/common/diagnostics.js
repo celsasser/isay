@@ -15,13 +15,14 @@
  * @param {number} [options.maxLines=10]
  * @returns {string}
  */
-module.exports.getStack=function(options=undefined) {
-	options=Object.assign({
-		popCount: 0
-	}, options);
-	// pop ourselves
-	options.popCount++;
-	return exports.groomStack(new Error().stack, options);
+module.exports.getStack=function({
+	maxLines=10,
+	popCount=0
+}={}) {
+	return exports.groomStack(new Error().stack, {
+		maxLines,
+		popCount: popCount+2,	// we pop the error message and ourselves
+	});
 };
 
 /**
@@ -32,8 +33,8 @@ module.exports.getStack=function(options=undefined) {
  * @returns {string}
  */
 module.exports.groomStack=function(stack, {
-	popCount=0,
-	maxLines=10
+	maxLines=10,
+	popCount=0
 }={}) {
 	stack=(stack || "").split("\n");
 	if(popCount>0) {

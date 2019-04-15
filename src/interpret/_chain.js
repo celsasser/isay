@@ -9,6 +9,61 @@ const _=require("lodash");
 
 
 /**
+ * Asserts that the current descriptor is not at the head of a chain
+ * @param {number} index
+ * @param {ModuleDescriptor} descriptor - associated with index. for reporting
+ */
+function _assertNotHead(index, descriptor) {
+	if(index===0) {
+		throw new Error(`unexpected "${descriptor.domain}.${descriptor.action}" at head of the chain`);
+	}
+}
+
+/**
+ * @param {ModuleDescriptor} first
+ * @param {ModuleDescriptor} second
+ * @param {boolean} allowUndefined - allow second to be undefined
+ * @throws {Error}
+ */
+function _assertDomainsMatch(first, second, {
+	allowUndefined=false
+}={}) {
+	if(second===undefined) {
+		if(allowUndefined===false) {
+			throw new Error(`unexpected state after ${first.domain}.${first.action}`);
+		}
+	} else if(first.domain!==second.domain) {
+		throw new Error(`mismatched domains for "${first.domain}.${first.action}" and "${second.domain}.${second.action}"`);
+	}
+}
+
+/**
+ * Asserts that <param>descriptor</param> is "else" or "elif" or a "then".
+ * @param {ModuleDescriptor} descriptor
+ */
+function _assertIsIfConditionalAction(descriptor) {
+	// we include "then" because it is the second stage of an if/elif conditional so when testing from
+	// an elif, for example, the previous action in a chain should be "then".
+	if(_.includes(["if", "elif", "then"], descriptor.action)===false) {
+		throw new Error(`misplaced "${descriptor.domain}.${descriptor.action}" statement`);
+	}
+}
+
+/**
+ * Asserts that <param>thenModule</param> is a then action
+ * @param {ModuleDescriptor} thenDescriptor
+ * @param {ModuleDescriptor} parentDescriptor
+ */
+function _assertIsThenAction(thenDescriptor, parentDescriptor) {
+	if(thenDescriptor===undefined) {
+		throw new Error(`"${parentDescriptor.domain}.${parentDescriptor.action}" missing a "then" action`);
+	} else if(thenDescriptor.action!=="then") {
+		// this should not be possible
+		throw new Error(`"${thenDescriptor.domain}.${thenDescriptor.action}" unexpected action`);
+	}
+}
+
+/**
  * Translates parsed script into a sequence of modules
  * @param {Array<ModuleDescriptor>} descriptors
  * @returns {ModuleBase}
@@ -75,39 +130,6 @@ function buildChain(descriptors) {
 		});
 
 		/**
-		 * Asserts that the current descriptor is not at the head of a chain
-		 */
-		const assertNotHead=()=>{
-			if(index===0) {
-				throw new Error(`unexpected "${descriptor.domain}.${descriptor.action}" at head of the chain`);
-			}
-		};
-
-		/**
-		 * Asserts that <param>module</param> is the same domain as <code>instance</code> and is "else" or "elif" or a "then".
-		 * @param {ModuleDescriptor} module
-		 */
-		const assertIsIfConditionalAction=(module)=>{
-			// 
-			if(module.domain!==instance.domain
-				// we include "then" because it is the second stage of an if/elif conditional so when testing from
-				// an elif, for example, the previous action in a chain should be "then".
-				|| _.includes(["if", "elif", "then"], module.action)===false) {	
-				throw new Error(`misplaced "${instance.domain}.${instance.action}" statement`);
-			}
-		};
-
-		/**
-		 * Asserts that <param>module</param> is a then action
-		 * @param {ModuleDescriptor} module
-		 */
-		const assertIsThenAction=(module)=>{
-			if(module.domain!==instance.domain || module.action!=="then") {
-				throw new Error(`"${descriptor.domain}.${descriptor.action}" missing a "then" action`);
-			}
-		};
-
-		/**
 		 * Note: whether a module is a link in a chain or contained by a module depends on <code>nextModule</code>.
 		 * Nodes that operate as links set <code>nextModule=instance</code>.
 		 * Nodes that are not links and are meant to be absorbed forward the previous <code>nextModule</code>
@@ -116,7 +138,7 @@ function buildChain(descriptors) {
 			case "catch": {
 				// This instance is an exception handler. We never want to flow into him. But rather want to install
 				// install him in nodes above us as an exception handler.
-				assertNotHead();
+				_assertNotHead(index, descriptor);
 				return _build({
 					index: index-1,
 					catchModule: instance,
@@ -124,28 +146,32 @@ function buildChain(descriptors) {
 				});
 			}
 			case "elif": {
-				assertNotHead();
-				assertIsThenAction(thenModule);
+				_assertNotHead(index, descriptor);
+				_assertIsThenAction(thenModule, instance);
+				_assertDomainsMatch(instance, thenModule);
+				_assertDomainsMatch(instance, elseModule, {allowUndefined: true});
 				return _build({
 					index: index-1,
 					catchModule,
 					elseModule: instance,
 					nextModule,
-					validate: assertIsIfConditionalAction
+					validate: _assertIsIfConditionalAction
 				});
 			}
 			case "else": {
-				assertNotHead();
+				_assertNotHead(index, descriptor);
 				return _build({
 					index: index-1,
 					catchModule,
 					elseModule: instance,
 					nextModule,
-					validate: assertIsIfConditionalAction
+					validate: _assertIsIfConditionalAction
 				});
 			}
 			case "if": {
-				assertIsThenAction(thenModule);
+				_assertIsThenAction(thenModule, instance);
+				_assertDomainsMatch(instance, thenModule);
+				_assertDomainsMatch(instance, elseModule, {allowUndefined: true});
 				return _build({
 					index: index-1,
 					catchModule,
@@ -153,14 +179,14 @@ function buildChain(descriptors) {
 				});
 			}
 			case "then": {
-				assertNotHead();
+				_assertNotHead(index, descriptor);
 				return _build({
 					index: index-1,
 					catchModule,
 					elseModule,
 					nextModule,
 					thenModule: instance,
-					validate: assertIsIfConditionalAction
+					validate: _assertIsIfConditionalAction
 				});
 			}
 			default: {
