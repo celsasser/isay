@@ -35,13 +35,18 @@ describe("lib.ModuleFlow", function() {
 	});
 
 	describe("_processConditionalLoopAction", function() {
-		it("should raise an exception if params[0] is missing", async function() {
-			const instance=_createInstance();
-			return instance._processConditionalLoopAction("input")
-				.then(assert.notCalled)
-				.catch(error=>{
-					assert.strictEqual(error.message, "expecting a value but found undefined");
+		it("should test on blob if params[0] is missing", async function() {
+			const thenModule=_createInstance({
+					method: "then",
+					params: ["output"]
+				}),
+				instance=_createInstance({
+					thenModule
 				});
+			return instance._processConditionalLoopAction(false)
+				.then(result=>{
+					assert.strictEqual(result, false);
+				})
 		});
 
 		it("should test and return blob if test fails and else does not exist", async function() {
@@ -126,13 +131,18 @@ describe("lib.ModuleFlow", function() {
 	});
 
 	describe("_processConditionalStepAction", function() {
-		it("should raise an exception if params[0] is missing", async function() {
-			const instance=_createInstance();
-			return instance._processConditionalStepAction("input")
-				.then(assert.notCalled)
-				.catch(error=>{
-					assert.strictEqual(error.message, "expecting a value but found undefined");
+		it("should test on blob if params[0] is missing", async function() {
+			const thenModule=_createInstance({
+					method: "then",
+					params: ["output"]
+				}),
+				instance=_createInstance({
+					thenModule
 				});
+			return instance._processConditionalStepAction("input")
+				.then(result=>{
+					assert.strictEqual(result, "output");
+				})
 		});
 
 		it("should test and pass on literal in this.params[0] if test passes", async function() {

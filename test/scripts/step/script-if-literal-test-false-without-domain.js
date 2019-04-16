@@ -1,5 +1,5 @@
 /**
- * Should return result of test
+ * Should inherit domain and return result of else
  */
 
 step.if(false)

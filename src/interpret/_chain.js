@@ -45,7 +45,7 @@ function _assertIsIfConditionalAction(descriptor) {
 	// we include "then" because it is the second stage of an if/elif conditional so when testing from
 	// an elif, for example, the previous action in a chain should be "then".
 	if(_.includes(["if", "elif", "then"], descriptor.action)===false) {
-		throw new Error(`misplaced "${descriptor.domain}.${descriptor.action}" statement`);
+		throw new Error(`expecting if-like statement but found "${descriptor.domain}.${descriptor.action}"`);
 	}
 }
 

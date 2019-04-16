@@ -1,5 +1,5 @@
 /**
- * Should catch meaningless else at head of chain
+ * Should catch unpaired else at the head of a chain
  */
 
 step.else("should fail")

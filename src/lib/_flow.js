@@ -51,6 +51,22 @@ class ModuleFlow extends ModuleBase {
 
 	/********************* Protected Interface *********************/
 	/**
+	 * Performs the test on the if/elif condition.  The rules here are the same as they are everywhere else:
+	 * - if this.params.length>0 then it's value is resolved.
+	 * - otherwise we use <param>blob</param>
+	 * @param {DataBlob} blob
+	 * @return {Promise<boolean>}
+	 * @private
+	 */
+	async _performTest(blob) {
+		if(this.params.length>0) {
+			return boolean(await resolveType(blob, this.params[0], "*"));
+		} else {
+			return boolean(blob);
+		}
+	}
+
+	/**
 	 * Processes non-feedback conditional "loop" test.
 	 * @resolves testPredicate:TestPredicate in this.params[0]
 	 * @resolves actPredicate:ActionPredicate in this.params[1]
@@ -64,7 +80,7 @@ class ModuleFlow extends ModuleBase {
 	}={}) {
 		// here we are not going to all null/undefined. Cause the use cases are fewer
 		// that the mistake that omitting it likely is.
-		if(boolean(await resolveType(blob, this.params[0], "*"))) {
+		if(await this._performTest(blob)) {
 			// Now we loop until this.params[0] returns falsey
 			return new Promise((resolve, reject)=>{
 				const _loop=(blob)=>{
@@ -73,7 +89,7 @@ class ModuleFlow extends ModuleBase {
 							const input=(feedback)
 								? result
 								: blob;
-							if(boolean(await resolveType(input, this.params[0], "*"))) {
+							if(await this._performTest(input)) {
 								process.nextTick(_loop, input);
 							} else {
 								resolve(result);
@@ -99,7 +115,7 @@ class ModuleFlow extends ModuleBase {
 	 * @protected
 	 */
 	async _processConditionalStepAction(blob) {
-		if(boolean(await resolveType(blob, this.params[0], "*"))) {
+		if(await this._performTest(blob)) {
 			return this._thenModule.process(blob);
 		} else if(this._elseModule) {
 			return this._elseModule.process(blob);

@@ -1,5 +1,5 @@
 /**
- * Testing use of both then and else
+ * A more complex test using both if and else
  */
 
 array.range(6)

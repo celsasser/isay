@@ -26,7 +26,7 @@ describe("command.run.index", function() {
 		const configuration={
 			options: {
 				input: undefined,
-				script: "test/scripts/script-if-then-with-domain.js"
+				script: "test/scripts/script-if-literal-test-true-without-domain.js"
 			}
 		};
 		return run(configuration)
@@ -80,18 +80,22 @@ describe("command.run.index", function() {
 				: all;
 		}
 
-		getTestSpecs().forEach(({fail, pass, script})=>{
+		getTestSpecs().forEach(({
+			input=undefined,
+			fail=undefined,
+			pass=undefined,
+			script
+		})=>{
 			it(`should successfully process '${script}'`, function() {
 				const configuration={
 					options: {
-						// note: we specify input so that we don't look at stdin otherwise we hang
-						input: undefined,
+						input,
 						script: `./test/scripts/${script}`
 					}
 				};
 				if(pass!==undefined) {
 					return run(configuration)
-						.catch(assert.notCalled.bind(null, script))
+						.catch(assert.fail)
 						.then(result=>{
 							if(pass.constructor.name==="String") {
 								assert.strictEqual(result, pass);

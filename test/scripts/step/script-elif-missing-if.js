@@ -1,5 +1,5 @@
 /**
- * Should catch elif without a then
+ * Should catch elif without an if
  */
 
 std.in("data")

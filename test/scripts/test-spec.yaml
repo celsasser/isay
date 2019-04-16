@@ -126,15 +126,53 @@
   fail: '"then" missing a parent "if"'
 - script: "step/script-else-at-head.js"
   fail: 'unexpected "step.else" at head of the chain'
-- script: "step/script-else-invalid.js"
-  fail: 'misplaced "step.else" statement'
+- script: "step/script-else-missing-if.js"
+  fail: 'expecting if-like statement but found "std.in"'
 - script: "step/script-else-sequence.js"
   pass: [0, 2, 4, 12, 16, 20]
-- script: "step/script-if-test-fail-with-domain.js"
+- script: "step/script-if-elif-predicate-test-with-domain.js"
+  input: 0
+  pass: "first"
+- script: "step/script-if-elif-predicate-test-with-domain.js"
+  input: 10
+  pass: "second"
+- script: "step/script-if-elif-predicate-test-with-domain.js"
+  input: 20
+  pass: "third"
+- script: "step/script-if-elif-predicate-test-with-domain.js"
+  input: 30
+  pass: "fourth"
+- script: "step/script-if-elif-predicate-test-without-domain.js"
+  input: 0
+  pass: "first"
+- script: "step/script-if-elif-predicate-test-without-domain.js"
+  input: 10
+  pass: "second"
+- script: "step/script-if-elif-predicate-test-without-domain.js"
+  input: 20
+  pass: "third"
+- script: "step/script-if-elif-predicate-test-without-domain.js"
+  input: 30
+  pass: "fourth"
+- script: "step/script-if-literal-test-false-with-domain.js"
   pass: false
-- script: "step/script-if-test-pass-with-domain.js"
+- script: "step/script-if-literal-test-true-with-domain.js"
   pass: true
-- script: "step/script-if-then-with-domain.js"
+- script: "step/script-if-literal-test-false-without-domain.js"
+  pass: false
+- script: "step/script-if-literal-test-true-without-domain.js"
   pass: true
-- script: "step/script-if-then-without-domain.js"
+- script: "step/script-if-predicate-test-with-domain.js"
+  input: true
   pass: true
+- script: "step/script-if-predicate-test-with-domain.js"
+  input: false
+  pass: false
+- script: "step/script-if-predicate-test-without-domain.js"
+  input: true
+  pass: true
+- script: "step/script-if-predicate-test-without-domain.js"
+  input: false
+  pass: false
+- script: "step/script-then-at-head.js"
+  fail: 'unexpected "step.then" at head of the chain'
