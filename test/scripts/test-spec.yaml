@@ -32,9 +32,57 @@
 - script: "error/script-throw-string.js"
   fail: "as string"
 
+# feedback scripts
+- script: "feedback/script-elif-at-head.js"
+  fail: 'unexpected "feedback.elif" at head of the chain'
+- script: "feedback/script-elif-missing-if.js"
+  fail: '"then" missing a parent "if"'
+- script: "feedback/script-else-at-head.js"
+  fail: 'unexpected "feedback.else" at head of the chain'
+- script: "feedback/script-else-missing-if.js"
+  fail: 'expecting if-like statement but found "std.in"'
+- script: "feedback/script-then-at-head.js"
+  fail: 'unexpected "feedback.then" at head of the chain'
+- script: "feedback/script-if-elif-predicate-test-with-domain.js"
+  input: 0
+  pass: 10
+- script: "feedback/script-if-elif-predicate-test-with-domain.js"
+  input: 10
+  pass: 20
+- script: "feedback/script-if-elif-predicate-test-with-domain.js"
+  input: 20
+  pass: 30
+- script: "feedback/script-if-elif-predicate-test-with-domain.js"
+  input: 50
+  pass: 50
+- script: "feedback/script-if-elif-predicate-test-without-domain.js"
+  input: 0
+  pass: 10
+- script: "feedback/script-if-elif-predicate-test-without-domain.js"
+  input: 10
+  pass: 20
+- script: "feedback/script-if-elif-predicate-test-without-domain.js"
+  input: 20
+  pass: 30
+- script: "feedback/script-if-elif-predicate-test-without-domain.js"
+  input: 50
+  pass: 50
+
 # JSON scripts
 - script: "json/script-stringify.js"
   pass: '{"george":{"type":"cat"}}'
+
+# loop scripts
+- script: "loop/script-elif-at-head.js"
+  fail: 'unexpected "loop.elif" at head of the chain'
+- script: "loop/script-elif-missing-if.js"
+  fail: '"then" missing a parent "if"'
+- script: "loop/script-else-at-head.js"
+  fail: 'unexpected "loop.else" at head of the chain'
+- script: "loop/script-else-missing-if.js"
+  fail: 'expecting if-like statement but found "std.in"'
+- script: "loop/script-then-at-head.js"
+  fail: 'unexpected "loop.then" at head of the chain'
 
 # math scripts
 - script: "math/script-binary.js"

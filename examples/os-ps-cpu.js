@@ -20,5 +20,6 @@ loop.forever(
 		string.format("${16l} ${8r} ${10c} ${10r} ${8r} ${10r}  ${l}")
 			.std.outln()
 	)
+	.std.out("[ctrl+c to quit]")
 	.app.sleep({seconds:1})
 );
