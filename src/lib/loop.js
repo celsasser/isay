@@ -31,24 +31,26 @@ const {resolveType}=require("./_data");
  */
 class ModuleLoop extends ModuleFlow {
 	/**
-	 * Loops while this.params[0] returns a truthy value
+	 * Loops while this.params[0] returns a truthy value.
+	 * Note: loop output becomes the next cycles input.
 	 * @param {DataBlob} blob
 	 * @returns {Promise<void>}
 	 */
 	async if(blob) {
 		return this._processConditionalLoopAction(blob, {
-			feedback: false
+			feedback: true
 		});
 	}
 
 	/**
 	 * Loops while this.params[0] returns a truthy value
+	 * Note: loop output becomes the next cycles input.
 	 * @param {DataBlob} blob
 	 * @returns {Promise<void>}
 	 */
 	async elif(blob) {
 		return this._processConditionalLoopAction(blob, {
-			feedback: false
+			feedback: true
 		});
 	}
 
@@ -62,7 +64,9 @@ class ModuleLoop extends ModuleFlow {
 	 */
 	async else(blob) {
 		if(_.isFunction(this.params[0])) {
-			return this._processEndlessLoopAction(blob);
+			return this._processEndlessLoopAction(blob, {
+				feedback: true
+			});
 		} else {
 			return resolveType(blob, this.params[0], "*", {allowNullish: true});
 		}

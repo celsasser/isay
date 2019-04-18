@@ -3,7 +3,7 @@
  * @required input
  */
 
-feedback.if(is.lessThan(10))
+loop.if(is.lessThan(10))
 	.then(math.add(1))
 	.elif(is.lessThan(20))
 	.then(math.add(1))
