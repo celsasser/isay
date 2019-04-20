@@ -21,7 +21,11 @@ class ModuleOs extends ModuleBase {
 	 * @returns {Promise<DataBlob>}
 	 */
 	async executionHandler(blob) {
-		const args=await this._paramsToArguments(blob),
+		const {
+				options={},
+				params
+			}=ModuleOs._preprocessParams(this.params),
+			args=await ModuleOs._paramsToArguments(blob, params),
 			input=_.isEmpty(blob)
 				? ""
 				: _.isObject(blob)
@@ -30,20 +34,24 @@ class ModuleOs extends ModuleBase {
 		return spawn.command({
 			args: args,
 			command: this.action,
-			stdin: input
+			input: input,
+			output: (options.stdout==="live")
+				? process.stdout
+				: undefined
 		});
 	}
 
 	/********************* Private Interface *********************/
 	/**
-	 * Parse the <code>this.params</code>. If there is a single param then we assume that the
+	 * Parse the <param>params</param>. If there is a single param then we assume that the
 	 * client has specified all of the params as a single argument. If there are more than 1
 	 * then we assume that we are to parse the input by shell delimiter rules.
 	 * @param {DataBlob} blob
+	 * @param {Array<*>} params
 	 * @return {Array<string>}
 	 * @private
 	 */
-	async _paramsToArguments(blob) {
+	static async _paramsToArguments(blob, params) {
 		async function _parse(param) {
 			if(_.isFunction(param)) {
 				return _parse(await resolveType(blob, param, "*", {allowNullish: true}));
@@ -53,9 +61,34 @@ class ModuleOs extends ModuleBase {
 				return param;
 			}
 		}
-		return (this.params.length===1)
-			? _parse(this.params[0])
-			: this.params;
+		return (params.length===1)
+			? _parse(params[0])
+			: params;
+	}
+
+	/**
+	 * Here we look for options to us vs. the command. If we find them we return them and remove
+	 * that param from the response's <code>params</code>
+	 * @param {Array<*>} params
+	 * @returns {options:Object=undefined, params:Array<*>}
+	 * @private
+	 */
+	static _preprocessParams(params) {
+		const lastParam=_.last(params);
+		if(_.isObject(lastParam)) {
+			const keys=Object.keys(lastParam);
+			// let's make sure it looks like it is meant for us and we do so by making sure
+			// we support all specified properties. Bugs will be able to fake us out.
+			if(_.intersection(Object.keys(lastParam), ["stdout"]).length===keys.length) {
+				return {
+					options: lastParam,
+					params: params.slice(0, params.length-1)
+				};
+			}
+		}
+		return {
+			params
+		};
 	}
 }
 

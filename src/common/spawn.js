@@ -14,48 +14,54 @@ const log=require("../common/log");
  * @param {Array<string>} args
  * @param {string} command
  * @param {boolean} detached
+ * @param {string|Buffer|undefined} input
+ * @param {Stream} output - if you want to pipe the spawned process's output
+ * 	then you may do so by specifying an output stream
  * @param {boolean} shell
- * @param {string|Buffer|undefined} stdin
  * @returns {Promise<*>}
  */
 async function command({
 	args=[],
 	command,
 	detached=false,
-	shell=true,
-	stdin=undefined
+	input=undefined,
+	output=undefined,
+	shell=true
 }) {
 	return new Promise((resolve, reject)=>{
-		const output={
+		const bufferedOutput={
 			err: "",
 			out: ""
 		};
-		const process=child.spawn(command, args, {
+		const spawed=child.spawn(command, args, {
 			detached,
 			shell
 		});
 
 		resolve=_.once(resolve);
 		reject=_.once(reject);
+		if(output) {
+			spawed.stdout.pipe(output);
+		}
 		// standard error: we track it and use it if our exit code is error
-		process.stderr.on("data", data=>{
+		spawed.stderr.on("data", data=>{
 			data=data.toString("utf8");
-			output.err=`${output.err}${data}`;
+			bufferedOutput.err=`${bufferedOutput.err}${data}`;
 		});
 		// standard out: we track it and use it if our exit code is not in error
-		process.stdout.on("data", data=>{
+		spawed.stdout.on("data", data=>{
 			data=data.toString("utf8");
-			output.out=`${output.out}${data.toString("utf8")}`;
+			bufferedOutput.out=`${bufferedOutput.out}${data.toString("utf8")}`;
 		});
-		process.on("close", code=>{
+		spawed.on("close", code=>{
 			if(code>0) {
-				const text=(output.err || output.out || "").trim();
+				const text=(bufferedOutput.err || bufferedOutput.out || "").trim();
 				reject(new Error(text));
 			} else {
-				resolve(output.out);
+				resolve(bufferedOutput.out);
 			}
 		});
-		process.on("error", error=>{
+		spawed.on("error", error=>{
 			reject(error);
 		});
 		// keep our eyes peeled for events we are not actively monitoring
@@ -63,13 +69,13 @@ async function command({
 			"disconnect",
 			"message"
 		].forEach(event=>{
-			process.on(event, (...args)=>{
+			spawed.on(event, (...args)=>{
 				log.warn(`spawn.command: received unhandled event=${event}, args=${JSON.stringify(args)}`);
 			});
 		});
-		// if there is input data then we assume that it is to be piped as input
-		if(_.isEmpty(stdin)===false) {
-			process.stdin.write(stdin, "utf8");
+		// if there is input data then we assume that it is to be written as input
+		if(_.isEmpty(input)===false) {
+			spawed.stdin.write(input, "utf8");
 		}
 	});
 }

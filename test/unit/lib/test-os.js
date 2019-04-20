@@ -31,10 +31,11 @@ describe("lib.ModuleOs", function() {
 			const instance=_createInstance({
 				params: ["param"]
 			});
-			proxy.stub(spawn, "command", async({args, command, stdin})=>{
+			proxy.stub(spawn, "command", async({args, command, input, output})=>{
 				assert.deepEqual(command, instance.action);
 				assert.deepEqual(args, instance.params);
-				assert.strictEqual(stdin, "input");
+				assert.strictEqual(input, "input");
+				assert.strictEqual(output, undefined);
 				return Promise.resolve("result");
 			});
 			return instance.executionHandler("input")
@@ -46,35 +47,69 @@ describe("lib.ModuleOs", function() {
 
 	describe("_paramsToArguments", function() {
 		it("should return params if length is 0", async function() {
-			const instance=_createInstance({
-				params: []
-			});
-			return instance._paramsToArguments()
+			return ModuleOs._paramsToArguments("input", [])
 				.then(result=>assert.deepEqual(result, []));
 		});
 
 		it("should return params if length is greater than 1", async function() {
-			const instance=_createInstance({
-				params: ["1", "2"]
-			});
-			return instance._paramsToArguments()
+			return ModuleOs._paramsToArguments("input", ["1", "2"])
 				.then(result=>assert.deepEqual(result, ["1", "2"]));
 		});
 
 		it("should parse params if length is 1", async function() {
-			const instance=_createInstance({
-				params: ["1 2"]
-			});
-			return instance._paramsToArguments()
+			return ModuleOs._paramsToArguments("input", ["1 2"])
 				.then(result=>assert.deepEqual(result, ["1", "2"]));
 		});
 
 		it("should allow params to be supplied by predicate in params[0]", async function() {
-			const instance=_createInstance({
-				params: [resolveNextTick.bind(null, "a b")]
-			});
-			return instance._paramsToArguments()
+			return ModuleOs._paramsToArguments("input", [resolveNextTick.bind(null, "a b")])
 				.then(result=>assert.deepEqual(result, ["a", "b"]));
+		});
+	});
+
+	describe("_preprocessParams", function() {
+		it("should return params as input if params is empty", function() {
+			const {
+				options,
+				params
+			}=ModuleOs._preprocessParams([]);
+			assert.strictEqual(options, undefined);
+			assert.deepEqual(params, []);
+		});
+
+		it("should return params if last param does not look like options", function() {
+			const {
+				options,
+				params
+			}=ModuleOs._preprocessParams(["a", "b"]);
+			assert.strictEqual(options, undefined);
+			assert.deepEqual(params, ["a", "b"]);
+		});
+
+		it("should properly process options in params[0]", function() {
+			const {
+				options,
+				params
+			}=ModuleOs._preprocessParams([{
+				stdout: "live"
+			}]);
+			assert.deepEqual(options, {
+				stdout: "live"
+			});
+			assert.deepEqual(params, []);
+		});
+
+		it("should properly process options in any other position", function() {
+			const {
+				options,
+				params
+			}=ModuleOs._preprocessParams(["a", {
+				stdout: "live"
+			}]);
+			assert.deepEqual(options, {
+				stdout: "live"
+			});
+			assert.deepEqual(params, ["a"]);
 		});
 	});
 });
