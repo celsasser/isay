@@ -83,33 +83,68 @@ In some cases, you will see variations of the same _function_ below. This is eit
 - **arguments**: is no input data. In this case we always use a function's _arguments_.
 - **both**: there is both _input_ and _arguments_. Some function support multiple arguments. But for those that expect only one source of data? We always use _arguments_ over _input_. The logic being that if a programmer has total control over _arguments_. 
 
+#### _paramater usage below_
+- `start`: value or index from
+- `stop`: value or index up to but not including
+
 #### array
-- each|forEach: `Array<*> -> each(predicate:function) -> Array<*>`
-- filter: `Array<*> -> filter(predicate:function) -> Array<*>`
-- find: `Array<*> -> find(predicate:function) -> (*|null)`
-- map: `Array<*> -> map(predicate:function) -> Array<*>`
-- range: `range(to:number) -> Array<number>`
-- range: `range(from:number, to:number, inc:number=1) -> Array<number>`
-- range: `to:number => range() -> Array<number>`
-- range: `[from:number, to:number, inc:number=1] => range() -> Array<number>`
-- reduce: `Array<*> -> reduce(predicate:function) -> Array<*>`
-- reverse: `Array<*> -> reverse(predicate:function) -> Array<*>`
+- append: `Array<*> -> append(element:*, {index:-1}) -> Array<*>`
+- append: `Array<*> -> append(elements:Array<*>, {index:-1, expand:true}) -> Array<*>`
+- each|forEach: `Array<*> -> each(predicate:(element)->*) -> Array<*>`
+- filter: `Array<*> -> filter(predicate:(element)->boolean) -> Array<*>`
+- filter: `Array<*> -> filter(filter:Object) -> Array<*>`
+- find: `Array<*> -> find(predicate:(element)->boolean) -> (*|null)`
+- find: `Array<*> -> find(criteria:Object) -> (*|null)`
+- first: `Array<*> -> first() -> *`
+- first: `Array<*> -> first(count:number) -> Array<*>`
+- insert: `Array<*> -> insert(element:*, {index:0}) -> Array<*>`
+- insert: `Array<*> -> insert(elements:Array<*>, {index:0, expand:true}) -> Array<*>`
+- last: `Array<*> -> last() -> *`
+- last: `Array<*> -> last(count:number) -> Array<*>`
+- map: `Array<*> -> map(predicate:(element)->*) -> Array<*>`
+- range: `range(stop:number) -> Array<number>`
+- range: `range(start:number, stop:number, increment:number=1) -> Array<number>`
+- range: `stop:number => range() -> Array<number>`
+- range: `[start:number, stop:number, increment:number=1] => range() -> Array<number>`
+- reduce: `Array<*> -> reduce(predicate:(result, element)->*, initial=[]) -> *`
+- reverse: `Array<*> -> reverse() -> Array<*>`
+- slice: `Array<*> -> slice(start:number) -> Array<*>`
+- slice: `Array<*> -> slice(start:number, stop:Number) -> Array<*>`
+- slice: `Array<*> -> slice({start:number, stop:number, count:number=undefined}) -> Array<*>`
 - sort: `Array<*> -> sort() -> Array<*>`
 - sort: `Array<*> -> sort(property:(number|string)) -> Array<*>`
 - sort: `Array<*> -> sort(properties:Array<(number|string)>) -> Array<*>`
 - unique: `Array<*> -> unique() -> Array<*>`
 
 #### csv
+- parse: `string -> parse({delimiter:string=","}) -> Array<Array<*>>`
 - read: `read(path:string, opts:(undefined|{delimiter:","}}) -> Array<Array<*>>`
 - read: `path:string -> read(opts:(undefined|{delimiter:","}}) -> Array<Array<*>>`
 - write: `data:Array<Array<*>> -> write(path:string, opts:(undefined|{delimiter:","}}) -> Array<Array<*>>`
 
+#### debug
+- assert: `* -> assert(predicate:(*)->boolean) -> *`
+- dump: `* -> dump() -> *`
+
+#### env
+- delete: `* -> delete(name:string) -> *`
+- get: `get() -> Object`
+- get: `get(name:string) -> *`
+- set: `* -> set(name:string, value:(boolean|number|string)) -> *`
+
+#### error
+- catch: `* -> catch() -> *`
+- catch: `* -> catch(predicate:(*)->*) -> *`
+- catch: `catch(resut:*) -> result:*`
+- throw: `* -> throw(value:(Error|String))`
+- throw: `* -> throw(thrower:function)`
+
 #### file
-- copy: `copy(source:string, target:string, {rebuild:boolean=false}) -> undefined`
+- copy: `* -> copy(source:string, target:string, {rebuild:boolean=false}) -> *`
 - copy: `source:string -> copy(target:string, {rebuild:boolean=false}) -> source:string`
 - create: `create(path:string, {type:string="file"}) -> undefined`
 - create: `path:string -> create({type:string="file"}) -> string`
-- delete: `delete(path:string) -> undefined`
+- delete: `* -> delete(path:string) -> *`
 - delete: `path:string -> delete() -> string`
 - ensure: `ensure(path:string, {type:string="file"}) -> undefined`
 - ensure: `path:string -> ensure({type:string="file"}) -> string`
@@ -124,8 +159,16 @@ In some cases, you will see variations of the same _function_ below. This is eit
 - empty: `(string|Array|Buffer) -> empty() -> boolean`
 - endsWith: `string -> endsWith(value:(string|Array<string>)) -> boolean`
 - equal: `comparedFrom:* -> equal(comparedTo:*) -> boolean`
+- false: `false(state:*) -> boolean`
+- false: `* -> false() -> boolean`
+- greaterThan: `(number|string) -> greaterThan(value:(number|string)) -> boolean`
+- lessThan: `(number|string) -> lessThan(value:(number|string)) -> boolean`
 - oneOf: `value:* -> oneOf(values:Array<*>) -> boolean`
 - startsWith: `string -> startsWith(value:(string|Array<string>)) -> boolean`
+- true: `true(state:*) -> boolean`
+- true: `* -> true() -> boolean`
+- type: `* -> type(type:("Array"|"Boolean"|"Number"|"Object")) -> boolean`
+- type: `* -> type(oneOf:Array<("Array"|"Boolean"|"Number"|"Object")>) -> boolean`
 
 #### json
 - parse: `data:(string|Buffer) -> parse() -> Object`
@@ -134,44 +177,119 @@ In some cases, you will see variations of the same _function_ below. This is eit
 - stringify: `Object -> stringify(options:{compact:true}) -> string`
 - write: `json:Object -> write(path:string) -> Object`
 
+#### loop:
+- if: `* -> if() -> boolean(*)`
+- if: `if(state:boolean) -> boolean`
+- if: `* -> if(predicate:(*)->boolean) -> boolean`
+- elif: `* -> elif() -> boolean(*)`
+- elif: `elif(state:boolean) -> boolean`
+- elif: `* -> elif(predicate:(*)->boolean) -> boolean`
+- else: `else(forever:function)`
+- else: `* -> else(value:*) -> *`
+- then: `* -> then(predicate:(*)->*) -> *`
+
+#### math:
+The math operations are grouped together by the API they support. Instead of spelling out all of the different param signatures we support per operation, we are using `op` as a symbol that represents any one of the operations listed on the left. So should you be interested in `add` then substitute `op` with `add`.
+
+- ceiling|floor|round: `op(number) -> number`
+- ceiling|floor|round: `op(Array<number>) -> Array<number>`
+- ceiling|floor|round: `number -> op() -> number`
+- ceiling|floor|round: `Array<number> -> op() -> Array<number>`
+- max|min: `op(number, number, ...) -> number`
+- max|min: `op(Array<number>) -> number`
+- max|min: `Array<number> -> op() -> number`
+- add|divide|multiply|subtract: `op(v1:number, v2:number) -> number`
+- add|divide|multiply|subtract: `op(v1:number, v2:Array<number>) -> Array<number>`
+- add|divide|multiply|subtract: `op(v1:Array<number>, v2:number) -> Array<number>`
+- add|divide|multiply|subtract: `op(v1:Array<number>, v2:Array<number>) -> Array<number>`
+- add|divide|multiply|subtract: `Array<number> -> op() -> number`
+- add|divide|multiply|subtract: `number -> op(number) -> number`
+- add|divide|multiply|subtract: `number -> op(Array<number>) -> Array<number>`
+- add|divide|multiply|subtract: `Array<number> -> op(number) -> Array<number>`
+- add|divide|multiply|subtract: `Array<number> -> op(Array<number>) -> Array<number>`
+- divmod: `divmod(v1:number, v2:number) -> [div:number, mod:number]`
+- divmod: `divmod(v1:number, v2:Array<number>) -> Array<[div:number, mod:number]>`
+- divmod: `divmod(v1:Array<number>, v2:number) -> Array<[div:number, mod:number]>`
+- divmod: `divmod(v1:Array<number>, v2:Array<number>) -> Array<[div:number, mod:number]>`
+- divmod: `Array<number> -> divmod() -> [div:number, mod:number]`
+- divmod: `number -> divmod(number) -> [div:number, mod:number]`
+- divmod: `number -> divmod(Array<number>) -> Array<[div:number, mod:number]>`
+- divmod: `Array<number> -> divmod(number) -> Array<[div:number, mod:number]>`
+- divmod: `Array<number> -> divmod(Array<number>) -> Array<[div:number, mod:number]>`
+
 #### midi:
 - read: `read(path:string) -> MidiIoSong`
 - read: `path:string -> read() -> MidiIoSong`
 - write: `data:MidiIoSong -> write(path:string) -> MidiIoSong`
 
-#### not:
-- empty: `(string|Array|Buffer) -> empty()`
+#### not
+- empty: `(string|Array|Buffer) -> empty() -> boolean`
 - endsWith: `string -> endsWith(value:(string|Array<string>)) -> boolean`
 - equal: `comparedFrom:* -> equal(comparedTo:*) -> boolean`
+- false: `false(state:*) -> boolean`
+- false: `* -> false() -> boolean`
+- greaterThan: `(number|string) -> greaterThan(value:(number|string)) -> boolean`
+- lessThan: `(number|string) -> lessThan(value:(number|string)) -> boolean`
 - oneOf: `value:* -> oneOf(values:Array<*>) -> boolean`
 - startsWith: `string -> startsWith(value:(string|Array<string>)) -> boolean`
+- true: `true(state:*) -> boolean`
+- true: `* -> true() -> boolean`
+- type: `* -> type(type:("Array"|"Boolean"|"Number"|"Object")) -> boolean`
+- type: `* -> type(oneOf:Array<("Array"|"Boolean"|"Number"|"Object")>) -> boolean`
 
 #### object:
+- each: `Array|Object -> each(predicate:(value, key), {rescurse:boolean=false}) -> Array|Object`
 - get: `(Array|Object) -> get(path:string) -> *`
-- map: `* -> map(predicate:function) -> *`
-- map: `(Array|Object) -> map(paths:Array<string|{from:string, to:string}>, {flatten:boolean=false}) -> Object`
+- map: `(Array|Object) -> map(predicate:(value, key)->*) -> (Array|Object)`
+- map: `(Array|Object) -> map(paths:Array<string|{from:string, to:string}>, {flatten=false, recurse=false}) -> Object`
+- mutate: `* -> mutate(predicate:(*)->*) -> *`
 - merge: `into:Object -> merge(data:Object) -> Object`
 - merge: `into:Array -> merge(data:Array) -> Array`
 - set: `(Array|Object) -> set(path:string, value:*) -> (Array|Object)`
 - toArray: `Object -> toString(predicate:function(Object, key:string):Object) -> Array<*>`
 
 #### os:
-- <command>: `stdin:(string|Buffer|undefined) -> <command>(params:string) -> *`
-- <command>: `stdin:(string|Buffer|undefined) -> <command>(param1:string, param2:string, ...) -> *`
+- <command>: `stdin:(string|Buffer|undefined) -> <command>(params:string, {stdout:("live")}=undefined) -> *`
+- <command>: `stdin:(string|Buffer|undefined) -> <command>(param1:string, param2:string, ..., {stdout:("live")}=undefined) -> *`
 
 #### path:
 - absolute: `string -> absolute:(from:string=".") -> string` 
 - relative: `string -> relative:(from:string=".") -> string` 
 
+#### step:
+- if: `* -> if() -> boolean(*)`
+- if: `if(state:boolean) -> boolean`
+- if: `* -> if(predicate:(*)->boolean) -> boolean`
+- elif: `* -> elif() -> boolean(*)`
+- elif: `elif(state:boolean) -> boolean`
+- elif: `* -> elif(predicate:(*)->boolean) -> boolean`
+- else: `else(forever:function)`
+- else: `* -> else(value:*) -> *`
+- then: `* -> then(predicate:(*)->*) -> *`
+
 #### std:
+- error: `* -> error(output:*) -> *`
 - error: `(string|Buffer|Object) -> error() -> (string|Buffer|Object)`
+- errorln: `* -> errorln(output:*) -> *`
+- errorln: `(string|Buffer|Object) -> errorln() -> (string|Buffer|Object)`
 - in: `in(data:*) -> *`
+- out: `* -> out(output:*) -> *`
 - out: `(string|Buffer|Object) -> out() -> (string|Buffer|Object)`
+- outln: `* -> outln(output:*) -> *`
+- outln: `(string|Buffer|Object) -> outln() -> (string|Buffer|Object)`
 
 #### string:
+- format: `(Array|Object) -> format(spec:string) -> string`
 - replace: `string -> replace(search:(string|RegExp), replace:string) -> string`
-- split: `string -> split(method:("newline"|"shell"|"white"))`
-- split: `string -> split(method:"delimiter", delimiter:string="\s*,\s*")`
+- split: `string -> split(on:(RegExp|string)) -> Array<string>`
+- split: `string -> split({method:("newline"|"shell"|"white")}) -> Array<string>`
+- split: `string -> split({delimiter:string="\s*,\s*", method:("delimiter"|undefined)}) -> Array<string>`
+- split: `string -> split({format:spec, method:("format"|undefined)}) -> Array<string>`
+
+#### tty:
+clear: `* -> clear() -> *`
+height: `height() -> number`
+height: `width() -> number`
 
 #### yaml:
 - parse: `data:(string|Buffer) -> parse() -> Object`
@@ -200,6 +318,66 @@ The following examples assume that you will be running them from the project's r
 ### Scripts
 _Note: the following scripts were created with a `.js` extension. This is not necessary, but handy when using syntax aware editors._
 
+[files-concat.js](./examples/files-concat.js)
+```
+./mouse.js run -s ./examples/files-concat.js
+```
+
+[files-copy-flatten.js](./examples/files-copy-flatten.js)
+```
+./mouse.js run -s ./examples/files-copy-flatten.js
+```
+
+[files-copy-rebuild.js](./examples/files-copy-rebuild.js)
+```
+./mouse.js run -s ./examples/files-copy-rebuild.js
+```
+
+[files-delete.js](./examples/files-delete.js)
+```
+./mouse.js run -s ./examples/files-delete.js
+```
+
+[files-move.js](./examples/files-move.js)
+```
+./mouse.js run -s ./examples/files-move.js
+```
+
+[files-zip-select.js](./examples/files-zip-select.js)
+```
+./mouse.js run -s ./examples/files-zip-select.js
+```
+
+[json-extract.js](./examples/json-extract.js)
+```
+./mouse.js run -s ./examples/json-extract.js
+```
+
+[json-filter-sort.js](./examples/json-filter-sort.js)
+```
+./mouse.js run -s ./examples/json-filter-sort.js
+```
+
+[json-mutate.js](./examples/json-mutate.js)
+```
+./mouse.js run -s ./examples/json-mutate.js
+```
+
+[json-to-yaml-file.js](./examples/json-to-yaml-file.js)
+```
+./mouse.js run -s ./examples/json-to-yaml-file.js
+```
+
+[json-to-yaml-spacious.js](./examples/json-to-yaml-spacious.js)
+```
+./mouse.js run -s ./examples/json-to-yaml-spacious.js
+```
+
+[json-to-yaml.js](./examples/json-to-yaml.js)
+```
+./mouse.js run -s ./examples/json-to-yaml.js
+```
+
 [json-write-compact.js](./examples/json-write-compact.js)
 ```
 ./mouse.js run -s ./examples/json-write-compact.js
@@ -210,64 +388,59 @@ _Note: the following scripts were created with a `.js` extension. This is not ne
 ./mouse.js run -s ./examples/json-write-spacious.js
 ```
 
-[json-extract.js](./examples/json-extract.js)
-```
-./mouse.js run -s ./examples/json-extract.js
-```
-
-[json-mutate.js](./examples/json-mutate.js)
-```
-./mouse.js run -s ./examples/json-mutate.js
-```
-
-[json-filter-sort.js](./examples/json-filter-sort.js)
-```
-./mouse.js run -s ./examples/json-filter-sort.js
-```
-
-[json-to-yaml.js](./examples/json-to-yaml.js)
-```
-./mouse.js run -s ./examples/json-to-yaml.js
-```
-
-[json-to-yaml-file.js](./examples/json-to-yaml-file.js)
-```
-./mouse.js run -s ./examples/json-to-yaml-file.js
-```
-
-[files-concat.js](examples/files-concat.js)
-```
-./mouse.js run -s ./examples/files-concat.js
-```
-
-[files-copy-flatten.js](examples/files-copy-flatten.js)
-```
-./mouse.js run -s ./examples/files-copy-flatten.js
-```
-
-[files-copy-rebuild.js](examples/files-copy-rebuild.js)
-```
-./mouse.js run -s ./examples/files-copy-rebuild.js
-```
-
-[files-delete.js](examples/files-delete.js)
-```
-./mouse.js run -s ./examples/files-delete.js
-```
-
-[files-zip-select.js](examples/files-zip-select.js)
-```
-./mouse.js run -s ./examples/files-zip-select.js
-```
-
-[math-factorial.js](examples/math-factorial.js)
+[math-factorial.js](./examples/math-factorial.js)
 ```
 ./mouse.js run -s ./examples/math-factorial.js
 ```
 
-[text-define-words-raven.js](examples/text-define-words-raven.js)
+[os-npm-run.js](./examples/os-npm-run.js)
+```
+./mouse.js run -s ./examples/os-npm-run.js
+```
+
+[os-ping-range.js](./examples/os-ping-range.js)
+```
+./mouse.js run -s ./examples/os-ping-range.js
+```
+
+[os-ps-cpu.js](./examples/os-ps-cpu.js)
+```
+./mouse.js run -s ./examples/os-ps-cpu.js
+```
+
+[readme.md](./examples/readme.md)
+```
+./mouse.js run -s ./examples/readme.md
+```
+
+[text-count-characters-input.js](./examples/text-count-characters-input.js)
+```
+./mouse.js run -s ./examples/text-count-characters-input.js
+```
+
+[text-count-characters-raven.js](./examples/text-count-characters-raven.js)
+```
+./mouse.js run -s ./examples/text-count-characters-raven.js
+```
+
+[text-count-words-input.js](./examples/text-count-words-input.js)
+```
+./mouse.js run -s ./examples/text-count-words-input.js
+```
+
+[text-count-words-raven.js](./examples/text-count-words-raven.js)
+```
+./mouse.js run -s ./examples/text-count-words-raven.js
+```
+
+[text-define-words-raven.js](./examples/text-define-words-raven.js)
 ```
 ./mouse.js run -s ./examples/text-define-words-raven.js
+```
+
+[text-replace.js](./examples/text-replace.js)
+```
+./mouse.js run -s ./examples/text-replace.js
 ```
 
 ### Inline
