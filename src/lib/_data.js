@@ -1,8 +1,7 @@
 /**
- * User: curtis
  * Date: 2019-03-12
  * Time: 23:06
- * Copyright @2019 by Xraymen Inc.
+ * @license MIT (see project's LICENSE file)
  *
  * A suite of functions and methods designed to assist us in dealing with data. This includes
  * operations such as comparing, validating and resolving data.

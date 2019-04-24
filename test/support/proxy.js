@@ -1,10 +1,7 @@
 /**
- * User: curt
  * Date: 05/27/18
  * Time: 5:45 PM
- *
- * @module common/proxy
- * @requires sinon
+ * @license MIT (see project's LICENSE file)
  */
 
 const _=require("lodash");

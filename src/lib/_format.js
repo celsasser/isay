@@ -1,8 +1,7 @@
 /**
- * User: curtis
  * Date: 2019-03-20
  * Time: 22:40
- * Copyright @2019 by Xraymen Inc.
+ * @license MIT (see project's LICENSE file)
  *
  * Methods designed to format data and parse formatted data
  */

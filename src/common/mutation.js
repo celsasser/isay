@@ -1,10 +1,7 @@
 /**
- * User: curtis
  * Date: 3/9/18
  * Time: 8:23 PM
- * Copyright @2019 by Xraymen Inc.
- *
- * @module common/mutation
+ * @license MIT (see project's LICENSE file)
  */
 
 const _=require("lodash");

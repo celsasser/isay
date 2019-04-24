@@ -1,8 +1,7 @@
 /**
- * User: curtis
  * Date: 2019-04-11
  * Time: 22:21
- * Copyright @2019 by Xraymen Inc.
+ * @license MIT (see project's LICENSE file)
  */
 
 const sinon=require("sinon");

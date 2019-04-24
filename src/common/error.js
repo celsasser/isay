@@ -1,9 +1,7 @@
 /**
- * User: curt
  * Date: 2/8/18
  * Time: 9:48 PM
- *
- * @module common/error
+ * @license MIT (see project's LICENSE file)
  */
 
 const _=require("lodash");

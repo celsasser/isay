@@ -1,8 +1,7 @@
 /**
- * User: curtis
  * Date: 2019-02-10
  * Time: 00:21
- * Copyright @2019 by Xraymen Inc.
+ * @license MIT (see project's LICENSE file)
  */
 
 const fs=require("fs-extra");

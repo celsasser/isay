@@ -1,8 +1,7 @@
 /**
- * User: curtis
  * Date: 2019-02-09
  * Time: 20:38
- * Copyright @2019 by Xraymen Inc.
+ * @license MIT (see project's LICENSE file)
  */
 
 const {spawn}=require("child_process");

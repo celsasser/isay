@@ -1,10 +1,7 @@
 /**
- * User: curtis
  * Date: 02/01/2019
  * Time: 1:22 PM
- * Copyright @2019 by Xraymen Inc.
- *
- * @module horse/cli
+ * @license MIT (see project's LICENSE file)
  */
 
 

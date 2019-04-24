@@ -1,10 +1,9 @@
 #!/usr/bin/env node
 
 /**
- * User: curtis
  * Date: 2019-02-01
  * Time: 00:09
- * Copyright @2019 by Xraymen Inc.
+ * @license MIT (see project's LICENSE file)
  */
 
 const {setApplicationConfiguration}=require("./src/command/configuration");

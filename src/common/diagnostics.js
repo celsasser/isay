@@ -1,10 +1,7 @@
 /**
- * User: curtis
  * Date: 3/5/2018
  * Time: 9:10 PM
- * Copyright @2019 by Xraymen Inc.
- *
- * @module common/diagnostics
+ * @license MIT (see project's LICENSE file)
  */
 
 

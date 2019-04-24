@@ -1,8 +1,7 @@
 /**
- * User: curtis
  * Date: 2019-04-11
  * Time: 20:59
- * Copyright @2019 by Xraymen Inc.
+ * @license MIT (see project's LICENSE file)
  */
 
 const {ModuleFlow}=require("./_flow");

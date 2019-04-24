@@ -1,8 +1,7 @@
 /**
- * User: curtis
  * Date: 2019-03-05
  * Time: 23:47
- * Copyright @2019 by Xraymen Inc.
+ * @license MIT (see project's LICENSE file)
  *
  * A place where we stash the application settings and run configuration
  */

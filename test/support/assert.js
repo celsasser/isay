@@ -1,11 +1,9 @@
 /**
- * User: curt
  * Date: 3/5/2018
  * Time: 9:10 PM
+ * @license MIT (see project's LICENSE file)
  *
- * @module common/assert
- *
- *  There is both runtime support and test support. We flag those that are safe for any runtime environment.
+ * There is both runtime support and test support. We flag those that are safe for any runtime environment.
  * But most are intended for unit and integration testing
  */
 

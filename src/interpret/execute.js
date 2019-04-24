@@ -1,8 +1,7 @@
 /**
- * User: curtis
  * Date: 2019-02-01
  * Time: 00:28
- * Copyright @2019 by Xraymen Inc.
+ * @license MIT (see project's LICENSE file)
  *
  * This is where the run script is parsed and converted into an array of ModuleDescriptor.
  * Parsing: we cheat. We let the V8 vm do most of the work. We create an object with our

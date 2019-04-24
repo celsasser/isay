@@ -1,8 +1,7 @@
 /**
- * User: curtis
  * Date: 05/27/18
  * Time: 1:22 PM
- * Copyright @2019 by Xraymen Inc.
+ * @license MIT (see project's LICENSE file)
  */
 
 

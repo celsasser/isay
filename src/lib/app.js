@@ -1,8 +1,7 @@
 /**
- * User: curtis
  * Date: 2019-02-26
  * Time: 22:12
- * Copyright @2019 by Xraymen Inc.
+ * @license MIT (see project's LICENSE file)
  */
 
 const constant=require("../common/constant");

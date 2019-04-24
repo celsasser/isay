@@ -1,8 +1,7 @@
 /**
- * User: curtis
  * Date: 2019-03-02
  * Time: 20:09
- * Copyright @2019 by Xraymen Inc.
+ * @license MIT (see project's LICENSE file)
  */
 
 const assert=require("../../support/assert");

@@ -1,8 +1,7 @@
 /**
- * User: curtis
  * Date: 2019-03-14
  * Time: 02:27
- * Copyright @2019 by Xraymen Inc.
+ * @license MIT (see project's LICENSE file)
  */
 
 const {ModuleBase}=require("./_base");
