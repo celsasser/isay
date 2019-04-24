@@ -14,9 +14,9 @@ const log=require("../common/log");
  * @param {string} command
  * @param {boolean} detached
  * @param {string|Buffer|undefined} input
- * @param {Stream} output - if you want to pipe the spawned process's output
- * 	then you may do so by specifying an output stream
- * @param {boolean} shell
+ * @param {Stream} stderr - optional outlet to which spawned process's stderr will be piped
+ * @param {Stream} stdout - optional outlet to which spawned process's stdout will be piped
+ * @param {boolean} shell - whether to run command in a shell
  * @returns {Promise<*>}
  */
 async function command({
@@ -24,7 +24,8 @@ async function command({
 	command,
 	detached=false,
 	input=undefined,
-	output=undefined,
+	stderr=undefined,
+	stdout=undefined,
 	shell=true
 }) {
 	return new Promise((resolve, reject)=>{
@@ -39,8 +40,11 @@ async function command({
 
 		resolve=_.once(resolve);
 		reject=_.once(reject);
-		if(output) {
-			spawed.stdout.pipe(output);
+		if(stdout) {
+			spawed.stdout.pipe(stdout);
+		}
+		if(stderr) {
+			spawed.stderr.pipe(stderr);
 		}
 		// standard error: we track it and use it if our exit code is error
 		spawed.stderr.on("data", data=>{

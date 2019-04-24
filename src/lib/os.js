@@ -34,7 +34,10 @@ class ModuleOs extends ModuleBase {
 			args: args,
 			command: this.action,
 			input: input,
-			output: (options.stdout==="live")
+			stderr: (options.stderr==="live")
+				? process.stderr
+				: undefined,
+			stdout: (options.stdout==="live")
 				? process.stdout
 				: undefined
 		});
@@ -78,7 +81,7 @@ class ModuleOs extends ModuleBase {
 			const keys=Object.keys(lastParam);
 			// let's make sure it looks like it is meant for us and we do so by making sure
 			// we support all specified properties. Bugs will be able to fake us out.
-			if(_.intersection(Object.keys(lastParam), ["stdout"]).length===keys.length) {
+			if(_.intersection(Object.keys(lastParam), ["stderr", "stdout"]).length>0) {
 				return {
 					options: lastParam,
 					params: params.slice(0, params.length-1)
