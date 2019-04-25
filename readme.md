@@ -1,12 +1,19 @@
 # Mouse
 
 ## Overview
-`mouse` is a shell command that supports and runs a JavaScript like scripting language. `mouse` offers an alternate means of interacting with your environment within your shell. A sort of shell in a shell, extending it and (hopefully) allowing one to easily accomplish tasks that some may consider cumbersome via the shell.  The language itself takes a _functional_ approach which may appeal to those who are fond of a more functional approach to programming.
+_Mouse_ is a shell command that supports and runs a JavaScript like scripting language. "So what!", you say. "Do we really need another scripting language!?" No, we probably don't. But _mouse_ is not trying to muscle into the sea full of scripting languages. Rather _mouse_ is designed to offer an alternate means of scripting within your shell. A sort of shell in a shell, extending it and (hopefully) allowing one to easily accomplish tasks that some may consider cumbersome via the shell.  The language itself takes a _functional_ approach to scripting:
 
- In addition to being a simple, pared down to basics language, `mouse` also benefits from built-in support for popular file formats such as JSON, YAML, CVS (and midi). Not only does it support loading, parsing and saving but also manipulation. But it's not limited to working with any single file type and is perfectly comfortable with loading, manipulating and saving any portal that my be treated as a file.
+* all functions take a single input (with small exceptions for array iteration, mapping and reduction) and return a single output.
+* there is no state in its purest sense, but we do not strictly enforce this nor do we want to.
+* all functions are lambdas.
+
+ In addition to being a simple, pared down to basics language, _mouse_ also benefits from built-in support for popular file formats such as JSON, YAML, CVS (and MIDI). Not only does it support loading, parsing and saving but also manipulation. But it's not limited to working with any single file type and is perfectly comfortable with loading, manipulating and saving any source that my be treated as a file.
+
+## Requirements
+Mouse is a NodeJS application. It is recommended that you use version >= `10.14.2` or greater as we are able to take advantage of support that was introduced for function compilation (version 10). `10.14.2` includes a fix for bugs within function compilation. It will run otherwise and likely be fine for normal tasks. But performance will suffer should you perform a large amount of iteration. One such example is [text-count-characters-raven.js](./examples/text-count-characters-raven.js)
 
 ## Getting started
-Pull `mouse` down and stick him somewhere. Being a NodeJS app he will need to live within a folder. This can be any location of your chosing but if you end up liking it you may want to make sure it is in your path.  
+Pull _mouse_ down and stick him somewhere. Being a NodeJS app he will need to live within a folder. This can be any location of your chosing but if you end up liking it you may want to make sure it is in your path.
 
 Quick start - in a terminal `cd` to someplace you would like for it to live and:
 ```
@@ -15,7 +22,7 @@ cd mouse
 npm install
 ```
 
-Should you want to make it a more permanent resource in your toolkit, you may chose to put it in your path - `/usr/local/bin` for example. In this case you may want to install it as follows:
+Should you want to make it a more permanent resource in your toolkit, you may chose to put it in your path - `/usr/local/bin` (assuming you are on a unix/linux machine) for example. In this case you may want to install it as follows:
 ```
 cd /usr/local
 git clone https://fishguts@bitbucket.org/fishguts/curt-mouse.git mouse
@@ -25,7 +32,7 @@ ln -s ${PWD}/mouse.js ../bin/mouse
 ```
 
 ## Running
-`mouse` is the top level command. To make it do anything one must specify a [_action_](#actions).  Each _action_ takes its own set of arguments and options. To start the only action it takes is `run`.
+`mouse.js` is the top level command. To make it do anything one must specify a [_action_](#actions).  Each _action_ takes its own set of arguments and options. To start the only action it takes is `run`.
 
 To get more information about `mouse.js` - at command prompt:
 
@@ -45,7 +52,7 @@ mouse.js --help <action>
 `run` is the rubber and your OS is the road. It supports and runs a simple [JavaScript like language](#language) entirely designed with the flow of data in mind. The language itself can be broken down into  _chains_,  _domains_ and _functions_.
 
 ### The chain
-A _chain_ is a list of sequentially excecuted, synchronous _functions_. A _function's_ output serves as input for the next _function_ in a _chain_.  The the value of a _chain_ is the value returned by the last _function_ in a _chain_. What about the topmost _chain_? Nothing is assumed regarding its result. If you want its results to be sent to `stdout` or `stderr` then you must send it via `std`. Examples are provided below of nested _chains_.
+A _chain_ is a list of sequentially excecuted, synchronous _functions_. A _function's_ output serves as input for the next _function_ in a _chain_.  The the value of a _chain_ is the value returned by the last _function_ in a _chain_. "What about the topmost _chain_? Are its results sent to `stdout`?" Nothing is assumed regarding its result. If you want its results to be sent to `stdout` or `stderr` then you must send it via `std`. Examples are provided below of nested _chains_.
 
 The syntax of a _chain_ is as follows:
 ```
@@ -60,27 +67,29 @@ The `.` is used as both a dereference operator and a pipe operator. When placed 
 Follows is an example:
 
 ```
-os.ls(".")
-   .string.split({method: "newline"})
-   .array.filter(item=>item.length>0)
-   .array.map(item=>`./${item}`)
-   .array.sort()
-   .array.reverse()
-   .std.out();
+os.find(".")
+	.string.split({method: "newline"})
+	.array.filter(is.startsWith(["./res", "./src", "./test"]))
+	.file.zip("./tmp/build")
 ```
 
-Note: it may be helpful to think of a function - `<domain>.<function>(params)` - as a function that returns a hybrid object that acts both as an instance of the _domain_ as well as result data that acts as input for the subsequent _function_.
+Note: it may be helpful to think of a function - `<domain>.<function>(params)` - as a function that returns a hybrid object that acts both as an instance of the _domain_ as well as the result. And that result acts as input for the subsequent _function_.
 
 <a id="language"></a>
 ### The Language
-The language used to define _chains_ (and _scripts_ which will follow) is a both a subset and not totally compliant variation of _JavaScript_. At its heart are _domains_ and _functions_.
+The language used to define _chains_ (and _scripts_ which will follow) is a both a subset and not totally compliant variation of JavaScript. At its heart are _domains_ and _functions_.
 
-A _domain_ is a conceptual and physical grouping of one or more _functions_. What is the function of a _domain_? It forces a modular breakdown of related functionality that allows for short (but non-abbreviated) _function_ names that may be reused encouraging a smaller, consistent and more terse _function_ lexicon. 
+A _domain_ is a conceptual and physical grouping of one or more _functions_. What is the function of a _domain_? It forces a modular breakdown of related functionality that allows for short (but non-abbreviated) function names that may be reused across domains encouraging a smaller, consistent and more terse function lexicon. 
 
-In some cases, you will see variations of the same _function_ below. This is either the result of different parameter configurations or is due to options in how a _function_ receives its input. There are three possibilities:
+A _function_ is a function. It takes input and returns output. _Mouse_ has built in support for the API you will see immediately below. But it also allows lamdas to be specified wherever a _mouse_ function takes arguments. These may be _mouse functions_ or they may be Javascript _functions_. JavaScript functions are an excellent way to introduce an named paramater. They are also an excellent means of ammending the _mouse_ API. 
 
-- **input data**: there are no arguments. We, of course, always use the input data.
-- **arguments**: is no input data. In this case we always use a function's _arguments_.
+**An important note regarding adding _chains_ to JavaScript functions. You are encouraged to use _chains_ in JavaScript functions but in a very limited way. If you are using JavaScript to do anything aside from naming parameters then don't include _chains_. You will probably not get the result you are expecting.**
+
+### The API
+So lets dig into the API. In some cases, you will see variations of the same _function_ below. This is either due to different parameter configurations or is to variations in how a _function_ receives its input. There are three possibilities:
+
+- **input data**: with no arguments we use the input data.
+- **arguments**: without input we use a function's _arguments_.
 - **both**: there is both _input_ and _arguments_. Some function support multiple arguments. But for those that expect only one source of data? We always use _arguments_ over _input_. The logic being that if a programmer has total control over _arguments_. 
 
 #### _paramater usage below_
@@ -302,8 +311,6 @@ height: `width() -> number`
 
 `run` takes a script. A `script` should include one, and no more than one, top level _chain_. It may include ornamentation such as documentation. But does not support more than that. 
 
-An important note regarding state and variables. The language does support lambda functions and will properly manage the scope of the parameters declared to store their arguments. **But it has no support for properly scoping variable declarations.**  
-
 How to input a script? It may be input in one of the following ways:
 
 1. file: `mouse.js run --script=run-os-ls.js`
@@ -452,7 +459,7 @@ You may also include your script inline.
 ### Editor
 Lastly, you may also use your favorite console editor by not including a script or script path.
 
-_Note: `mouse` will look for env.EDITOR or env.VISUAL and launch the associated editor (should be a tty based editor). If it does not find one then it defaults to `vim`_
+_Note: _mouse_ will look for env.EDITOR or env.VISUAL and launch the associated editor (should be a tty based editor). If it does not find one then it defaults to `vim`_
 ```
 ./mouse.js run
 ```

@@ -10,7 +10,7 @@
  */
 
 os.cp("-R ./examples ./tmp")
-os.find("./tmp")
+	.os.find("./tmp")
 	.string.split({method: "newline"})
 	.array.filter(is.endsWith([".js", ".json"]))
 	.array.each(file.move("./tmp/moved/."))
