@@ -90,10 +90,10 @@ In some cases, you will see variations of the same _function_ below. This is eit
 #### array
 - append: `Array<*> -> append(element:*, {index:-1}) -> Array<*>`
 - append: `Array<*> -> append(elements:Array<*>, {index:-1, expand:true}) -> Array<*>`
-- each|forEach: `Array<*> -> each(predicate:(element)->*) -> Array<*>`
-- filter: `Array<*> -> filter(predicate:(element)->boolean) -> Array<*>`
+- each|forEach: `Array<*> -> each((element)->*) -> Array<*>`
+- filter: `Array<*> -> filter((element)->boolean) -> Array<*>`
 - filter: `Array<*> -> filter(filter:Object) -> Array<*>`
-- find: `Array<*> -> find(predicate:(element)->boolean) -> (*|null)`
+- find: `Array<*> -> find((element)->boolean) -> (*|null)`
 - find: `Array<*> -> find(criteria:Object) -> (*|null)`
 - first: `Array<*> -> first() -> *`
 - first: `Array<*> -> first(count:number) -> Array<*>`
@@ -101,12 +101,12 @@ In some cases, you will see variations of the same _function_ below. This is eit
 - insert: `Array<*> -> insert(elements:Array<*>, {index:0, expand:true}) -> Array<*>`
 - last: `Array<*> -> last() -> *`
 - last: `Array<*> -> last(count:number) -> Array<*>`
-- map: `Array<*> -> map(predicate:(element)->*) -> Array<*>`
+- map: `Array<*> -> map((element)->*) -> Array<*>`
 - range: `range(stop:number) -> Array<number>`
 - range: `range(start:number, stop:number, increment:number=1) -> Array<number>`
 - range: `stop:number => range() -> Array<number>`
 - range: `[start:number, stop:number, increment:number=1] => range() -> Array<number>`
-- reduce: `Array<*> -> reduce(predicate:(result, element)->*, initial=[]) -> *`
+- reduce: `Array<*> -> reduce((result, element)->*, initial=[]) -> *`
 - reverse: `Array<*> -> reverse() -> Array<*>`
 - slice: `Array<*> -> slice(start:number) -> Array<*>`
 - slice: `Array<*> -> slice(start:number, stop:Number) -> Array<*>`
@@ -123,7 +123,7 @@ In some cases, you will see variations of the same _function_ below. This is eit
 - write: `data:Array<Array<*>> -> write(path:string, opts:(undefined|{delimiter:","}}) -> Array<Array<*>>`
 
 #### debug
-- assert: `* -> assert(predicate:(*)->boolean) -> *`
+- assert: `* -> assert((*)->boolean) -> *`
 - dump: `* -> dump() -> *`
 
 #### env
@@ -134,7 +134,7 @@ In some cases, you will see variations of the same _function_ below. This is eit
 
 #### error
 - catch: `* -> catch() -> *`
-- catch: `* -> catch(predicate:(*)->*) -> *`
+- catch: `* -> catch((*)->*) -> *`
 - catch: `catch(resut:*) -> result:*`
 - throw: `* -> throw(value:(Error|String))`
 - throw: `* -> throw(thrower:function)`
@@ -180,13 +180,13 @@ In some cases, you will see variations of the same _function_ below. This is eit
 #### loop:
 - if: `* -> if() -> boolean(*)`
 - if: `if(state:boolean) -> boolean`
-- if: `* -> if(predicate:(*)->boolean) -> boolean`
+- if: `* -> if((*)->boolean) -> boolean`
 - elif: `* -> elif() -> boolean(*)`
 - elif: `elif(state:boolean) -> boolean`
-- elif: `* -> elif(predicate:(*)->boolean) -> boolean`
+- elif: `* -> elif((*)->boolean) -> boolean`
 - else: `else(forever:function)`
 - else: `* -> else(value:*) -> *`
-- then: `* -> then(predicate:(*)->*) -> *`
+- then: `* -> then((*)->*) -> *`
 
 #### math:
 The math operations are grouped together by the API they support. Instead of spelling out all of the different param signatures we support per operation, we are using `op` as a symbol that represents any one of the operations listed on the left. So should you be interested in `add` then substitute `op` with `add`.
@@ -238,15 +238,15 @@ The math operations are grouped together by the API they support. Instead of spe
 - type: `* -> type(oneOf:Array<("Array"|"Boolean"|"Number"|"Object")>) -> boolean`
 
 #### object:
-- each: `Array|Object -> each(predicate:(value, key), {rescurse:boolean=false}) -> Array|Object`
+- each: `Array|Object -> each((value, key), {rescurse:boolean=false}) -> Array|Object`
 - get: `(Array|Object) -> get(path:string) -> *`
-- map: `(Array|Object) -> map(predicate:(value, key)->*) -> (Array|Object)`
+- map: `(Array|Object) -> map((value, key)->*) -> (Array|Object)`
 - map: `(Array|Object) -> map(paths:Array<string|{from:string, to:string}>, {flatten=false, recurse=false}) -> Object`
-- mutate: `* -> mutate(predicate:(*)->*) -> *`
+- mutate: `* -> mutate((*)->*) -> *`
 - merge: `into:Object -> merge(data:Object) -> Object`
 - merge: `into:Array -> merge(data:Array) -> Array`
 - set: `(Array|Object) -> set(path:string, value:*) -> (Array|Object)`
-- toArray: `Object -> toString(predicate:function(Object, key:string):Object) -> Array<*>`
+- toArray: `Object -> toString((Object, key:string)->Object) -> Array<*>`
 
 #### os:
 - <command>: `stdin:(string|Buffer|undefined) -> <command>(params:string, {stdout:("live")}=undefined) -> *`
@@ -262,10 +262,10 @@ The math operations are grouped together by the API they support. Instead of spe
 - if: `* -> if(predicate:(*)->boolean) -> boolean`
 - elif: `* -> elif() -> boolean(*)`
 - elif: `elif(state:boolean) -> boolean`
-- elif: `* -> elif(predicate:(*)->boolean) -> boolean`
+- elif: `* -> elif((*)->boolean) -> boolean`
 - else: `else(forever:function)`
 - else: `* -> else(value:*) -> *`
-- then: `* -> then(predicate:(*)->*) -> *`
+- then: `* -> then((*)->*) -> *`
 
 #### std:
 - error: `* -> error(output:*) -> *`
@@ -302,7 +302,7 @@ height: `width() -> number`
 
 `run` takes a script. A `script` should include one, and no more than one, top level _chain_. It may include ornamentation such as documentation. But does not support more than that. 
 
-An important note regarding state and variables. The language does support predicate functions and will properly manage the scope of the parameters declared to store their arguments. **But it has no support for properly scoping variable declarations.**  
+An important note regarding state and variables. The language does support lambda functions and will properly manage the scope of the parameters declared to store their arguments. **But it has no support for properly scoping variable declarations.**  
 
 How to input a script? It may be input in one of the following ways:
 
