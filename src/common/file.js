@@ -76,7 +76,6 @@ function readToJSONSync(uri, {
 /**
  * @param {string} uri
  * @param {*} data
- * @param {boolean} async
  * @param {boolean} createPath
  * @param {string} encoding
  * @param {string} flag
@@ -86,7 +85,6 @@ function readToJSONSync(uri, {
  */
 async function writeJSON({
 	uri, data,
-	async=true,
 	createPath=true,
 	encoding="utf8",
 	flag=undefined,
@@ -95,7 +93,7 @@ async function writeJSON({
 	if(typeof (data)!=="string") {
 		data=JSON.stringify(data);
 	}
-	return writeFile({uri, data, async, createPath, encoding, flag, mode});
+	return writeFile({uri, data, createPath, encoding, flag, mode});
 }
 
 
@@ -104,7 +102,6 @@ async function writeJSON({
  * Chances are you are better off using these guys directly
  * @param {string} uri
  * @param {*} data
- * @param {boolean} async
  * @param {boolean} createPath
  * @param {string} encoding
  * @param {string} flag
@@ -114,22 +111,15 @@ async function writeJSON({
  */
 async function writeFile({
 	uri, data,
-	async=true,
 	createPath=true,
 	encoding=undefined,
 	flag=undefined,
 	mode=undefined
 }) {
 	const options=util.scrubObject({encoding, flag, mode});
-	if(async) {
-		return (createPath)
-			? fs.outputFile(uri, data, options)
-			: fs.writeFile(uri, data, options);
-	} else {
-		return (createPath)
-			? fs.outputFileSync(uri, data, options)
-			: fs.writeFileSync(uri, data, options);
-	}
+	return (createPath)
+		? fs.outputFile(uri, data, options)
+		: fs.writeFile(uri, data, options);
 }
 
 module.exports={

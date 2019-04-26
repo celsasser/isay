@@ -178,7 +178,6 @@ describe("lib.ModuleJson", function() {
 				});
 			proxy.stub(file, "writeJSON", (options)=>{
 				assert.deepEqual(options, {
-					"async": true,
 					"data": data,
 					"encoding": "binary",
 					"mode": 0o666,

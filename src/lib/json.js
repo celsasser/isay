@@ -65,7 +65,6 @@ class ModuleJson extends ModuleIO {
 	async write(blob) {
 		const {encoding, mode, path}=await this._getWritePathAndOptions(blob);
 		await file.writeJSON({
-			async: true,
 			data: blob,
 			encoding,
 			mode,
