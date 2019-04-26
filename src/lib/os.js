@@ -78,7 +78,6 @@ class ModuleOs extends ModuleBase {
 	static _preprocessParams(params) {
 		const lastParam=_.last(params);
 		if(_.isObject(lastParam)) {
-			const keys=Object.keys(lastParam);
 			// let's make sure it looks like it is meant for us and we do so by making sure
 			// we support all specified properties. Bugs will be able to fake us out.
 			if(_.intersection(Object.keys(lastParam), ["stderr", "stdout"]).length>0) {

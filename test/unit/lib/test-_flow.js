@@ -45,7 +45,7 @@ describe("lib.ModuleFlow", function() {
 			return instance._processConditionalLoopAction(false)
 				.then(result=>{
 					assert.strictEqual(result, false);
-				})
+				});
 		});
 
 		it("should test and return blob if test fails and else does not exist", async function() {
@@ -141,7 +141,7 @@ describe("lib.ModuleFlow", function() {
 			return instance._processConditionalStepAction("input")
 				.then(result=>{
 					assert.strictEqual(result, "output");
-				})
+				});
 		});
 
 		it("should test and pass on literal in this.params[0] if test passes", async function() {

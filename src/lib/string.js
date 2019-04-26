@@ -10,10 +10,8 @@ const {
 	assertType,
 	resolveType
 }=require("./_data");
-const {
-	formatMouseSpecification,
-	unformatMouseSpecification
-}=require("./_format");
+const {formatMouseSpecification}=require("./_format");
+const {unformatMouseSpecification}=require("./_unformat");
 const string=require("../common/parse");
 
 /**

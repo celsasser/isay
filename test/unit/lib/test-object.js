@@ -224,7 +224,7 @@ describe("lib.ModuleObject", function() {
 			const input={a: 1, b: {c: 1}},
 				instance=_createInstance({
 					params: [(value, key)=>{
-						assert.ok(_.includes(["a", "b"], key));
+						assert.true(_.includes(["a", "b"], key));
 						return key;
 					}]
 				});
@@ -238,7 +238,7 @@ describe("lib.ModuleObject", function() {
 			const input={a: 1, b: {c: 2}},
 				instance=_createInstance({
 					params: [(value, key)=>{
-						assert.ok(_.includes(["a", "b", "c", "b.c"], key));
+						assert.true(_.includes(["a", "b", "c", "b.c"], key));
 						return _.isPlainObject(value)
 							? value
 							: value+1;

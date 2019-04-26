@@ -18,6 +18,7 @@ const util=require("../../src/common/util");
 exports.deepStrictEqual=assert.deepStrictEqual;
 exports.doesNotThrow=assert.doesNotThrow;
 exports.equal=assert.equal;
+exports.false=(condition, ...args)=>assert.ok(Boolean(condition)===false, ...args);
 exports.ifError=assert.ifError;
 exports.notDeepEqual=assert.notDeepEqual;
 exports.notEqual=assert.notEqual;
@@ -25,6 +26,7 @@ exports.notStrictEqual=assert.notStrictEqual;
 exports.ok=assert.ok;
 exports.strictEqual=assert.strictEqual;
 exports.throws=assert.throws;
+exports.true=(condition, ...args)=>assert.ok(Boolean(condition), ...args);
 
 /**
  * We print out the expected as, in here at least, we frequently want to steal it.
@@ -160,6 +162,16 @@ exports.properties=function(object, property) {
 };
 
 /**
+ * @param {string} full - the whole string
+ * @param {string} partial - the part that should match the beginning
+ */
+exports.startsWith=function(full, partial) {
+	if(_.startsWith(full, partial)===false) {
+		assert.ok(false, `"${full}" does not start with "${partial}"`);
+	}
+};
+
+/**
  * Assert condition and if it is false then logs it
  * @param {boolean} condition
  * @param {string|Error|Function} [message]
@@ -167,6 +179,6 @@ exports.properties=function(object, property) {
  */
 exports.toLog=function(condition, message="") {
 	if(!condition) {
-		log.error(new Error(`assert.toLog() failed: ${format.messageToString(message)}`));
+		log.error(new Error(`assert.toLog() failed: ${format.messageToString(message, {stack: true})}`));
 	}
 };

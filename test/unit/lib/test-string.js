@@ -83,7 +83,7 @@ describe("lib.ModuleString", function() {
 				return instance.replace(input)
 					.then(assert.notCalled)
 					.catch(error=>{
-						assert.ok(error.message.startsWith("expecting"));
+						assert.startsWith(error.message, "expecting");
 					});
 			});
 		});

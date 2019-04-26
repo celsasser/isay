@@ -106,8 +106,8 @@ exports.setProperty=function(object, name, value) {
  */
 exports.restoreProperty=function(object, name) {
 	const instance=_.find(_props, {name, object});
-	assert.ok(instance!==undefined);
-	assert.ok(instance.count>0);
+	assert.notStrictEqual(instance, undefined);
+	assert.true(instance.count>0);
 	if(--instance.count===0) {
 		if(instance.value===undefined) {
 			delete instance.object[instance.name];

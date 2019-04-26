@@ -32,7 +32,7 @@ describe("file", function() {
 	describe("readToJSONSync", function() {
 		it("should properly read a json file", function() {
 			const result=file.readToJSONSync("./test/data/data-pet.json");
-			assert.ok(_.isPlainObject(result));
+			assert.true(_.isPlainObject(result));
 		});
 	});
 
@@ -44,8 +44,8 @@ describe("file", function() {
 				createPath: false
 			})
 				.then(assert.notCalled)
-				.catch((error)=>{
-					assert.ok(error);
+				.catch(error=>{
+					assert.startsWith(error.message, "ENOENT: no such file or directory");
 				});
 		});
 
