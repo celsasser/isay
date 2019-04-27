@@ -18,7 +18,7 @@ module.exports.getStack=function({
 }={}) {
 	return exports.groomStack(new Error().stack, {
 		maxLines,
-		popCount: popCount+2,	// we pop the error message and ourselves
+		popCount: popCount+2	// we pop the error message and ourselves
 	});
 };
 

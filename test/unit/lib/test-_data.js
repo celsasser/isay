@@ -5,12 +5,8 @@
  */
 
 const assert=require("../../support/assert");
-const {
-	resolveNextTick,
-}=require("../../../src/common/promise");
-const {
-	ModuleBase
-}=require("../../../src/lib/_base");
+const {resolveNextTick}=require("../../../src/common/promise");
+const {ModuleBase}=require("../../../src/lib/_base");
 const {
 	assertAction,
 	assertPredicate,

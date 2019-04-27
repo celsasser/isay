@@ -33,6 +33,7 @@ class ModuleIO extends ModuleBase {
 		}
 	}
 
+	// eslint-disable-next-line valid-jsdoc
 	/**
 	 * Finds the path and options. <code>this.params</code> get priority but will defer to <param>blob</param>.
 	 * @resolves path:string in this.params[0]|data
@@ -74,6 +75,7 @@ class ModuleIO extends ModuleBase {
 		return resolveType(blob, this.params[0], "String");
 	}
 
+	// eslint-disable-next-line valid-jsdoc
 	/**
 	 * The path should always be in <code>this.params[0]</code>.
 	 * Options may optionally be in <code>this.params[1]</code>

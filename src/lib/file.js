@@ -11,6 +11,8 @@ const {ModuleIO}=require("./_io");
 const {assertType, getType, resolveType}=require("./_data");
 const spawn=require("../common/spawn");
 
+/* eslint-disable indent */
+
 /**
  * file support for any and all data types
  * @typedef {ModuleIO} ModuleFile

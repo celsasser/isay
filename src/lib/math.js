@@ -45,6 +45,7 @@ class ModuleMath extends ModuleBase {
 		return this._applyBinary(input, (a, b)=>a/b);
 	}
 
+	// eslint-disable-next-line valid-jsdoc
 	/**
 	 * Calculates floor(input/params[0]) and input%params[0]. It incoming <param>input</param> from whatever is in this.params[0] provided it is a number
 	 * @param {number|Array<number>} input

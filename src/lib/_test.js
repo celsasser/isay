@@ -35,7 +35,7 @@ class ModuleTest extends ModuleBase {
 		method,
 		nextModule=undefined,
 		params=[],
-		positive,
+		positive
 	}) {
 		super({action, catchModule, domain, method, nextModule, params});
 		this._positive=positive;

@@ -46,5 +46,5 @@ module.exports={
 	parallel: Promise.all,
 	rejectNextTick,
 	resolveNextTick,
-	series,
+	series
 };

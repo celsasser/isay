@@ -72,7 +72,7 @@ class ModuleOs extends ModuleBase {
 	 * Here we look for options to us vs. the command. If we find them we return them and remove
 	 * that param from the response's <code>params</code>
 	 * @param {Array<*>} params
-	 * @returns {options:Object=undefined, params:Array<*>}
+	 * @returns {{options:(Object|undefined), params:Array<*>}}
 	 * @private
 	 */
 	static _preprocessParams(params) {
