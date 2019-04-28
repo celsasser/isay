@@ -304,8 +304,32 @@ describe("lib.ModuleString", function() {
 					const instance=_createInstance({
 							params: [{method: "newline"}]
 						}),
+						blob=await instance.split("1\n2\n3");
+					assert.deepEqual(blob, ["1", "2", "3"]);
+				});
+
+				it("should remove empty lines and leading and trailing space by default", async function() {
+					const instance=_createInstance({
+							params: [{method: "newline"}]
+						}),
 						blob=await instance.split("1\n2 \n 3");
 					assert.deepEqual(blob, ["1", "2", "3"]);
+				});
+
+				it("should remove empty lines and leading and trailing space if trim=true", async function() {
+					const instance=_createInstance({
+							params: [{method: "newline", trim: true}]
+						}),
+						blob=await instance.split("1\n2 \n 3\n");
+					assert.deepEqual(blob, ["1", "2", "3"]);
+				});
+
+				it("should not remove empty lines and leading and trailing space if trime=false", async function() {
+					const instance=_createInstance({
+							params: [{method: "newline", trim: false}]
+						}),
+						blob=await instance.split("1\n2 \n 3\n");
+					assert.deepEqual(blob, ["1", "2 ", " 3", ""]);
 				});
 			});
 
