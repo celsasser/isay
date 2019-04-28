@@ -1,0 +1,30 @@
+- age: 5
+  name: George
+  species: cat
+- age: 0.5
+  name: Tiny
+  species: cat
+- age: 3
+  name: Little Man
+  species: cat
+- age: 8
+  name: Peanut
+  species: cat
+- age: 3
+  name: Dark Rage
+  species: cat
+- age: 12
+  name: Wesley
+  species: dog
+- age: 13
+  name: Pepin
+  species: dog
+- age: 5
+  name: Beatrice
+  species: dog
+- age: 9
+  name: Trevor
+  species: pigeon
+- age: 2
+  name: Alfred
+  species: hermit crab

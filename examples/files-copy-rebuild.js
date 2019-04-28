@@ -9,5 +9,5 @@
 
 os.find("./examples")
 	.string.split({method: "newline"})
-	.array.filter(is.endsWith([".js", ".json"]))
+	.array.filter(is.endsWith([".js", ".json", ".txt", ".yaml"]))
 	.array.each(file.copy("./tmp", {rebuild: true}))
