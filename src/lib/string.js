@@ -136,16 +136,23 @@ class ModuleString extends ModuleBase {
 				return unformatMouseSpecification(spec.format, blob);
 			}
 			case "newline": {
-				const result=blob.split(/\s*\n\s*/);
-				if(_.last(result)==="") {
-					// What are we doing here? We are trimming off the trailing empty string included when a string is
-					// terminated with "\n". Is it right? Yes and no. My decision is motivated by our integration and
-					// focus on OS commands. "ls", "find" and friends all return with a trailing newline which when
-					// parsed will result in an empty line. I think it's safe to assume that we never want it.
-					// In conclusion - it's an executive decision that we may back out of.
-					result.pop();
+				// there are two useful versions of this split:
+				//	1. trims whitespace from the beginning and ends of lines
+				//	2. only splits on "\n".
+				// Thinking that this will largely be used to split data input by <code>os</code> commands, we are going to default to "trim".
+				const trim=_.get(spec, "trim", true);
+				if(trim) {
+					const result=blob.split(/\s*\n\s*/);
+					if(_.last(result)==="") {
+						// If the blob ended with a newline then node's parsing rules leave us with one last empty entry. He we deal with that.
+						// are trimming off the trailing empty string included when a string is
+						// terminated with "\n". Is it right? Yes and no.
+						result.pop();
+					}
+					return result;
+				} else {
+					return blob.split(/\n/);
 				}
-				return result;
 			}
 			case "shell": {
 				return string.shell(blob);

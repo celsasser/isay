@@ -291,9 +291,10 @@ The math operations are grouped together by the API they support. Instead of spe
 - format: `(Array|Object) -> format(spec:string) -> string`
 - replace: `string -> replace(search:(string|RegExp), replace:string) -> string`
 - split: `string -> split(on:(RegExp|string)) -> Array<string>`
-- split: `string -> split({method:("newline"|"shell"|"white")}) -> Array<string>`
-- split: `string -> split({delimiter:string="\s*,\s*", method:("delimiter"|undefined)}) -> Array<string>`
-- split: `string -> split({format:spec, method:("format"|undefined)}) -> Array<string>`
+- split: `string -> split({method:("delimiter"|"newline"|"shell"|"white")}) -> Array<string>`
+- split: `string -> split({method:("delimiter"|undefined), delimiter:string="\s*,\s*"}) -> Array<string>`
+- split: `string -> split({method:("format"|undefined), format:spec}) -> Array<string>`
+- split: `string -> split({method:"newline", trim:boolean=true}) -> Array<string>`
 
 #### tty:
 clear: `* -> clear() -> *`
