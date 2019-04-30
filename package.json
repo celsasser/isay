@@ -28,16 +28,16 @@
 		"scripting"
 	],
 	"license": "MIT",
-	"main": "mouse.js",
-	"name": "mouse",
+	"main": "isay.js",
+	"name": "isay",
 	"readme": "README.md",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/celsasser/mouse"
+		"url": "git+https://github.com/celsasser/isay.git"
 	},
 	"scripts": {
 		"lint": "eslint --config ./node_modules/pig-quality/server.eslintrc.json src/**/*.js test/unit/**/*.js",
 		"test": "mocha --recursive test/unit/**/*.js"
 	},
-	"version": "0.6.1"
+	"version": "0.7.0"
 }

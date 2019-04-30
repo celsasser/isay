@@ -3,7 +3,7 @@
  * Time: 22:40
  * @license MIT (see project's LICENSE file)
  *
- * parses text formatted by our own mouse spec or any data that is in a columnar format
+ * parses text formatted by our own i-say spec or any data that is in a columnar format
  */
 
 const _=require("lodash");

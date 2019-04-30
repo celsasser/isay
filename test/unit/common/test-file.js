@@ -13,7 +13,7 @@ const file=require("../../../src/common/file");
 describe("file", function() {
 	describe("toLocalPath", function() {
 		it("should properly translate a local path into a full path relative to root", function() {
-			const path=file.toLocalPath("./mouse.js");
+			const path=file.toLocalPath("./isay.js");
 			assert.strictEqual(fs.existsSync(path), true);
 		});
 	});

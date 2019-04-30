@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 ################################################################################
-# We've compiled all of our example scripts and run them one by one and 
+# We've compiled all of our example scripts and run them one by one and
 # where applicable write result like data to the terminal
 ################################################################################
 
@@ -16,11 +16,11 @@ function run() {
 
 	# clear the screen and print out the script
 	clear; cat "${1}"
-	printf "\n./mouse.js run ${_OPTIONS} -s ${1}\n"
+	printf "\n./isay.js run ${_OPTIONS} -s ${1}\n"
 	# some of our scripts are forever loops. They may break out of these via ctrl-c
 	# in which case they will return here. At this point we want to return
 	trap return SIGINT
-	./mouse.js run ${_OPTIONS} -s "${1}"
+	./isay.js run ${_OPTIONS} -s "${1}"
 	if [[ -n "${2}" ]]
 	then
 		printf "${2}\n"

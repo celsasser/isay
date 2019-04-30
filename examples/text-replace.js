@@ -1,5 +1,5 @@
 /**
- * mouse.js example of reading, replacing and writing text:
+ * isay.js example of reading, replacing and writing text:
  * - loading "The Raven"
  * - changing all cases of "raven" to "monkey"
  * - write to stdout

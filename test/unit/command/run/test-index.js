@@ -52,7 +52,7 @@ describe("command.run.index", function() {
 		return run(configuration)
 			.then(result=>{
 				const expected=[
-					"mouse.js",
+					"isay.js",
 					"node_modules",
 					"package.json",
 					"readme.md",

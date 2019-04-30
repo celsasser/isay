@@ -198,7 +198,7 @@ class ModuleFile extends ModuleIO {
 			options=param1;
 		}
 		options=options || {};
-		// Keeping with mouse's rule of creating hierarchy that does not exists, we are going to
+		// Keeping with i-say's rule of creating hierarchy that does not exists, we are going to
 		// ensure that as much of the target that can be known to be directories exists
 		await this._ensureDirectoryHierarchy(target);
 		if(options.rebuild) {

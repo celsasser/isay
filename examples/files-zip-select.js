@@ -1,5 +1,5 @@
 /**
- * mouse.js example zipping a set of filtered files:
+ * isay.js example zipping a set of filtered files:
  * 1. get a list of all files in the current directory
  * 2. split the text list into an array of paths
  * 3. filter the paths by those that are in "res", "src" and "test"

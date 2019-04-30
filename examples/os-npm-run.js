@@ -1,5 +1,5 @@
 /**
- * mouse.js example of live streaming stdout.
+ * isay.js example of live streaming stdout.
  * live-streaming = stream command output to stdout as it is received.
  */
 

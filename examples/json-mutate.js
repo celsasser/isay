@@ -1,5 +1,5 @@
 /**
- * mouse.js example of loading and mutating a JSON file
+ * isay.js example of loading and mutating a JSON file
  * 1. loading our sample JSON formatted, pets database
  * 2. add "maturity" to each element using a silly calculation
  * 3. sort in ascending maturity order

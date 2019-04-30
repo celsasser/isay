@@ -1,5 +1,5 @@
 /**
- * mouse.js run script template.
- * See https://bitbucket.org/fishguts/curt-mouse/src/master/readme.md for API documentation
+ * isay.js run script template.
+ * See https://github.com/celsasser/isay/src/master/readme.md for API documentation
  */
 

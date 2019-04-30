@@ -1,7 +1,7 @@
 /**
- * mouse.js example that continually get all active processes and sort by total cpu time and 
- * presents the top 25 consumers. 
- * 
+ * isay.js example that continually get all active processes and sort by total cpu time and
+ * presents the top 25 consumers.
+ *
  * It demonstrates looping, os integration, splitting text using the "format" method
  * and string formatting.
  */

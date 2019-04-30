@@ -1,5 +1,5 @@
 /**
- * mouse.js example of reading and filtering text and integrating with remote APIs
+ * isay.js example of reading and filtering text and integrating with remote APIs
  * To summarize we are:
  * - loading "The Raven"
  * - isolating "big" words and reducing to a unique set

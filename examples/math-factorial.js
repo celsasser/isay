@@ -1,5 +1,5 @@
 /**
- * mouse.js example of looping over a numeric range and some basic math functionality
+ * isay.js example of looping over a numeric range and some basic math functionality
  */
 
 array.range(1, 10)

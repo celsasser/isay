@@ -1,5 +1,5 @@
 /**
- * mouse.js example of reading, parsing and reducing text and sorting the resulting array of {count:number, word:string} objects.
+ * isay.js example of reading, parsing and reducing text and sorting the resulting array of {count:number, word:string} objects.
 */
 
 file.read("./examples/data/the-raven.txt")

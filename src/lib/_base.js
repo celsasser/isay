@@ -157,7 +157,7 @@ class ModuleBase {
 			if(typeof(data)==="function") {
 				formatted="Function";
 			} else {
-				// Most of the data we are going to encounter in mouse is not going to be binary. So, optimistically, we are going
+				// Most of the data we are going to encounter in i-say is not going to be binary. So, optimistically, we are going
 				// to convert it to text and see what we make of it.
 				let text=(typeof(data)==="object")
 					? JSON.stringify(data)

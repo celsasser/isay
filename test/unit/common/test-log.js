@@ -11,7 +11,7 @@ describe("common.log", function() {
 	describe("configure", function() {
 		it("should properly configure the log", function() {
 			log.configure({
-				applicationName: "mouse",
+				applicationName: "isay",
 				logLevel: "info"
 			});
 			assert.strictEqual(log.level.get(), "info");

@@ -199,7 +199,7 @@ exports.error=function(text, {
 function _getLogger() {
 	if(!storage.logger) {
 		storage.logger=_buildLogger({
-			applicationName: "mouse",
+			applicationName: "isay",
 			logLevel: constant.severity.DEBUG
 		});
 	}

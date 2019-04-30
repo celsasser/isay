@@ -1,5 +1,5 @@
 /**
- * mouse.js example of reading and reducing text into a sorted frequency analysis list
+ * isay.js example of reading and reducing text into a sorted frequency analysis list
 */
 
 file.read("./examples/data/the-raven.txt")

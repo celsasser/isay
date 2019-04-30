@@ -1,48 +1,50 @@
-# Mouse
+# I Say
 
 ## Overview
-_Mouse_ is a shell command that supports and runs a JavaScript like scripting language. "So what!", you say. "Do we really need another scripting language!?" No, we probably don't. But _mouse_ is not trying to muscle into the sea full of scripting languages. Rather _mouse_ is designed to offer an alternate means of scripting within your shell. A sort of shell in a shell, extending it and (hopefully) allowing one to easily accomplish tasks that some may consider cumbersome via the shell.  The language itself takes a _functional_ approach to scripting:
+`isay.js` is a shell command that supports and runs a JavaScript like scripting language. And "i say" is a name by which we refer to it. We originally called it "mouse" but found that was taken. We settled upon "I say" because it was not taken, it is a great and ridiculous expression, but mostly because it works nicely as a command - "i say run this script" and "i say compile this script" - though we don't have compile yet.
+ 
+So, `isay.js` is a shell command that runs a JavaScript like scripting language. "So what", you say. "Do we really need another scripting language!?" No, we probably don't. But _i say_ is not trying to muscle into a sea already full of scripting languages. Rather _i say_ is designed to offer an alternate means of scripting within your shell. A sort of shell in a shell with hopes of extending it and allowing one to more easily accomplish tasks that may be considered cumbersome via the shell.  The language itself takes a _functional_ approach to scripting:
 
 * all functions take a single input (with small exceptions for array iteration, mapping and reduction) and return a single output.
 * there is no state in its purest sense, but we do not strictly enforce this nor do we want to.
-* all functions are lambdas.
+* all user defined functions are lambdas.
 
- In addition to being a simple, pared down to basics language, _mouse_ also benefits from built-in support for popular file formats such as JSON, YAML, CVS (and MIDI). Not only does it support loading, parsing and saving but also manipulation. But it's not limited to working with any single file type and is perfectly comfortable with loading, manipulating and saving any source that my be treated as a file.
+In addition to being a simple, pared down to basics language, _i say_ also benefits from built-in support for popular file formats such as JSON, YAML, CVS (and MIDI). Not only does it support loading, parsing and saving but also manipulation. But it's not limited to working with any single file type and is perfectly comfortable with loading, manipulating and saving any source that my be treated as a file.
 
 ## Requirements
-Mouse is a NodeJS application. It is recommended that you use version >= `10.14.2` or greater as we are able to take advantage of support that was introduced for function compilation (version 10). `10.14.2` includes a fix for bugs within function compilation. It will run otherwise and likely be fine for normal tasks. But performance will suffer should you perform a large amount of iteration. One such example is [text-count-characters-raven.js](./examples/text-count-characters-raven.js)
+_i say_ is a NodeJS application. It is recommended that you use version >= `10.14.2` or greater as we are able to take advantage of support that was introduced for function compilation (version 10). `10.14.2` includes a fix for bugs within function compilation. It will run otherwise and likely be fine for normal tasks. But performance will suffer should you perform a large amount of iteration. One such example is [text-count-characters-raven.js](./examples/text-count-characters-raven.js)
 
 ## Getting started
-Pull _mouse_ down and stick him somewhere. Being a NodeJS app he will need to live within a folder. This can be any location of your chosing but if you end up liking it you may want to make sure it is in your path.
+Pull [_i say_](https://github.com/celsasser/isay) down and stick him somewhere. Being a NodeJS app he will need to live within a folder. This can be any location of your chosing but if you end up liking it you may want to make sure it is in your path.
 
 Quick start - in a terminal `cd` to someplace you would like for it to live and:
 ```
-git clone https://fishguts@bitbucket.org/fishguts/curt-mouse.git mouse
-cd mouse
+git clone https://github.com/celsasser/isay.git isay
+cd isay
 npm install
 ```
 
 Should you want to make it a more permanent resource in your toolkit, you may chose to put it in your path - `/usr/local/bin` (assuming you are on a unix/linux machine) for example. In this case you may want to install it as follows:
 ```
 cd /usr/local
-git clone https://fishguts@bitbucket.org/fishguts/curt-mouse.git mouse
-cd mouse
+git clone https://github.com/celsasser/isay.git isay
+cd isay
 npm install
-ln -s ${PWD}/mouse.js ../bin/mouse
+ln -s ${PWD}/isay.js ../bin/isay
 ```
 
 ## Running
-`mouse.js` is the top level command. To make it do anything one must specify a [_action_](#actions).  Each _action_ takes its own set of arguments and options. To start the only action it takes is `run`.
+`isay.js` is the top level command. To make it do anything one must specify a [_action_](#actions).  Each _action_ takes its own set of arguments and options. To start the only action it takes is `run`.
 
-To get more information about `mouse.js` - at command prompt:
+To get more information about `isay.js` - at command prompt:
 
 ```
-mouse.js --help
+isay.js --help
 ```
 
 And to get more information about an _action_:
 ```
-mouse.js --help <action>
+isay.js --help <action>
 ```
 
 <a id="actions"></a>
@@ -81,7 +83,7 @@ The language used to define _chains_ (and _scripts_ which will follow) is a both
 
 A _domain_ is a conceptual and physical grouping of one or more _functions_. What is the function of a _domain_? It forces a modular breakdown of related functionality that allows for short (but non-abbreviated) function names that may be reused across domains encouraging a smaller, consistent and more terse function lexicon. 
 
-A _function_ is a function. It takes input and returns output. _Mouse_ has built in support for the API you will see immediately below. But it also allows lamdas to be specified wherever a _mouse_ function takes arguments. These may be _mouse functions_ or they may be Javascript _functions_. JavaScript functions are an excellent way to introduce an named paramater. They are also an excellent means of ammending the _mouse_ API. 
+A _function_ is a function. It takes input and returns output. _i say_ has built in support for the API you will see immediately below. But it also allows lamdas to be specified wherever a _i say_ function takes arguments. These may be _I say functions_ or they may be Javascript _functions_. JavaScript functions are an excellent way to introduce an named paramater. They are also an excellent means of ammending the _i say_ API. 
 
 **An important note regarding adding _chains_ to JavaScript functions. You are encouraged to use _chains_ in JavaScript functions but in a very limited way. If you are using JavaScript to do anything aside from naming parameters then don't include _chains_. You will probably not get the result you are expecting.**
 
@@ -314,12 +316,12 @@ height: `width() -> number`
 
 How to input a script? It may be input in one of the following ways:
 
-1. file: `mouse.js run --script=run-os-ls.js`
-2. inline: `mouse.js run "os.ls().std.out()"`
-3. editor: `mouse.js run`
+1. file: `isay.js run --script=run-os-ls.js`
+2. inline: `isay.js run "os.ls().std.out()"`
+3. editor: `isay.js run`
 
 ## Run Examples
-In `./examples` there are several scripts demonstrating basic functionality as well as some more advanced scripts demonstrating `mouse's` power.
+In `./examples` there are several scripts demonstrating basic functionality as well as some more advanced scripts demonstrating _I say's_ power.
 
 The following examples assume that you will be running them from the project's root. To see details about any example follow the link to the associated script.
 
@@ -328,139 +330,139 @@ _Note: the following scripts were created with a `.js` extension. This is not ne
 
 [files-concat.js](./examples/files-concat.js)
 ```
-./mouse.js run -s ./examples/files-concat.js
+./isay.js run -s ./examples/files-concat.js
 ```
 
 [files-copy-flatten.js](./examples/files-copy-flatten.js)
 ```
-./mouse.js run -s ./examples/files-copy-flatten.js
+./isay.js run -s ./examples/files-copy-flatten.js
 ```
 
 [files-copy-rebuild.js](./examples/files-copy-rebuild.js)
 ```
-./mouse.js run -s ./examples/files-copy-rebuild.js
+./isay.js run -s ./examples/files-copy-rebuild.js
 ```
 
 [files-delete.js](./examples/files-delete.js)
 ```
-./mouse.js run -s ./examples/files-delete.js
+./isay.js run -s ./examples/files-delete.js
 ```
 
 [files-move.js](./examples/files-move.js)
 ```
-./mouse.js run -s ./examples/files-move.js
+./isay.js run -s ./examples/files-move.js
 ```
 
 [files-zip-select.js](./examples/files-zip-select.js)
 ```
-./mouse.js run -s ./examples/files-zip-select.js
+./isay.js run -s ./examples/files-zip-select.js
 ```
 
 [json-extract.js](./examples/json-extract.js)
 ```
-./mouse.js run -s ./examples/json-extract.js
+./isay.js run -s ./examples/json-extract.js
 ```
 
 [json-filter-sort.js](./examples/json-filter-sort.js)
 ```
-./mouse.js run -s ./examples/json-filter-sort.js
+./isay.js run -s ./examples/json-filter-sort.js
 ```
 
 [json-mutate.js](./examples/json-mutate.js)
 ```
-./mouse.js run -s ./examples/json-mutate.js
+./isay.js run -s ./examples/json-mutate.js
 ```
 
 [json-to-yaml-file.js](./examples/json-to-yaml-file.js)
 ```
-./mouse.js run -s ./examples/json-to-yaml-file.js
+./isay.js run -s ./examples/json-to-yaml-file.js
 ```
 
 [json-to-yaml-spacious.js](./examples/json-to-yaml-spacious.js)
 ```
-./mouse.js run -s ./examples/json-to-yaml-spacious.js
+./isay.js run -s ./examples/json-to-yaml-spacious.js
 ```
 
 [json-to-yaml.js](./examples/json-to-yaml.js)
 ```
-./mouse.js run -s ./examples/json-to-yaml.js
+./isay.js run -s ./examples/json-to-yaml.js
 ```
 
 [json-write-compact.js](./examples/json-write-compact.js)
 ```
-./mouse.js run -s ./examples/json-write-compact.js
+./isay.js run -s ./examples/json-write-compact.js
 ```
 
 [json-write-spacious.js](./examples/json-write-spacious.js)
 ```
-./mouse.js run -s ./examples/json-write-spacious.js
+./isay.js run -s ./examples/json-write-spacious.js
 ```
 
 [math-factorial.js](./examples/math-factorial.js)
 ```
-./mouse.js run -s ./examples/math-factorial.js
+./isay.js run -s ./examples/math-factorial.js
 ```
 
 [os-npm-run.js](./examples/os-npm-run.js)
 ```
-./mouse.js run -s ./examples/os-npm-run.js
+./isay.js run -s ./examples/os-npm-run.js
 ```
 
 [os-ping-range.js](./examples/os-ping-range.js)
 ```
-./mouse.js run -s ./examples/os-ping-range.js
+./isay.js run -s ./examples/os-ping-range.js
 ```
 
 [os-ps-cpu.js](./examples/os-ps-cpu.js)
 ```
-./mouse.js run -s ./examples/os-ps-cpu.js
+./isay.js run -s ./examples/os-ps-cpu.js
 ```
 
 [readme.md](./examples/readme.md)
 ```
-./mouse.js run -s ./examples/readme.md
+./isay.js run -s ./examples/readme.md
 ```
 
 [text-count-characters-input.js](./examples/text-count-characters-input.js)
 ```
-./mouse.js run -s ./examples/text-count-characters-input.js
+./isay.js run -s ./examples/text-count-characters-input.js
 ```
 
 [text-count-characters-raven.js](./examples/text-count-characters-raven.js)
 ```
-./mouse.js run -s ./examples/text-count-characters-raven.js
+./isay.js run -s ./examples/text-count-characters-raven.js
 ```
 
 [text-count-words-input.js](./examples/text-count-words-input.js)
 ```
-./mouse.js run -s ./examples/text-count-words-input.js
+./isay.js run -s ./examples/text-count-words-input.js
 ```
 
 [text-count-words-raven.js](./examples/text-count-words-raven.js)
 ```
-./mouse.js run -s ./examples/text-count-words-raven.js
+./isay.js run -s ./examples/text-count-words-raven.js
 ```
 
 [text-define-words-raven.js](./examples/text-define-words-raven.js)
 ```
-./mouse.js run -s ./examples/text-define-words-raven.js
+./isay.js run -s ./examples/text-define-words-raven.js
 ```
 
 [text-replace.js](./examples/text-replace.js)
 ```
-./mouse.js run -s ./examples/text-replace.js
+./isay.js run -s ./examples/text-replace.js
 ```
 
 ### Inline
 You may also include your script inline. 
 ```
-./mouse.js run "os.ls().string.split({method: 'newline'}).array.sort().std.out()"
+./isay.js run "os.ls().string.split({method: 'newline'}).array.sort().std.out()"
 ```
 
 ### Editor
 Lastly, you may also use your favorite console editor by not including a script or script path.
 
-_Note: _mouse_ will look for env.EDITOR or env.VISUAL and launch the associated editor (should be a tty based editor). If it does not find one then it defaults to `vim`_
+_Note: _i say_ will look for env.EDITOR or env.VISUAL and launch the associated editor (should be a tty based editor). If it does not find one then it defaults to `vim`_
 ```
-./mouse.js run
+./isay.js run
 ```

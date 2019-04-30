@@ -1,5 +1,5 @@
 /**
- * mouse.js example of loading and mapping a JSON file
+ * isay.js example of loading and mapping a JSON file
  * 1. loading our sample JSON formatted, pets database
  * 2. extract name from each element
  * 3. sort in ascending (name) order

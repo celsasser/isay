@@ -82,12 +82,12 @@
 - script: "math/script-binary-assert.js"
   pass: true
 
-# mouse scripts - scripts testing our "compiler"
-- script: "mouse/script-closure-test.js"
+# isay scripts - scripts testing our "compiler"
+- script: "isay/script-closure-test.js"
   pass:
     age: 4
     name: "George"
-- script: "mouse/script-embedded-chain.js"
+- script: "isay/script-embedded-chain.js"
   pass:
     - age: 5
       link1: "link1"
@@ -104,7 +104,7 @@
       link2: "link2"
       name: "Tiny"
       species: "cat"
-- script: "mouse/script-embedded-predicate.js"
+- script: "isay/script-embedded-predicate.js"
   pass:
     - age: 5
       inserted: "data"
@@ -118,15 +118,15 @@
       inserted: "data"
       name: "Tiny"
       species: "cat"
-- script: "mouse/script-embedded-predicate-deep.js"
+- script: "isay/script-embedded-predicate-deep.js"
   pass:
     - "range(1)=[0]"
     - "range(2)=[0,1]"
     - "range(3)=[0,1,2]"
     - "range(4)=[0,1,2,3]"
-- script: "mouse/script-function-cache.js"
+- script: "isay/script-function-cache.js"
   pass: [1, 2]
-- script: "mouse/script-function-predicate.js"
+- script: "isay/script-function-predicate.js"
   pass:
     - age: 5
       inserted: data
@@ -140,7 +140,7 @@
       inserted: data
       name: Tiny
       species: cat
-- script: "mouse/script-unknown-action.js"
+- script: "isay/script-unknown-action.js"
   fail: "json.invalid is not a function"
 
 # object scripts
