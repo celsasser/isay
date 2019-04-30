@@ -2,8 +2,9 @@
  * mouse.js example of reading and filtering text and integrating with remote APIs
  * To summarize we are:
  * - loading "The Raven"
- * - isolate "big" words and reduce to a unique set
- * - lookup words using an online dictionary API
+ * - isolating "big" words and reducing to a unique set
+ * - looking up words using a limited API we are using thanks to Merriam Webster. Incidentally, the key we are using is a
+ *   limited use key. Please be considerate and isolate its use to this example. They offer keys to all who register. Highly recommended.
  * - parse the results which we know are JSON
  * - reduce the results to one definition. Note: the particular API we are using is
  *   pretty crumby and common words are missing.
