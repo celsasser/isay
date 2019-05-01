@@ -10,6 +10,10 @@
     - "Tiny"
     - "George"
 
+# cast scripts
+- script: "cast/script-cast.js"
+  pass: "0.125"
+
 # error scripts
 - script: "error/script-catch-at-head.js"
   fail: 'unexpected "error.catch" at head of the chain'
