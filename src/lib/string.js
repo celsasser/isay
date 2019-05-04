@@ -5,13 +5,12 @@
  */
 
 const _=require("lodash");
+const falign=require("falign");
 const {ModuleBase}=require("./_base");
 const {
 	assertType,
 	resolveType
 }=require("./_data");
-const {formatMouseSpecification}=require("./_format");
-const {unformatMouseSpecification}=require("./_unformat");
 const string=require("../common/parse");
 
 /**
@@ -21,7 +20,7 @@ const string=require("../common/parse");
 class ModuleString extends ModuleBase {
 	/**
 	 * Formats the data in <param>blob<param>. We are using a somewhat hybrid approach to formatting. It's a little
-	 * sprintf, it's a little es6 template and it's a little custom. See <code>formatMouseSpecification</code> for more information.
+	 * sprintf, it's a little es6 template and it's a little custom. See <code>falign.format</code> for more information.
 	 * @resolves spec:string in this.params[0]
 	 * @param {DataBlob} blob
 	 * @return {Promise<string>}
@@ -30,7 +29,7 @@ class ModuleString extends ModuleBase {
 	async format(blob) {
 		assertType(blob, ["Array", "Object"]);
 		const format=await resolveType(blob, this.params[0], "String");
-		return formatMouseSpecification(format, blob);
+		return falign.format(format, blob);
 	}
 
 	/**
@@ -133,7 +132,7 @@ class ModuleString extends ModuleBase {
 			}
 			case "format": {
 				assertType(spec.format, "String");
-				return unformatMouseSpecification(spec.format, blob);
+				return falign.parse(spec.format, blob);
 			}
 			case "newline": {
 				// there are two useful versions of this split:
